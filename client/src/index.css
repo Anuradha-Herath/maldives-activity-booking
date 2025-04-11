@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f8ff; /* Light blue background */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #1e90ff; /* Dodger blue for headings */
+}
+
+a {
+    color: #1e90ff; /* Dodger blue for links */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.footer {
+    background-color: #1e90ff; /* Dodger blue for footer */
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.header {
+    background-color: #1e90ff; /* Dodger blue for header */
+    color: white;
+    padding: 10px 0;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.activity-card {
+    border: 1px solid #1e90ff; /* Border for activity cards */
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    background-color: white;
+}
+
+.hero-section {
+    background-color: #1e90ff; /* Dodger blue for hero section */
+    color: white;
+    padding: 50px 20px;
+    text-align: center;
+}
