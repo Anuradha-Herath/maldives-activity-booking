@@ -7,6 +7,7 @@ const sendEmail = require('../utils/sendEmail');
 // @access    Public
 exports.register = async (req, res, next) => {
   try {
+    console.log('Registration attempt with data:', req.body);
     const { name, email, password } = req.body;
 
     // Create user
@@ -15,9 +16,11 @@ exports.register = async (req, res, next) => {
       email,
       password,
     });
-
+    
+    console.log('User created successfully:', user);
     sendTokenResponse(user, 200, res);
   } catch (error) {
+    console.error('Error in registration:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };

@@ -7,11 +7,18 @@ axios.defaults.withCredentials = true;
 
 // Register new user
 export const register = async (userData) => {
-  const response = await axios.post(`${API_URL}/auth/register`, userData);
-  if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
+  try {
+    console.log('Attempting to register with data:', userData);
+    const response = await axios.post(`${API_URL}/auth/register`, userData);
+    console.log('Registration response:', response.data);
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response.data;
+  } catch (error) {
+    console.error('Registration error:', error.response?.data || error.message);
+    throw error;
   }
-  return response.data;
 };
 
 // Login user
