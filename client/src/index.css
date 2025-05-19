@@ -77,6 +77,11 @@ a:hover {
   display: none;  /* Chrome, Safari and Opera */
 }
 
+/* Added for smooth scrolling behavior */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
 /* Font styles */
 .font-display {
   font-family: 'Montserrat', 'Arial', sans-serif;
