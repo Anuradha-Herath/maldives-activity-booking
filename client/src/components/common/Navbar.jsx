@@ -120,13 +120,19 @@ const Navbar = () => {
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
                                         <div className="py-1">
                                             <Link 
+                                                to="/dashboard" 
+                                                className="block px-4 py-2 text-gray-800 hover:bg-blue-100"
+                                            >
+                                                <i className="fas fa-tachometer-alt mr-2"></i> Dashboard
+                                            </Link>
+                                            <Link 
                                                 to="/profile" 
                                                 className="block px-4 py-2 text-gray-800 hover:bg-blue-100"
                                             >
                                                 My Profile
                                             </Link>
                                             <Link 
-                                                to="/bookings" 
+                                                to="/dashboard/bookings" 
                                                 className="block px-4 py-2 text-gray-800 hover:bg-blue-100"
                                             >
                                                 My Bookings
@@ -169,7 +175,7 @@ const Navbar = () => {
                     </div>
                 </div>
                 
-                {/* Mobile menu */}
+                {/* Mobile menu - Fixed corrupted JSX */}
                 <div className={`md:hidden ${isOpen ? 'block' : 'hidden'} pt-4`}>
                     <div className="flex flex-col space-y-4 pb-4">
                         <Link to="/" className={`text-white hover:text-yellow-300 transition-colors ${location.pathname === '/' ? 'font-semibold' : ''}`}>
@@ -191,6 +197,9 @@ const Navbar = () => {
                         {currentUser ? (
                             <>
                                 <div className="border-t border-blue-700 pt-4 mt-2"></div>
+                                <Link to="/dashboard" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                    <i className="fas fa-tachometer-alt mr-2"></i> Dashboard
+                                </Link>
                                 <Link to="/profile" className="text-white hover:text-yellow-300 transition-colors flex items-center">
                                     <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-2">
                                         <span className="text-white text-xs font-bold">
@@ -199,7 +208,7 @@ const Navbar = () => {
                                     </div>
                                     My Profile
                                 </Link>
-                                <Link to="/bookings" className="text-white hover:text-yellow-300 transition-colors">
+                                <Link to="/dashboard/bookings" className="text-white hover:text-yellow-300 transition-colors">
                                     My Bookings
                                 </Link>
                                 <button 
