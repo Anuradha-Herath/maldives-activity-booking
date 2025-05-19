@@ -1,61 +1,124 @@
 const Activity = require('../models/Activity');
 
-// Function to get all activities
+// @desc    Get all activities
+// @route   GET /api/v1/activities
+// @access  Public
 exports.getAllActivities = async (req, res) => {
-    try {
-        const activities = await Activity.find();
-        res.status(200).json(activities);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const activities = await Activity.find();
+    res.status(200).json({
+      success: true,
+      count: activities.length,
+      data: activities
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
 };
 
-// Function to get a single activity by ID
+// @desc    Get single activity by ID
+// @route   GET /api/v1/activities/:id
+// @access  Public
 exports.getActivityById = async (req, res) => {
-    try {
-        const activity = await Activity.findById(req.params.id);
-        if (!activity) {
-            return res.status(404).json({ message: 'Activity not found' });
-        }
-        res.status(200).json(activity);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const activity = await Activity.findById(req.params.id);
+    
+    if (!activity) {
+      return res.status(404).json({
+        success: false,
+        error: 'Activity not found'
+      });
     }
+    
+    res.status(200).json({
+      success: true,
+      data: activity
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
 };
 
-// Function to create a new activity
+// @desc    Create new activity
+// @route   POST /api/v1/activities
+// @access  Private (Admin only)
 exports.createActivity = async (req, res) => {
-    const activity = new Activity(req.body);
-    try {
-        const savedActivity = await activity.save();
-        res.status(201).json(savedActivity);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+  try {
+    const activity = await Activity.create(req.body);
+    
+    res.status(201).json({
+      success: true,
+      data: activity
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
 };
 
-// Function to update an activity
+// @desc    Update activity
+// @route   PUT /api/v1/activities/:id
+// @access  Private (Admin only)
 exports.updateActivity = async (req, res) => {
-    try {
-        const updatedActivity = await Activity.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedActivity) {
-            return res.status(404).json({ message: 'Activity not found' });
-        }
-        res.status(200).json(updatedActivity);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+  try {
+    const activity = await Activity.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+    
+    if (!activity) {
+      return res.status(404).json({
+        success: false,
+        error: 'Activity not found'
+      });
     }
+    
+    res.status(200).json({
+      success: true,
+      data: activity
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
 };
 
-// Function to delete an activity
+// @desc    Delete activity
+// @route   DELETE /api/v1/activities/:id
+// @access  Private (Admin only)
 exports.deleteActivity = async (req, res) => {
-    try {
-        const deletedActivity = await Activity.findByIdAndDelete(req.params.id);
-        if (!deletedActivity) {
-            return res.status(404).json({ message: 'Activity not found' });
-        }
-        res.status(204).send();
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const activity = await Activity.findByIdAndDelete(req.params.id);
+    
+    if (!activity) {
+      return res.status(404).json({
+        success: false,
+        error: 'Activity not found'
+      });
     }
+    
+    res.status(200).json({
+      success: true,
+      data: {}
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
 };
