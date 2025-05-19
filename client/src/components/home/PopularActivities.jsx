@@ -103,7 +103,7 @@ const PopularActivities = () => {
                         className="flex overflow-x-auto pb-6 space-x-6 hide-scrollbar scroll-smooth"
                     >
                         {activities.map(activity => (
-                            <div key={activity.id} className="flex-none w-full sm:w-1/2 md:w-1/3 lg:w-1/4 bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                            <div key={activity.id} className="flex-none w-full sm:w-1/2 md:w-1/3 lg:w-1/4 bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
                                 <div className="relative h-48">
                                     <img 
                                         src={activity.image} 
@@ -115,7 +115,7 @@ const PopularActivities = () => {
                                         ${activity.price}
                                     </div>
                                 </div>
-                                <div className="p-4">
+                                <div className="p-4 flex flex-col flex-grow">
                                     <div className="flex justify-between items-center mb-2">
                                         <h3 className="text-lg font-bold text-blue-700">{activity.title}</h3>
                                         <div className="flex items-center">
@@ -125,10 +125,12 @@ const PopularActivities = () => {
                                             <span className="text-sm ml-1 text-gray-600">{activity.rating}</span>
                                         </div>
                                     </div>
-                                    <p className="text-gray-600 text-sm mb-4">{activity.description}</p>
+                                    <div className="h-20 overflow-hidden mb-4">
+                                        <p className="text-gray-600 text-sm line-clamp-3">{activity.description}</p>
+                                    </div>
                                     <button 
                                         onClick={() => handleBookNow(activity.id)}
-                                        className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-800 transition duration-300"
+                                        className="mt-auto bg-gradient-to-r from-blue-500 to-blue-700 text-white py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-800 transition duration-300"
                                     >
                                         Book Now
                                     </button>
