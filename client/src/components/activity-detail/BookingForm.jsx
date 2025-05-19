@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const BookingForm = ({ activity }) => {
+    const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState('');
     const [guests, setGuests] = useState(2);
     const [totalPrice, setTotalPrice] = useState(activity.price * 2);
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState(null);
     const maxGuests = 10;
     
     // Update total price when guests or activity changes
@@ -17,25 +17,17 @@ const BookingForm = ({ activity }) => {
         e.preventDefault();
         
         if (!selectedDate) {
-            setMessage({ type: 'error', text: 'Please select a date' });
+            alert('Please select a date');
             return;
         }
         
-        setLoading(true);
-        setMessage(null);
-        
-        // Simulate API call with setTimeout
-        setTimeout(() => {
-            setLoading(false);
-            setMessage({ 
-                type: 'success', 
-                text: 'Your booking request has been sent! You will receive a confirmation email shortly.' 
-            });
-            
-            // Reset form
-            setSelectedDate('');
-            setGuests(2);
-        }, 1500);
+        // Navigate to booking page with selected information
+        navigate(`/booking/${activity.id}`, {
+            state: {
+                selectedDate,
+                guests
+            }
+        });
     };
     
     // Generate array of numbers for guest dropdown
@@ -118,29 +110,13 @@ const BookingForm = ({ activity }) => {
                 {/* Submit Button */}
                 <button 
                     type="submit"
-                    className={`w-full py-3 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
-                    disabled={loading}
+                    className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                    {loading ? (
-                        <span className="flex items-center justify-center">
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Processing...
-                        </span>
-                    ) : 'Send Booking Request'}
+                    Continue to Book
                 </button>
                 
-                {/* Success/Error Message */}
-                {message && (
-                    <div className={`mt-4 p-3 rounded-md ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-                        {message.text}
-                    </div>
-                )}
-                
                 <p className="text-gray-500 text-sm mt-4">
-                    You won't be charged yet. We'll confirm availability and payment details via email.
+                    You won't be charged yet. Complete your booking on the next page.
                 </p>
             </form>
         </div>
