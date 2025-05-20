@@ -1,33 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
+import axios from 'axios';
 
 const AdminActivities = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
+  
+  const API_URL = 'http://localhost:5000/api/v1';
 
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        // In a real app, this would be an API call
-        // For now just simulate API call with setTimeout
-        setTimeout(() => {
-          const mockActivities = [
-            { id: 1, title: 'Scuba Diving Experience', price: 149, featured: true, status: 'active', location: 'Baa Atoll', type: 'water-sports' },
-            { id: 2, title: 'Sunset Dolphin Cruise', price: 89, featured: true, status: 'active', location: 'Male Atoll', type: 'cruises' },
-            { id: 3, title: 'Snorkeling with Manta Rays', price: 129, featured: false, status: 'active', location: 'Hanifaru Bay', type: 'water-sports' },
-            { id: 4, title: 'Island Hopping Tour', price: 199, featured: true, status: 'active', location: 'South Ari Atoll', type: 'island-tours' },
-            { id: 5, title: 'Traditional Maldivian Cooking Class', price: 79, featured: false, status: 'active', location: 'Male', type: 'cultural' },
-            { id: 6, title: 'Deep Sea Fishing', price: 169, featured: false, status: 'inactive', location: 'North Male Atoll', type: 'adventure' },
-            { id: 7, title: 'Full Day Sandbank Picnic', price: 149, featured: true, status: 'active', location: 'Rasdhoo Atoll', type: 'island-tours' },
-          ];
-          setActivities(mockActivities);
-          setLoading(false);
-        }, 800);
+        setLoading(true);
+        const response = await axios.get(`${API_URL}/activities`);
+        
+        if (response.data.success) {
+          setActivities(response.data.data);
+        } else {
+          throw new Error('Failed to fetch activities');
+        }
       } catch (error) {
         console.error('Error fetching activities:', error);
+        setError('Failed to load activities. Please try again later.');
+      } finally {
         setLoading(false);
       }
     };
@@ -38,7 +37,7 @@ const AdminActivities = () => {
   // Filter activities based on search term and filter
   const filteredActivities = activities.filter(activity => {
     const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         activity.location.toLowerCase().includes(searchTerm.toLowerCase());
+                         (activity.location && activity.location.toLowerCase().includes(searchTerm.toLowerCase()));
     
     if (filter === 'all') return matchesSearch;
     if (filter === 'featured') return matchesSearch && activity.featured;
@@ -48,12 +47,50 @@ const AdminActivities = () => {
     return matchesSearch && activity.type === filter;
   });
 
-  // Delete activity handler (would make an API call in real app)
-  const handleDelete = (id) => {
+  // Delete activity handler - now calls the API
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this activity?')) {
-      setActivities(activities.filter(activity => activity.id !== id));
+      try {
+        setLoading(true);
+        const response = await axios.delete(`${API_URL}/activities/${id}`);
+        
+        if (response.data.success) {
+          setActivities(activities.filter(activity => activity._id !== id));
+          alert('Activity deleted successfully');
+        } else {
+          throw new Error('Failed to delete activity');
+        }
+      } catch (error) {
+        console.error('Error deleting activity:', error);
+        alert('Failed to delete activity: ' + (error.response?.data?.error || error.message));
+      } finally {
+        setLoading(false);
+      }
     }
   };
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <i className="fas fa-exclamation-circle text-red-500"></i>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+        >
+          Try Again
+        </button>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -106,8 +143,10 @@ const AdminActivities = () => {
                 <option value="water-sports">Water Sports</option>
                 <option value="cruises">Cruises</option>
                 <option value="island-tours">Island Tours</option>
+                <option value="diving">Diving</option>
                 <option value="cultural">Cultural</option>
                 <option value="adventure">Adventure</option>
+                <option value="wellness">Wellness</option>
               </select>
             </div>
           </div>
@@ -126,13 +165,13 @@ const AdminActivities = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Activity
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Location
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Type
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Price
@@ -148,24 +187,37 @@ const AdminActivities = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredActivities.length > 0 ? (
                   filteredActivities.map((activity) => (
-                    <tr key={activity.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        #{activity.id}
-                      </td>
+                    <tr key={activity._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="text-sm font-medium text-gray-900">
-                            {activity.title}
-                            {activity.featured && (
-                              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Featured
-                              </span>
-                            )}
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <img 
+                              className="h-10 w-10 rounded-full object-cover" 
+                              src={activity.image} 
+                              alt={activity.title} 
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://via.placeholder.com/40?text=NA';
+                              }}
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {activity.title}
+                              {activity.featured && (
+                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  Featured
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {activity.location}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {activity.type.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         ${activity.price}
@@ -176,18 +228,24 @@ const AdminActivities = () => {
                             ? 'bg-green-100 text-green-800' 
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {activity.status.charAt(0).toUpperCase() + activity.status.slice(1)}
+                          {activity.status ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1) : 'Active'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link
-                          to={`/admin/activities/${activity.id}`}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
+                          to={`/admin/activities/view/${activity._id}`}
+                          className="text-blue-600 hover:text-blue-900 mr-3"
+                        >
+                          View
+                        </Link>
+                        <Link
+                          to={`/admin/activities/${activity._id}/edit`}
+                          className="text-blue-600 hover:text-blue-900 mr-3"
                         >
                           Edit
                         </Link>
                         <button
-                          onClick={() => handleDelete(activity.id)}
+                          onClick={() => handleDelete(activity._id)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Delete
@@ -204,6 +262,11 @@ const AdminActivities = () => {
                 )}
               </tbody>
             </table>
+          </div>
+          
+          {/* Activity count */}
+          <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
+            Showing {filteredActivities.length} of {activities.length} activities
           </div>
         </div>
       )}
