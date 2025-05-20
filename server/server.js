@@ -16,6 +16,7 @@ connectDB();
 const activityRoutes = require('./routes/activity.routes');
 const authRoutes = require('./routes/auth.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const testUploadRoutes = require('./routes/testUpload.routes');
 
 const app = express();
 
@@ -45,10 +46,25 @@ app.use(fileUpload({
   useTempFiles: false
 }));
 
+// Debug middleware to log file uploads
+app.use((req, res, next) => {
+  if (req.files) {
+    console.log('Files uploaded:', Object.keys(req.files));
+  }
+  next();
+});
+
 // Mount routers
 app.use('/api/v1/activities', activityRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/test-upload', testUploadRoutes);
+
+// Add debug routes in non-production environments
+if (process.env.NODE_ENV !== 'production') {
+  const debugRoutes = require('./routes/debug.routes');
+  app.use('/api/v1/debug', debugRoutes);
+}
 
 // Handle 404 errors - Route not found
 app.all('*', (req, res, next) => {

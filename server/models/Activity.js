@@ -11,6 +11,10 @@ const ActivitySchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a description']
   },
+  shortDescription: {
+    type: String,
+    maxlength: [200, 'Short description cannot be more than 200 characters']
+  },
   price: {
     type: Number,
     required: [true, 'Please add a price']
@@ -22,7 +26,8 @@ const ActivitySchema = new mongoose.Schema({
   rating: {
     type: Number,
     min: [1, 'Rating must be at least 1'],
-    max: [5, 'Rating cannot be more than 5']
+    max: [5, 'Rating cannot be more than 5'],
+    default: 5
   },
   reviewCount: {
     type: Number,
@@ -41,9 +46,34 @@ const ActivitySchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add an image URL']
   },
+  galleryImages: {
+    type: [String],
+    default: []
+  },
+  included: {
+    type: [String],
+    default: []
+  },
+  notIncluded: {
+    type: [String],
+    default: []
+  },
+  requirements: {
+    type: [String],
+    default: []
+  },
+  maxParticipants: {
+    type: Number,
+    default: 10
+  },
   featured: {
     type: Boolean,
     default: false
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active'
   },
   createdAt: {
     type: Date,
