@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import AdminLayout from '../../components/admin/AdminLayout';
+import axios from 'axios';
 
 const ActivityForm = () => {
   const { id } = useParams();
@@ -11,46 +12,37 @@ const ActivityForm = () => {
   const [loading, setLoading] = useState(id ? true : false);
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(null);
   const isNew = !id;
+  
+  const API_URL = 'http://localhost:5000/api/v1';
 
   useEffect(() => {
     // Fetch activity data if editing
     if (id) {
       const fetchActivity = async () => {
         try {
-          // In a real app, this would be an API call
-          // For now just simulate API call with setTimeout
-          setTimeout(() => {
-            const mockActivity = {
-              id: parseInt(id),
-              title: 'Scuba Diving Experience',
-              description: 'Enjoy an amazing underwater adventure with professional instructors.',
-              shortDescription: 'Discover the colorful marine life of the Maldives.',
-              price: 149,
-              duration: 3,
-              location: 'Baa Atoll',
-              type: 'water-sports',
-              maxParticipants: 8,
-              included: ['Equipment rental', 'Professional guide', 'Hotel pickup', 'Safety briefing'],
-              notIncluded: ['Gratuities', 'Personal expenses'],
-              featured: true,
-              status: 'active',
-              images: [
-                'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
-                'https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=800'
-              ]
-            };
-            setActivity(mockActivity);
-            setImages(mockActivity.images.map((url, index) => ({
-              id: index,
-              url,
-              file: null,
-              isUploaded: true
-            })));
+          setLoading(true);
+          const response = await axios.get(`${API_URL}/activities/${id}`);
+          
+          if (response.data.success) {
+            const activityData = response.data.data;
+            setActivity(activityData);
+            
+            // Set up images from the activity data
+            if (activityData.image) {
+              setImages([{
+                id: Date.now(),
+                url: activityData.image,
+                isUploaded: true
+              }]);
+            }
+            
             setLoading(false);
-          }, 800);
+          }
         } catch (error) {
           console.error('Error fetching activity:', error);
+          setError('Failed to load activity data');
           setLoading(false);
         }
       };
@@ -63,65 +55,117 @@ const ActivityForm = () => {
   const validationSchema = Yup.object({
     title: Yup.string().required('Title is required'),
     description: Yup.string().required('Description is required'),
-    shortDescription: Yup.string().required('Short description is required').max(150, 'Max 150 characters'),
     price: Yup.number().required('Price is required').positive('Price must be positive'),
     duration: Yup.number().required('Duration is required').positive('Duration must be positive'),
     location: Yup.string().required('Location is required'),
     type: Yup.string().required('Activity type is required'),
-    maxParticipants: Yup.number().required('Max participants is required').positive('Must be positive').integer('Must be a whole number'),
   });
 
-  // Handle image upload
-  const handleImageUpload = (event) => {
+  // Handle image upload using server endpoint
+  const handleImageUpload = async (event) => {
     const files = Array.from(event.target.files);
-    
-    // In a real app, you would upload to Cloudinary here
+    if (!files.length) return;
     
     setUploading(true);
-
-    // Simulate upload delay
-    setTimeout(() => {
-      const newImages = files.map((file, index) => ({
+    
+    try {
+      // Use server endpoint instead of direct Cloudinary API
+      const uploadPromises = files.map(file => {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        return axios.post(`${API_URL}/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+      });
+      
+      const responses = await Promise.all(uploadPromises);
+      
+      const newImages = responses.map((response, index) => ({
         id: Date.now() + index,
-        url: URL.createObjectURL(file),
-        file,
+        url: response.data.data.url,
         isUploaded: true
       }));
       
       setImages([...images, ...newImages]);
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      console.log('Error details:', error.response ? error.response.data : 'No response data');
+      alert('Failed to upload images. Please try again.');
+    } finally {
       setUploading(false);
-    }, 1500);
-  };
-
-  // Remove image
-  const removeImage = (imageId) => {
-    setImages(images.filter(image => image.id !== imageId));
+    }
   };
 
   // Handle form submission
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      // Combine images with form values
+      if (images.length === 0) {
+        alert('Please upload at least one image');
+        setSubmitting(false);
+        return;
+      }
+      
+      // Use the first image as the main image
+      const mainImage = images[0].url;
+      
+      // Prepare activity data
       const activityData = {
         ...values,
-        images: images.map(img => img.url)
+        image: mainImage,
+        // Parse included and notIncluded from comma-separated strings to arrays
+        included: values.included ? values.included.split(',').map(item => item.trim()) : [],
+        notIncluded: values.notIncluded ? values.notIncluded.split(',').map(item => item.trim()) : [],
       };
       
-      console.log('Saving activity data:', activityData);
+      let response;
       
-      // In a real app, this would be an API call to save the data
+      if (isNew) {
+        // Create new activity
+        response = await axios.post(`${API_URL}/activities`, activityData);
+      } else {
+        // Update existing activity
+        response = await axios.put(`${API_URL}/activities/${id}`, activityData);
+      }
       
-      // Simulate API delay
-      setTimeout(() => {
-        setSubmitting(false);
+      if (response.data.success) {
         // Redirect back to activities list after save
         navigate('/admin/activities');
-      }, 1000);
+      } else {
+        throw new Error(response.data.error || 'Failed to save activity');
+      }
     } catch (error) {
       console.error('Error saving activity:', error);
+      alert(error.response?.data?.error || error.message || 'Failed to save activity');
+    } finally {
       setSubmitting(false);
     }
   };
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <i className="fas fa-exclamation-circle text-red-500"></i>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={() => navigate('/admin/activities')}
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+        >
+          Back to Activities
+        </button>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -150,16 +194,15 @@ const ActivityForm = () => {
             initialValues={{
               title: activity?.title || '',
               description: activity?.description || '',
-              shortDescription: activity?.shortDescription || '',
               price: activity?.price || '',
               duration: activity?.duration || '',
               location: activity?.location || '',
               type: activity?.type || '',
-              maxParticipants: activity?.maxParticipants || '',
               included: activity?.included ? activity.included.join(', ') : '',
               notIncluded: activity?.notIncluded ? activity.notIncluded.join(', ') : '',
               featured: activity?.featured || false,
-              status: activity?.status || 'active',
+              rating: activity?.rating || 5,
+              reviewCount: activity?.reviewCount || 0,
             }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
@@ -187,25 +230,8 @@ const ActivityForm = () => {
                     </div>
                     
                     <div>
-                      <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700">
-                        Short Description <span className="text-red-500">*</span>
-                      </label>
-                      <Field
-                        as="textarea"
-                        name="shortDescription"
-                        id="shortDescription"
-                        rows={2}
-                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
-                          errors.shortDescription && touched.shortDescription ? 'border-red-300' : ''
-                        }`}
-                        placeholder="Brief description for listings (max 150 chars)"
-                      />
-                      <ErrorMessage name="shortDescription" component="div" className="mt-1 text-sm text-red-600" />
-                    </div>
-                    
-                    <div>
                       <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                        Full Description <span className="text-red-500">*</span>
+                        Description <span className="text-red-500">*</span>
                       </label>
                       <Field
                         as="textarea"
@@ -286,27 +312,13 @@ const ActivityForm = () => {
                           <option value="water-sports">Water Sports</option>
                           <option value="cruises">Cruises</option>
                           <option value="island-tours">Island Tours</option>
+                          <option value="diving">Diving</option>
                           <option value="adventure">Adventure</option>
                           <option value="cultural">Cultural</option>
                           <option value="wellness">Wellness</option>
                         </Field>
                         <ErrorMessage name="type" component="div" className="mt-1 text-sm text-red-600" />
                       </div>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="maxParticipants" className="block text-sm font-medium text-gray-700">
-                        Max Participants <span className="text-red-500">*</span>
-                      </label>
-                      <Field
-                        type="number"
-                        name="maxParticipants"
-                        id="maxParticipants"
-                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
-                          errors.maxParticipants && touched.maxParticipants ? 'border-red-300' : ''
-                        }`}
-                      />
-                      <ErrorMessage name="maxParticipants" component="div" className="mt-1 text-sm text-red-600" />
                     </div>
                     
                     <div>
@@ -351,24 +363,6 @@ const ActivityForm = () => {
                           Featured Activity
                         </label>
                         <p className="text-gray-500">Display this activity prominently on the homepage</p>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                        Status
-                      </label>
-                      <Field
-                        as="select"
-                        name="status"
-                        id="status"
-                        className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </Field>
-                      <div className="mt-1 text-sm text-gray-500">
-                        Inactive activities will not be shown on the website
                       </div>
                     </div>
                   </div>
