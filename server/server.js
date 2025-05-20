@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
+const fileUpload = require('express-fileupload');
 
 // Load env vars
 dotenv.config();
@@ -14,6 +15,7 @@ connectDB();
 // Route files
 const activityRoutes = require('./routes/activity.routes');
 const authRoutes = require('./routes/auth.routes');
+const uploadRoutes = require('./routes/upload.routes');
 
 const app = express();
 
@@ -36,9 +38,17 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// File upload middleware
+app.use(fileUpload({
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max file size
+  abortOnLimit: true,
+  useTempFiles: false
+}));
+
 // Mount routers
 app.use('/api/v1/activities', activityRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/upload', uploadRoutes);
 
 // Handle 404 errors - Route not found
 app.all('*', (req, res, next) => {
