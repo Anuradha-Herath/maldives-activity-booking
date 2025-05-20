@@ -296,14 +296,15 @@ const ActivityForm = () => {
                     <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
                     
                     <div>
-                      <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="title" className="block text-base font-medium text-gray-700">
                         Activity Title <span className="text-red-500">*</span>
                       </label>
                       <Field
                         type="text"
                         name="title"
                         id="title"
-                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
+                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md 
+                          text-base py-3 px-4 ${
                           errors.title && touched.title ? 'border-red-300' : ''
                         }`}
                       />
@@ -311,7 +312,7 @@ const ActivityForm = () => {
                     </div>
                     
                     <div>
-                      <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="shortDescription" className="block text-base font-medium text-gray-700">
                         Short Description (for listings)
                       </label>
                       <Field
@@ -319,7 +320,8 @@ const ActivityForm = () => {
                         name="shortDescription"
                         id="shortDescription"
                         rows={2}
-                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
+                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md 
+                          text-base py-3 px-4 ${
                           errors.shortDescription && touched.shortDescription ? 'border-red-300' : ''
                         }`}
                         placeholder="Brief description for activity listings (max 200 chars)"
@@ -328,7 +330,7 @@ const ActivityForm = () => {
                     </div>
                     
                     <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="description" className="block text-base font-medium text-gray-700">
                         Full Description <span className="text-red-500">*</span>
                       </label>
                       <Field
@@ -336,7 +338,8 @@ const ActivityForm = () => {
                         name="description"
                         id="description"
                         rows={6}
-                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
+                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md 
+                          text-base py-3 px-4 ${
                           errors.description && touched.description ? 'border-red-300' : ''
                         }`}
                       />
@@ -345,28 +348,30 @@ const ActivityForm = () => {
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="price" className="block text-base font-medium text-gray-700">
                           Price (USD) <span className="text-red-500">*</span>
                         </label>
                         <Field
                           type="number"
                           name="price"
                           id="price"
-                          className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
+                          className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md 
+                            text-base py-3 px-4 ${
                             errors.price && touched.price ? 'border-red-300' : ''
                           }`}
                         />
                         <ErrorMessage name="price" component="div" className="mt-1 text-sm text-red-600" />
                       </div>
                       <div>
-                        <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="duration" className="block text-base font-medium text-gray-700">
                           Duration (hours) <span className="text-red-500">*</span>
                         </label>
                         <Field
                           type="number"
                           name="duration"
                           id="duration"
-                          className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
+                          className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md 
+                            text-base py-3 px-4 ${
                             errors.duration && touched.duration ? 'border-red-300' : ''
                           }`}
                         />
@@ -381,28 +386,30 @@ const ActivityForm = () => {
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="location" className="block text-base font-medium text-gray-700">
                           Location <span className="text-red-500">*</span>
                         </label>
                         <Field
                           type="text"
                           name="location"
                           id="location"
-                          className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
+                          className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md 
+                            text-base py-3 px-4 ${
                             errors.location && touched.location ? 'border-red-300' : ''
                           }`}
                         />
                         <ErrorMessage name="location" component="div" className="mt-1 text-sm text-red-600" />
                       </div>
                       <div>
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="type" className="block text-base font-medium text-gray-700">
                           Activity Type <span className="text-red-500">*</span>
                         </label>
                         <Field
                           as="select"
                           name="type"
                           id="type"
-                          className={`mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                          className={`mt-1 block w-full py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm 
+                            focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base ${
                             errors.type && touched.type ? 'border-red-300' : ''
                           }`}
                         >
@@ -420,14 +427,15 @@ const ActivityForm = () => {
                     </div>
                     
                     <div>
-                      <label htmlFor="maxParticipants" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="maxParticipants" className="block text-base font-medium text-gray-700">
                         Max Participants
                       </label>
                       <Field
                         type="number"
                         name="maxParticipants"
                         id="maxParticipants"
-                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
+                        className={`mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md 
+                          text-base py-3 px-4 ${
                           errors.maxParticipants && touched.maxParticipants ? 'border-red-300' : ''
                         }`}
                       />
@@ -435,7 +443,7 @@ const ActivityForm = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-base font-medium text-gray-700 mb-2">
                         What's Included
                       </label>
                       <FieldArray name="included">
@@ -446,27 +454,27 @@ const ActivityForm = () => {
                                 <div key={index} className="flex items-center mb-2">
                                   <Field
                                     name={`included.${index}`}
-                                    className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                    className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md text-base py-3 px-4"
                                     placeholder="E.g., Equipment rental"
                                   />
                                   <button
                                     type="button"
-                                    className="ml-2 text-red-500"
+                                    className="ml-2 text-red-500 p-3"
                                     onClick={() => remove(index)}
                                   >
-                                    <i className="fas fa-trash"></i>
+                                    <i className="fas fa-trash text-base"></i>
                                   </button>
                                 </div>
                               ))
                             ) : (
-                              <div className="text-gray-500 text-sm">No items added</div>
+                              <div className="text-gray-500 text-base">No items added</div>
                             )}
                             <button
                               type="button"
-                              className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                              className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
                               onClick={() => push('')}
                             >
-                              <i className="fas fa-plus mr-1"></i> Add Item
+                              <i className="fas fa-plus mr-2"></i> Add Item
                             </button>
                           </div>
                         )}
@@ -474,7 +482,7 @@ const ActivityForm = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-base font-medium text-gray-700 mb-2">
                         Not Included
                       </label>
                       <FieldArray name="notIncluded">
@@ -485,27 +493,27 @@ const ActivityForm = () => {
                                 <div key={index} className="flex items-center mb-2">
                                   <Field
                                     name={`notIncluded.${index}`}
-                                    className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                    className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md text-base py-3 px-4"
                                     placeholder="E.g., Gratuities"
                                   />
                                   <button
                                     type="button"
-                                    className="ml-2 text-red-500"
+                                    className="ml-2 text-red-500 p-3"
                                     onClick={() => remove(index)}
                                   >
-                                    <i className="fas fa-trash"></i>
+                                    <i className="fas fa-trash text-base"></i>
                                   </button>
                                 </div>
                               ))
                             ) : (
-                              <div className="text-gray-500 text-sm">No items added</div>
+                              <div className="text-gray-500 text-base">No items added</div>
                             )}
                             <button
                               type="button"
-                              className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                              className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
                               onClick={() => push('')}
                             >
-                              <i className="fas fa-plus mr-1"></i> Add Item
+                              <i className="fas fa-plus mr-2"></i> Add Item
                             </button>
                           </div>
                         )}
@@ -513,7 +521,7 @@ const ActivityForm = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-base font-medium text-gray-700 mb-2">
                         Requirements
                       </label>
                       <FieldArray name="requirements">
@@ -524,27 +532,27 @@ const ActivityForm = () => {
                                 <div key={index} className="flex items-center mb-2">
                                   <Field
                                     name={`requirements.${index}`}
-                                    className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                    className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm border-gray-300 rounded-md text-base py-3 px-4"
                                     placeholder="E.g., Minimum age: 8 years"
                                   />
                                   <button
                                     type="button"
-                                    className="ml-2 text-red-500"
+                                    className="ml-2 text-red-500 p-3"
                                     onClick={() => remove(index)}
                                   >
-                                    <i className="fas fa-trash"></i>
+                                    <i className="fas fa-trash text-base"></i>
                                   </button>
                                 </div>
                               ))
                             ) : (
-                              <div className="text-gray-500 text-sm">No requirements added</div>
+                              <div className="text-gray-500 text-base">No requirements added</div>
                             )}
                             <button
                               type="button"
-                              className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                              className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
                               onClick={() => push('')}
                             >
-                              <i className="fas fa-plus mr-1"></i> Add Requirement
+                              <i className="fas fa-plus mr-2"></i> Add Requirement
                             </button>
                           </div>
                         )}
@@ -576,7 +584,7 @@ const ActivityForm = () => {
                         as="select"
                         name="status"
                         id="status"
-                        className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        className="mt-1 block w-full py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       >
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
