@@ -14,10 +14,18 @@ import MyBookings from './pages/dashboard/MyBookings';
 import BookingHistory from './pages/dashboard/BookingHistory';
 import EditProfile from './pages/dashboard/EditProfile';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRoute from './components/auth/AdminRoute';
 import NotFound from './pages/NotFound';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import Navbar from './components/common/Navbar';
+
+// Admin Pages
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminActivities from './pages/admin/Activities';
+import ActivityForm from './pages/admin/ActivityForm';
+import AdminBookings from './pages/admin/Bookings';
+import AdminUsers from './pages/admin/Users';
 
 function App() {
   return (
@@ -28,6 +36,7 @@ function App() {
           <Navbar />
           <main className="flex-grow">
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/activities" element={<Activities />} />
               <Route path="/activities/:id" element={<ActivityDetail />} />
@@ -39,11 +48,20 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               
-              {/* Dashboard Routes */}
+              {/* User Dashboard Routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/dashboard/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
               <Route path="/dashboard/history" element={<ProtectedRoute><BookingHistory /></ProtectedRoute>} />
               <Route path="/dashboard/profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/admin/activities" element={<AdminRoute><AdminActivities /></AdminRoute>} />
+              <Route path="/admin/activities/new" element={<AdminRoute><ActivityForm /></AdminRoute>} />
+              <Route path="/admin/activities/:id" element={<AdminRoute><ActivityForm /></AdminRoute>} />
+              <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
+              <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
