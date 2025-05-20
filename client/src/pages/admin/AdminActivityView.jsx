@@ -96,7 +96,7 @@ const AdminActivityView = () => {
         <h1 className="text-2xl font-bold text-gray-800">Activity Details</h1>
         <div className="mt-3 sm:mt-0 sm:ml-4 flex space-x-3">
           <Link
-            to={`/admin/activities/${id}/edit`}
+            to={`/admin/activities/${activity._id}`}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
           >
             <i className="fas fa-edit mr-2"></i> Edit Activity

@@ -239,7 +239,7 @@ const AdminActivities = () => {
                           View
                         </Link>
                         <Link
-                          to={`/admin/activities/${activity._id}/edit`}
+                          to={`/admin/activities/${activity._id}`}
                           className="text-blue-600 hover:text-blue-900 mr-3"
                         >
                           Edit
