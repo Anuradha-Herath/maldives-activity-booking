@@ -26,6 +26,7 @@ import AdminActivities from './pages/admin/Activities';
 import ActivityForm from './pages/admin/ActivityForm';
 import AdminBookings from './pages/admin/Bookings';
 import AdminUsers from './pages/admin/Users';
+import AdminActivityView from './pages/admin/AdminActivityView';
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
               <Route path="/admin/activities" element={<AdminRoute><AdminActivities /></AdminRoute>} />
               <Route path="/admin/activities/new" element={<AdminRoute><ActivityForm /></AdminRoute>} />
               <Route path="/admin/activities/:id" element={<AdminRoute><ActivityForm /></AdminRoute>} />
+              <Route path="/admin/activities/view/:id" element={<AdminRoute><AdminActivityView /></AdminRoute>} />
               <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
               <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
               
