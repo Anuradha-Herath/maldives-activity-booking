@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import ActivityFilters from '../components/activities/ActivityFilters';
 import ActivitySorting from '../components/activities/ActivitySorting';
 import ActivityList from '../components/activities/ActivityList';
 import { activitiesAPI } from '../utils/api';
 
 const Activities = () => {
+    const location = useLocation();
     const [activities, setActivities] = useState([]);
     const [filteredActivities, setFilteredActivities] = useState([]);
     const [filters, setFilters] = useState({
@@ -12,6 +14,7 @@ const Activities = () => {
         priceRange: [0, 500],
         duration: [0, 12]
     });
+    
     const [sortOption, setSortOption] = useState('popularity');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);    // Fetch activities from the backend API
@@ -20,7 +23,11 @@ const Activities = () => {
             try {
                 setIsLoading(true);
                 setError(null);
-                const response = await activitiesAPI.getAll();
+                // include category query for server filter
+                const params = {};
+                const category = new URLSearchParams(location.search).get('category');
+                if (category) params.type = category;
+                const response = await activitiesAPI.getAll(params);
                 
                 // Check if response has the expected structure
                 if (response.data && response.data.data) {
@@ -39,7 +46,7 @@ const Activities = () => {
         };
         
         fetchActivities();
-    }, []);
+    }, [location.search]);
 
     // Apply filters and sorting whenever they change
     useEffect(() => {
