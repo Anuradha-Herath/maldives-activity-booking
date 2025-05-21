@@ -236,7 +236,7 @@ const HeroSection = () => {
                             <div className="text-yellow-400 text-3xl mb-3 group-hover:text-yellow-300 transition-colors transform group-hover:scale-110 group-hover:rotate-3 duration-300 drop-shadow-md">
                                 <i className="fas fa-star"></i>
                             </div>
-                            <h3 className="text-xl font-bold mb-2 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Top-rated Experiences</h3>
+                            <h3 className="text-xl font-bold mb-2 text-yellow-400 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Top-rated Experiences</h3>
                             <p className="text-white transition-colors">Curated selection of the highest quality activities</p>
                             <div className="mt-3 h-0.5 w-0 bg-yellow-400 group-hover:w-1/2 transition-all duration-300"></div>
                         </div>
@@ -245,7 +245,7 @@ const HeroSection = () => {
                             <div className="text-yellow-400 text-3xl mb-3 group-hover:text-yellow-300 transition-colors transform group-hover:scale-110 group-hover:rotate-3 duration-300 drop-shadow-md">
                                 <i className="fas fa-calendar-check"></i>
                             </div>
-                            <h3 className="text-xl font-bold mb-2 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Instant Booking</h3>
+                            <h3 className="text-xl font-bold mb-2 text-yellow-400 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Instant Booking</h3>
                             <p className="text-white transition-colors">Secure your spot instantly with immediate confirmation</p>
                             <div className="mt-3 h-0.5 w-0 bg-yellow-400 group-hover:w-1/2 transition-all duration-300"></div>
                         </div>
@@ -254,7 +254,7 @@ const HeroSection = () => {
                             <div className="text-yellow-400 text-3xl mb-3 group-hover:text-yellow-300 transition-colors transform group-hover:scale-110 group-hover:rotate-3 duration-300 drop-shadow-md">
                                 <i className="fas fa-money-bill-wave"></i>
                             </div>
-                            <h3 className="text-xl font-bold mb-2 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Best Price Guarantee</h3>
+                            <h3 className="text-xl font-bold mb-2 text-yellow-400 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Best Price Guarantee</h3>
                             <p className="text-white transition-colors">Find it cheaper elsewhere and we'll match the price</p>
                             <div className="mt-3 h-0.5 w-0 bg-yellow-400 group-hover:w-1/2 transition-all duration-300"></div>
                         </div>
@@ -262,13 +262,13 @@ const HeroSection = () => {
                     
                     {/* Trending Activity Types */}
                     <div className="mt-12 mb-8 animate-fade-in-delay-2">
-                        <h3 className="text-xl font-semibold mb-6 drop-shadow-md">Trending Activity Types</h3>
+                        <h3 className="text-xl font-semibold mb-6 drop-shadow-md text-yellow-300">Trending Activity Types</h3>
                         <div className="flex flex-wrap justify-center gap-3">
                             {activityTypes.filter(type => type.value).map((type, index) => (
                                 <Link 
                                     key={type.value}
                                     to={`/activities?type=${type.value}`}
-                                    className="relative px-4 py-2 bg-white/25 backdrop-blur-md rounded-full transition-all hover:scale-105 hover:shadow-lg group border border-yellow-300 shadow-sm hover:bg-yellow-400 hover:text-blue-900"
+                                    className="relative px-4 py-2 bg-white/25 backdrop-blur-md rounded-full text-yellow-300 transition-all hover:scale-105 hover:shadow-lg group border border-yellow-300 shadow-sm hover:bg-yellow-400 hover:text-yellow-900"
                                     style={{ animationDelay: `${index * 100}ms` }}
                                 >
                                     <span className="relative z-10 font-medium drop-shadow-sm">{type.label}</span>
