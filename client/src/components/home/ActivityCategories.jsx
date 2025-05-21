@@ -3,62 +3,13 @@ import { Link } from 'react-router-dom';
 
 const ActivityCategories = () => {
     const categories = [
-        {
-            id: 1,
-            title: "Surfing",
-            icon: "🏄‍♂️",
-            description: "Catch the perfect wave in crystal clear waters",
-            slug: "surfing"
-        },
-        {
-            id: 2,
-            title: "Diving",
-            icon: "🤿",
-            description: "Explore vibrant coral reefs and underwater wonders",
-            slug: "diving"
-        },
-        {
-            id: 3,
-            title: "Snorkeling",
-            icon: "🐠",
-            description: "Swim alongside colorful marine life in shallow waters",
-            slug: "snorkeling"
-        },
-        {
-            id: 4,
-            title: "Island Hopping",
-            icon: "🏝️",
-            description: "Discover multiple islands and their unique cultures",
-            slug: "island-hopping"
-        },
-        {
-            id: 5,
-            title: "Sunset Cruise",
-            icon: "🚢",
-            description: "Enjoy breathtaking sunsets from a luxury cruise",
-            slug: "sunset-cruise"
-        },
-        {
-            id: 6,
-            title: "Fishing",
-            icon: "🎣",
-            description: "Try traditional Maldivian fishing techniques",
-            slug: "fishing"
-        },
-        {
-            id: 7,
-            title: "Water Sports",
-            icon: "🏊‍♂️",
-            description: "Experience jet skiing, parasailing and more",
-            slug: "water-sports"
-        },
-        {
-            id: 8,
-            title: "Spa & Wellness",
-            icon: "💆‍♀️",
-            description: "Relax with treatments overlooking the ocean",
-            slug: "wellness"
-        }
+        { slug: 'water-sports', title: 'Water Sports', icon: '🏄‍♂️', description: 'Experience jet skiing, parasailing and more' },
+        { slug: 'cruises', title: 'Cruises', icon: '🚢', description: 'Enjoy scenic boat tours and sunset cruises' },
+        { slug: 'island-tours', title: 'Island Tours', icon: '🏝️', description: 'Discover multiple islands and their unique cultures' },
+        { slug: 'diving', title: 'Diving', icon: '🤿', description: 'Explore vibrant coral reefs and underwater wonders' },
+        { slug: 'adventure', title: 'Adventure', icon: '🧗‍♂️', description: 'Thrilling land and water based adventures' },
+        { slug: 'cultural', title: 'Cultural', icon: '🎭', description: 'Immerse in Maldivian traditions and experiences' },
+        { slug: 'wellness', title: 'Wellness', icon: '💆‍♀️', description: 'Relax with spa treatments overlooking the ocean' }
     ];
 
     return (
