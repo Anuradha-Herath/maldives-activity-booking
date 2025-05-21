@@ -35,6 +35,17 @@ exports.getAllActivities = async (req, res) => {
       query.location = { $regex: req.query.location, $options: 'i' };
     }
     
+    // Search by title or description
+    if (req.query.search) {
+      const searchRegex = { $regex: req.query.search, $options: 'i' };
+      query.$or = [
+        { title: searchRegex },
+        { description: searchRegex },
+        { shortDescription: searchRegex },
+        { location: searchRegex }
+      ];
+    }
+    
     // Filter by featured
     if (req.query.featured) {
       query.featured = req.query.featured === 'true';
