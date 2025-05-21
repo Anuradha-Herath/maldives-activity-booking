@@ -11,10 +11,9 @@ const RelatedActivities = ({ activities }) => {
             <h2 className="text-2xl font-bold text-blue-800 mb-6 font-display">You Might Also Like</h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {activities.map(activity => (
-                    <Link 
-                        to={`/activities/${activity.id}`} 
-                        key={activity.id}
+                {activities.map(activity => (                    <Link 
+                        to={`/activities/${activity._id}`} 
+                        key={activity._id}
                         className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
                     >
                         <div className="relative h-48">

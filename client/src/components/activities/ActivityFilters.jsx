@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const ActivityFilters = ({ filters, onFilterChange }) => {
     const activityTypes = [
@@ -11,12 +11,39 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
         { id: 'cultural', name: 'Cultural Experiences' }
     ];
 
+    // Price presets for easier filtering
+    const pricePresets = [
+        { label: 'All', range: [0, 500] },
+        { label: 'Under $50', range: [0, 50] },
+        { label: '$50 - $100', range: [50, 100] },
+        { label: '$100 - $200', range: [100, 200] },
+        { label: '$200+', range: [200, 500] }
+    ];
+    
+    // Duration presets for easier filtering
+    const durationPresets = [
+        { label: 'All', range: [0, 12] },
+        { label: '0-2 hrs', range: [0, 2] },
+        { label: '2-4 hrs', range: [2, 4] },
+        { label: '4-8 hrs', range: [4, 8] },
+        { label: '8+ hrs', range: [8, 12] }
+    ];
+
     // Local state to keep track of slider values
     const [priceRange, setPriceRange] = useState(filters.priceRange);
     const [duration, setDuration] = useState(filters.duration);
     
     // Selected activity types
     const [selectedTypes, setSelectedTypes] = useState(filters.activityTypes || []);
+    
+    // Implement auto-filter with debounce
+    useEffect(() => {
+        const debounceTimer = setTimeout(() => {
+            onFilterChange({ priceRange, duration, activityTypes: selectedTypes });
+        }, 500);
+        
+        return () => clearTimeout(debounceTimer);
+    }, [priceRange, duration, selectedTypes]);
 
     // Update activity type filters
     const handleTypeChange = (type) => {
@@ -26,9 +53,7 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
         
         setSelectedTypes(updatedTypes);
         onFilterChange({ activityTypes: updatedTypes });
-    };
-
-    // Handle price range change
+    };    // Handle price range change
     const handlePriceChange = (e, index) => {
         const newPriceRange = [...priceRange];
         newPriceRange[index] = parseInt(e.target.value);
@@ -42,16 +67,28 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
         
         setPriceRange(newPriceRange);
     };
-
-    // Apply price filter when slider stops
-    const handlePriceChangeComplete = () => {
-        onFilterChange({ priceRange });
+    
+    // Handle direct input for price range
+    const handlePriceInput = (e, index) => {
+        const value = parseInt(e.target.value) || 0;
+        const newPriceRange = [...priceRange];
+        
+        if (index === 0) {
+            newPriceRange[0] = Math.min(value, newPriceRange[1]);
+        } else {
+            newPriceRange[1] = Math.max(value, newPriceRange[0]);
+        }
+        
+        setPriceRange(newPriceRange);
     };
-
-    // Handle duration change
+    
+    // Apply price preset
+    const applyPricePreset = (preset) => {
+        setPriceRange([...preset.range]);
+    };    // Handle duration change
     const handleDurationChange = (e, index) => {
         const newDuration = [...duration];
-        newDuration[index] = parseInt(e.target.value);
+        newDuration[index] = parseFloat(e.target.value);
         
         // Ensure min <= max
         if (index === 0 && newDuration[0] > newDuration[1]) {
@@ -62,22 +99,30 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
         
         setDuration(newDuration);
     };
-
-    // Apply duration filter when slider stops
-    const handleDurationChangeComplete = () => {
-        onFilterChange({ duration });
+    
+    // Handle direct input for duration
+    const handleDurationInput = (e, index) => {
+        const value = parseFloat(e.target.value) || 0;
+        const newDuration = [...duration];
+        
+        if (index === 0) {
+            newDuration[0] = Math.min(value, newDuration[1]);
+        } else {
+            newDuration[1] = Math.max(value, newDuration[0]);
+        }
+        
+        setDuration(newDuration);
     };
-
-    // Reset all filters
+    
+    // Apply duration preset
+    const applyDurationPreset = (preset) => {
+        setDuration([...preset.range]);
+    };    // Reset all filters
     const resetFilters = () => {
         setPriceRange([0, 500]);
         setDuration([0, 12]);
         setSelectedTypes([]);
-        onFilterChange({
-            activityTypes: [],
-            priceRange: [0, 500],
-            duration: [0, 12]
-        });
+        // onFilterChange will be automatically triggered by the useEffect
     };
 
     return (
@@ -111,16 +156,56 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                         </div>
                     ))}
                 </div>
-            </div>
-
-            {/* Price Range Filter */}
+            </div>            {/* Price Range Filter */}
             <div className="mb-6">
                 <h3 className="font-medium mb-3 text-gray-800">Price Range</h3>
+                
+                {/* Price presets */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                    {pricePresets.map((preset, index) => (
+                        <button
+                            key={index}
+                            onClick={() => applyPricePreset(preset)}
+                            className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                                priceRange[0] === preset.range[0] && priceRange[1] === preset.range[1]
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            {preset.label}
+                        </button>
+                    ))}
+                </div>
+                
                 <div className="px-2">
-                    <div className="flex justify-between mb-2 text-sm text-gray-600">
-                        <span>${priceRange[0]}</span>
-                        <span>${priceRange[1]}</span>
+                    {/* Price input fields */}
+                    <div className="flex justify-between mb-4">
+                        <div className="relative w-20">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                            <input
+                                type="number"
+                                min="0"
+                                max="500"
+                                value={priceRange[0]}
+                                onChange={(e) => handlePriceInput(e, 0)}
+                                className="w-full pl-6 pr-2 py-1 border rounded text-sm"
+                            />
+                        </div>
+                        <span className="self-center text-gray-500">to</span>
+                        <div className="relative w-20">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                            <input
+                                type="number"
+                                min="0"
+                                max="500"
+                                value={priceRange[1]}
+                                onChange={(e) => handlePriceInput(e, 1)}
+                                className="w-full pl-6 pr-2 py-1 border rounded text-sm"
+                            />
+                        </div>
                     </div>
+                    
+                    {/* Price slider */}
                     <div className="relative mb-4 h-2 bg-gray-200 rounded">
                         <div 
                             className="absolute h-2 bg-blue-500 rounded" 
@@ -130,39 +215,79 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                             }}
                         ></div>
                     </div>
+                    
                     <div className="relative">
                         <input
                             type="range"
                             min="0"
                             max="500"
+                            step="10"
                             value={priceRange[0]}
                             onChange={(e) => handlePriceChange(e, 0)}
-                            onMouseUp={handlePriceChangeComplete}
-                            onTouchEnd={handlePriceChangeComplete}
-                            className="absolute w-full h-2 opacity-0 cursor-pointer"
+                            className="absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer"
                         />
                         <input
                             type="range"
                             min="0"
                             max="500"
+                            step="10"
                             value={priceRange[1]}
                             onChange={(e) => handlePriceChange(e, 1)}
-                            onMouseUp={handlePriceChangeComplete}
-                            onTouchEnd={handlePriceChangeComplete}
-                            className="absolute w-full h-2 opacity-0 cursor-pointer"
+                            className="absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer"
                         />
                     </div>
                 </div>
-            </div>
-
-            {/* Duration Filter */}
+            </div>            {/* Duration Filter */}
             <div className="mb-6">
                 <h3 className="font-medium mb-3 text-gray-800">Duration (hours)</h3>
+                
+                {/* Duration presets */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                    {durationPresets.map((preset, index) => (
+                        <button
+                            key={index}
+                            onClick={() => applyDurationPreset(preset)}
+                            className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                                duration[0] === preset.range[0] && duration[1] === preset.range[1]
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            {preset.label}
+                        </button>
+                    ))}
+                </div>
+                
                 <div className="px-2">
-                    <div className="flex justify-between mb-2 text-sm text-gray-600">
-                        <span>{duration[0]} hr</span>
-                        <span>{duration[1]} hr</span>
+                    {/* Duration inputs */}
+                    <div className="flex justify-between mb-4">
+                        <div className="w-16">
+                            <input
+                                type="number"
+                                min="0"
+                                max="12"
+                                step="0.5"
+                                value={duration[0]}
+                                onChange={(e) => handleDurationInput(e, 0)}
+                                className="w-full px-2 py-1 border rounded text-sm"
+                            />
+                        </div>
+                        <span className="self-center text-gray-500">to</span>
+                        <div className="w-16">
+                            <input
+                                type="number"
+                                min="0"
+                                max="12"
+                                step="0.5"
+                                value={duration[1]}
+                                onChange={(e) => handleDurationInput(e, 1)}
+                                className="w-full px-2 py-1 border rounded text-sm"
+                            />
+                        </div>
+                        <span className="self-center text-sm text-gray-500">hours</span>
                     </div>
+                    
+                    {/* Duration slider */}
                     <div className="relative mb-4 h-2 bg-gray-200 rounded">
                         <div 
                             className="absolute h-2 bg-blue-500 rounded" 
@@ -172,39 +297,29 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                             }}
                         ></div>
                     </div>
+                    
                     <div className="relative">
                         <input
                             type="range"
                             min="0"
                             max="12"
+                            step="0.5"
                             value={duration[0]}
                             onChange={(e) => handleDurationChange(e, 0)}
-                            onMouseUp={handleDurationChangeComplete}
-                            onTouchEnd={handleDurationChangeComplete}
-                            className="absolute w-full h-2 opacity-0 cursor-pointer"
+                            className="absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer"
                         />
                         <input
                             type="range"
                             min="0"
                             max="12"
+                            step="0.5"
                             value={duration[1]}
                             onChange={(e) => handleDurationChange(e, 1)}
-                            onMouseUp={handleDurationChangeComplete}
-                            onTouchEnd={handleDurationChangeComplete}
-                            className="absolute w-full h-2 opacity-0 cursor-pointer"
+                            className="absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer"
                         />
                     </div>
                 </div>
-            </div>
-            
-            <button 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
-                onClick={() => {
-                    onFilterChange({ priceRange, duration, activityTypes: selectedTypes });
-                }}
-            >
-                Apply Filters
-            </button>
+            </div>            {/* No Apply button needed - filters are applied automatically */}
         </div>
     );
 };

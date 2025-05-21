@@ -22,7 +22,8 @@ API.interceptors.request.use(
 
 // Activities API
 export const activitiesAPI = {
-  getAll: () => API.get('/activities'),
+  // fetch all activities or filter by query params (e.g., type)
+  getAll: (params) => API.get('/activities', { params }),
   getById: (id) => API.get(`/activities/${id}`),
   create: (data) => API.post('/activities', data),
   update: (id, data) => API.put(`/activities/${id}`, data),

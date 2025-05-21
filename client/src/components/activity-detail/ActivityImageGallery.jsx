@@ -4,15 +4,22 @@ import React, { useState } from 'react';
 const ActivityImageGallery = ({ activity }) => {
     // For simplicity, we're creating a mock gallery with the main image and 4 additional images
     const [mainImage, setMainImage] = useState(activity.image);
+      // Use gallery images from the database or generate placeholder images
+    let images = [activity.image];
     
-    // Generate some placeholder images based on the main image
-    const images = [
-        activity.image,
-        `https://source.unsplash.com/random/800x600?maldives,${activity.type},1`,
-        `https://source.unsplash.com/random/800x600?maldives,${activity.type},2`,
-        `https://source.unsplash.com/random/800x600?maldives,${activity.type},3`,
-        `https://source.unsplash.com/random/800x600?maldives,${activity.type},4`
-    ];
+    // Add gallery images if they exist in the database
+    if (activity.galleryImages && activity.galleryImages.length > 0) {
+        images = [activity.image, ...activity.galleryImages];
+    } else {
+        // Fallback to placeholder images if no gallery images exist
+        images = [
+            activity.image,
+            `https://source.unsplash.com/random/800x600?maldives,${activity.type},1`,
+            `https://source.unsplash.com/random/800x600?maldives,${activity.type},2`,
+            `https://source.unsplash.com/random/800x600?maldives,${activity.type},3`,
+            `https://source.unsplash.com/random/800x600?maldives,${activity.type},4`
+        ];
+    }
 
     return (
         <div className="bg-gray-900">

@@ -3,54 +3,13 @@ import { Link } from 'react-router-dom';
 
 const ActivityCategories = () => {
     const categories = [
-        {
-            id: 1,
-            title: "Surfing",
-            icon: "🏄‍♂️",
-            description: "Catch the perfect wave in crystal clear waters"
-        },
-        {
-            id: 2,
-            title: "Diving",
-            icon: "🤿",
-            description: "Explore vibrant coral reefs and underwater wonders"
-        },
-        {
-            id: 3,
-            title: "Snorkeling",
-            icon: "🐠",
-            description: "Swim alongside colorful marine life in shallow waters"
-        },
-        {
-            id: 4,
-            title: "Island Hopping",
-            icon: "🏝️",
-            description: "Discover multiple islands and their unique cultures"
-        },
-        {
-            id: 5,
-            title: "Sunset Cruise",
-            icon: "🚢",
-            description: "Enjoy breathtaking sunsets from a luxury cruise"
-        },
-        {
-            id: 6,
-            title: "Fishing",
-            icon: "🎣",
-            description: "Try traditional Maldivian fishing techniques"
-        },
-        {
-            id: 7,
-            title: "Water Sports",
-            icon: "🏊‍♂️",
-            description: "Experience jet skiing, parasailing and more"
-        },
-        {
-            id: 8,
-            title: "Spa & Wellness",
-            icon: "💆‍♀️",
-            description: "Relax with treatments overlooking the ocean"
-        }
+        { slug: 'water-sports', title: 'Water Sports', icon: '🏄‍♂️', description: 'Experience jet skiing, parasailing and more' },
+        { slug: 'cruises', title: 'Cruises', icon: '🚢', description: 'Enjoy scenic boat tours and sunset cruises' },
+        { slug: 'island-tours', title: 'Island Tours', icon: '🏝️', description: 'Discover multiple islands and their unique cultures' },
+        { slug: 'diving', title: 'Diving', icon: '🤿', description: 'Explore vibrant coral reefs and underwater wonders' },
+        { slug: 'adventure', title: 'Adventure', icon: '🧗‍♂️', description: 'Thrilling land and water based adventures' },
+        { slug: 'cultural', title: 'Cultural', icon: '🎭', description: 'Immerse in Maldivian traditions and experiences' },
+        { slug: 'wellness', title: 'Wellness', icon: '💆‍♀️', description: 'Relax with spa treatments overlooking the ocean' }
     ];
 
     return (
@@ -62,22 +21,20 @@ const ActivityCategories = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {categories.map(category => (
-                    <Link 
-                        to={`/activities/category/${category.id}`} 
-                        key={category.id} 
-                        className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 border border-blue-50 group"
+                    <Link
+                        to={`/activities?category=${category.slug}`}
+                        key={category.id}
+                        className="relative bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 border border-blue-50 group"
                     >
                         <div className="bg-gradient-to-r from-blue-400 to-blue-600 p-6 text-center group-hover:from-blue-500 group-hover:to-blue-700 transition-all duration-300">
                             <span className="text-5xl">{category.icon}</span>
                         </div>
                         <div className="p-6">
                             <h3 className="text-xl font-bold mb-2 text-blue-600 group-hover:text-blue-700">{category.title}</h3>
-                            <p className="text-gray-600 mb-4">{category.description}</p>
-                            <div className="flex items-center text-blue-500 font-medium group-hover:text-blue-700">
-                                Explore <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 group-hover:ml-2 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </div>
+                        </div>
+                        {/* Hover overlay with description */}
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <p className="text-white p-4 text-center">{category.description}</p>
                         </div>
                     </Link>
                 ))}
