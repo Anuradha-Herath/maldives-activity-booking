@@ -12,9 +12,8 @@ const ActivityList = ({ activities }) => {
     }
     
     return (
-        <div className="space-y-4">
-            {activities.map(activity => (
-                <ActivityListItem key={activity.id} activity={activity} />
+        <div className="space-y-4">            {activities.map(activity => (
+                <ActivityListItem key={activity._id || activity.id} activity={activity} />
             ))}
         </div>
     );

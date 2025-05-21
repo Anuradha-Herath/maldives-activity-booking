@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ActivityFilters from '../components/activities/ActivityFilters';
 import ActivitySorting from '../components/activities/ActivitySorting';
 import ActivityList from '../components/activities/ActivityList';
-import { activitiesData } from '../data/activitiesData';
+import { activitiesAPI } from '../utils/api';
 
 const Activities = () => {
     const [activities, setActivities] = useState([]);
@@ -14,15 +14,31 @@ const Activities = () => {
     });
     const [sortOption, setSortOption] = useState('popularity');
     const [isLoading, setIsLoading] = useState(true);
-
-    // Fetch activities (simulated)
+    const [error, setError] = useState(null);    // Fetch activities from the backend API
     useEffect(() => {
-        // In a real app, this would be an API call
-        setTimeout(() => {
-            setActivities(activitiesData);
-            setFilteredActivities(activitiesData);
-            setIsLoading(false);
-        }, 500);
+        const fetchActivities = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const response = await activitiesAPI.getAll();
+                
+                // Check if response has the expected structure
+                if (response.data && response.data.data) {
+                    setActivities(response.data.data);
+                    setFilteredActivities(response.data.data);
+                } else {
+                    console.error('Unexpected API response structure:', response);
+                    setError('Received unexpected data format from server.');
+                }
+            } catch (err) {
+                console.error('Error fetching activities:', err);
+                setError('Failed to load activities. Please try again later.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        fetchActivities();
     }, []);
 
     // Apply filters and sorting whenever they change
@@ -110,11 +126,20 @@ const Activities = () => {
                                 onSortChange={handleSortChange} 
                             />
                         </div>
-                        
-                        {/* Activity Listings */}
+                          {/* Activity Listings */}
                         {isLoading ? (
                             <div className="flex justify-center py-20">
                                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                            </div>
+                        ) : error ? (
+                            <div className="bg-red-50 text-red-700 p-6 rounded-lg shadow-md text-center">
+                                <p className="text-lg font-medium">{error}</p>
+                                <button 
+                                    onClick={() => window.location.reload()}
+                                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                                >
+                                    Try Again
+                                </button>
                             </div>
                         ) : (
                             <ActivityList activities={filteredActivities} />

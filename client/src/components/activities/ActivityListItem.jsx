@@ -50,9 +50,8 @@ const ActivityListItem = ({ activity }) => {
                         <div className="text-blue-800 font-bold text-xl">${activity.price}</div>
                         <div className="text-gray-500 text-sm">per person</div>
                     </div>
-                    
-                    <Link 
-                        to={`/activities/${activity.id}`}
+                      <Link 
+                        to={`/activities/${activity._id || activity.id}`}
                         className="mt-3 sm:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium text-sm"
                     >
                         View Details
