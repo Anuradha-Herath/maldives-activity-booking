@@ -16,6 +16,8 @@ import EditProfile from './pages/dashboard/EditProfile';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
 import NotFound from './pages/NotFound';
+import About from './pages/About';
+import Contact from './pages/Contact';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import Navbar from './components/common/Navbar';
@@ -40,6 +42,8 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/activities" element={<Activities />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/activities/:id" element={<ActivityDetail />} />
               <Route path="/booking/:id" element={<BookingRequest />} />
               

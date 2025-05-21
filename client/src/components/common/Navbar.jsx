@@ -84,10 +84,10 @@ const Navbar = () => {
                             </button>
                             <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                                 <div className="py-2">
-                                    <Link to="/destinations/male" className="block px-4 py-2 text-gray-800 hover:bg-blue-100">Malé</Link>
-                                    <Link to="/destinations/ari-atoll" className="block px-4 py-2 text-gray-800 hover:bg-blue-100">Ari Atoll</Link>
-                                    <Link to="/destinations/baa-atoll" className="block px-4 py-2 text-gray-800 hover:bg-blue-100">Baa Atoll</Link>
-                                    <Link to="/destinations/all" className="block px-4 py-2 text-gray-800 hover:bg-blue-100">All Destinations</Link>
+                                    <Link to="/activities?location=male" className="block px-4 py-2 text-gray-800 hover:bg-blue-100">Malé</Link>
+                                    <Link to="/activities?location=ari-atoll" className="block px-4 py-2 text-gray-800 hover:bg-blue-100">Ari Atoll</Link>
+                                    <Link to="/activities?location=baa-atoll" className="block px-4 py-2 text-gray-800 hover:bg-blue-100">Baa Atoll</Link>
+                                    <Link to="/activities" className="block px-4 py-2 text-gray-800 hover:bg-blue-100">All Destinations</Link>
                                 </div>
                             </div>
                         </div>
