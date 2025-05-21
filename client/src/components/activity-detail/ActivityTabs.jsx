@@ -2,24 +2,27 @@ import React, { useState } from 'react';
 
 const ActivityTabs = ({ activity }) => {
     const [activeTab, setActiveTab] = useState('description');
+      // Use included and requirements from the database or fallback to defaults
+    const inclusions = activity.included && activity.included.length > 0 ? 
+        activity.included : 
+        [
+            "Professional English-speaking guide",
+            "Hotel pickup and drop-off",
+            "All equipment needed for the activity",
+            "Bottled water and refreshments",
+            "Safety briefing",
+            "Insurance"
+        ];
     
-    // Mock data for inclusions and requirements
-    const inclusions = [
-        "Professional English-speaking guide",
-        "Hotel pickup and drop-off",
-        "All equipment needed for the activity",
-        "Bottled water and refreshments",
-        "Safety briefing",
-        "Insurance"
-    ];
-    
-    const requirements = [
-        "Minimum age: 8 years",
-        "Good physical condition",
-        "Swimwear and towel",
-        "Sunscreen and sunglasses",
-        "Comfortable clothing"
-    ];
+    const requirements = activity.requirements && activity.requirements.length > 0 ? 
+        activity.requirements : 
+        [
+            "Minimum age: 8 years",
+            "Good physical condition",
+            "Swimwear and towel",
+            "Sunscreen and sunglasses",
+            "Comfortable clothing"
+        ];
     
     // Location coordinates for the map (mock data)
     const mapCoordinates = {

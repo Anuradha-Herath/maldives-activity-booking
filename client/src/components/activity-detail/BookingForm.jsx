@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 const BookingForm = ({ activity }) => {
     const navigate = useNavigate();
-    const [selectedDate, setSelectedDate] = useState('');
-    const [guests, setGuests] = useState(2);
+    const [selectedDate, setSelectedDate] = useState('');    const [guests, setGuests] = useState(2);
     const [totalPrice, setTotalPrice] = useState(activity.price * 2);
-    const maxGuests = 10;
+    // Use maxParticipants from the database or fallback to 10
+    const maxGuests = activity.maxParticipants || 10;
     
     // Update total price when guests or activity changes
     useEffect(() => {

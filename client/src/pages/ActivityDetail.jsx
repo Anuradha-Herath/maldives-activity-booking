@@ -5,38 +5,44 @@ import ActivityInfo from '../components/activity-detail/ActivityInfo';
 import ActivityTabs from '../components/activity-detail/ActivityTabs';
 import BookingForm from '../components/activity-detail/BookingForm';
 import RelatedActivities from '../components/activity-detail/RelatedActivities';
-import { activitiesData } from '../data/activitiesData';
+import { activitiesAPI } from '../utils/api';
 
 const ActivityDetail = () => {
     const { id } = useParams();
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [relatedActivities, setRelatedActivities] = useState([]);
-
-    useEffect(() => {
-        // In a real app, this would be an API call
-        const fetchActivity = () => {
+    const [relatedActivities, setRelatedActivities] = useState([]);    useEffect(() => {
+        // Fetch activity from the actual database API
+        const fetchActivity = async () => {
             setLoading(true);
-            setTimeout(() => {
-                // Find the activity with the matching ID
-                const foundActivity = activitiesData.find(act => act.id.toString() === id);
+            try {
+                // Get the activity by its ID
+                const activityResponse = await activitiesAPI.getById(id);
+                const foundActivity = activityResponse.data.data;
                 
                 if (foundActivity) {
                     setActivity(foundActivity);
                     
+                    // Fetch all activities to find related ones (same type or location)
+                    const allActivitiesResponse = await activitiesAPI.getAll();
+                    const allActivities = allActivitiesResponse.data.data;
+                    
                     // Find related activities (same type or location)
-                    const related = activitiesData
+                    const related = allActivities
                         .filter(act => 
-                            act.id !== foundActivity.id && 
+                            act._id !== foundActivity._id && 
                             (act.type === foundActivity.type || act.location === foundActivity.location)
                         )
                         .slice(0, 4); // Limit to 4 related activities
                     
                     setRelatedActivities(related);
                 }
-                
+            } catch (error) {
+                console.error('Error fetching activity details:', error);
+                // Activity not found or error will be handled in the UI
+            } finally {
                 setLoading(false);
-            }, 500);
+            }
         };
 
         if (id) {
