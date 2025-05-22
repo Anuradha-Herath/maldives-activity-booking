@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { bookingsAPI } from '../../utils/api';
 
@@ -11,6 +11,7 @@ const AdminBookings = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedDateFilter, setSelectedDateFilter] = useState('all');
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   
   useEffect(() => {
     // Get status from URL parameter
@@ -144,6 +145,25 @@ const AdminBookings = () => {
     }
   };
 
+  // Navigate to booking detail page
+  const navigateToBookingDetail = (bookingId) => {
+    navigate(`/admin/bookings/${bookingId}`);
+  };
+
+  // Handle row click
+  const handleRowClick = (bookingId, e) => {
+    // Prevent navigation if clicking on buttons or links
+    if (
+      e.target.tagName === 'BUTTON' || 
+      e.target.tagName === 'A' ||
+      e.target.closest('button') ||
+      e.target.closest('a')
+    ) {
+      return;
+    }
+    navigateToBookingDetail(bookingId);
+  };
+
   return (
     <AdminLayout>
       <div className="pb-5 border-b border-gray-200 mb-6">
@@ -275,9 +295,15 @@ const AdminBookings = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredBookings.length > 0 ? (
                   filteredBookings.map((booking) => (
-                    <tr key={booking._id} className="hover:bg-gray-50">
+                    <tr 
+                      key={booking._id} 
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={(e) => handleRowClick(booking._id, e)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                        <Link to={`/admin/bookings/${booking._id}`}>{booking.bookingReference}</Link>
+                        <Link to={`/admin/bookings/${booking._id}`} onClick={(e) => e.stopPropagation()}>
+                          {booking.bookingReference}
+                        </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {booking.activity?.title || "Unknown Activity"}
@@ -302,13 +328,19 @@ const AdminBookings = () => {
                         {booking.status === 'pending' && (
                           <div className="space-x-2">
                             <button
-                              onClick={() => handleStatusChange(booking._id, 'confirmed')}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusChange(booking._id, 'confirmed');
+                              }}
                               className="text-green-600 hover:text-green-900"
                             >
                               Confirm
                             </button>
                             <button
-                              onClick={() => handleStatusChange(booking._id, 'cancelled')}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusChange(booking._id, 'cancelled');
+                              }}
                               className="text-red-600 hover:text-red-900"
                             >
                               Cancel
@@ -317,7 +349,10 @@ const AdminBookings = () => {
                         )}
                         {booking.status === 'confirmed' && (
                           <button
-                            onClick={() => handleStatusChange(booking._id, 'cancelled')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusChange(booking._id, 'cancelled');
+                            }}
                             className="text-red-600 hover:text-red-900"
                           >
                             Cancel
@@ -325,7 +360,10 @@ const AdminBookings = () => {
                         )}
                         {booking.status === 'cancelled' && (
                           <button
-                            onClick={() => handleStatusChange(booking._id, 'confirmed')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusChange(booking._id, 'confirmed');
+                            }}
                             className="text-green-600 hover:text-green-900"
                           >
                             Reactivate
