@@ -153,17 +153,17 @@ const AdminBookings = () => {
       {/* Filters and Search */}
       <div className="bg-white shadow rounded-lg mb-6">
         <div className="px-4 py-5 sm:p-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="col-span-1 md:col-span-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+            <div className="col-span-1 md:col-span-4">
               <label htmlFor="search" className="sr-only">Search Bookings</label>
               <div className="relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <i className="fas fa-search text-gray-400"></i>
                 </div>
                 <input
                   type="text"
                   id="search"
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2.5 text-base border-gray-300 rounded-lg h-12"
                   placeholder="Search by booking ID, activity or customer name"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}

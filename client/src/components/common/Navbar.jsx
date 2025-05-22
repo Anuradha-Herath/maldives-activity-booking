@@ -157,24 +157,57 @@ const Navbar = () => {
                                 {profileDropdownOpen && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-md shadow-lg z-10 border border-blue-200/20 overflow-hidden animate-fade-in-down">
                                         <div className="py-1">
-                                            <Link 
-                                                to="/dashboard" 
-                                                className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
-                                            >
-                                                <i className="fas fa-tachometer-alt mr-2 text-blue-600"></i> Dashboard
-                                            </Link>
-                                            <Link 
-                                                to="/profile" 
-                                                className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
-                                            >
-                                                <i className="fas fa-user mr-2 text-blue-600"></i> My Profile
-                                            </Link>
-                                            <Link 
-                                                to="/dashboard/bookings" 
-                                                className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
-                                            >
-                                                <i className="fas fa-bookmark mr-2 text-blue-600"></i> My Bookings
-                                            </Link>
+                                            {currentUser.role === 'admin' ? (
+                                                /* Admin specific links */
+                                                <>
+                                                    <Link 
+                                                        to="/admin/dashboard" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-user-shield mr-2 text-purple-600"></i> Admin Panel
+                                                    </Link>
+                                                    <Link 
+                                                        to="/admin/activities" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-water mr-2 text-purple-600"></i> Manage Activities
+                                                    </Link>
+                                                    <Link 
+                                                        to="/admin/bookings" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-calendar-check mr-2 text-purple-600"></i> Manage Bookings
+                                                    </Link>
+                                                    <Link 
+                                                        to="/admin/users" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-users mr-2 text-purple-600"></i> Manage Users
+                                                    </Link>
+                                                </>
+                                            ) : (
+                                                /* Regular user links */
+                                                <>
+                                                    <Link 
+                                                        to="/dashboard" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-tachometer-alt mr-2 text-blue-600"></i> Dashboard
+                                                    </Link>
+                                                    <Link 
+                                                        to="/profile" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-user mr-2 text-blue-600"></i> My Profile
+                                                    </Link>
+                                                    <Link 
+                                                        to="/dashboard/bookings" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-bookmark mr-2 text-blue-600"></i> My Bookings
+                                                    </Link>
+                                                </>
+                                            )}
                                             <div className="border-t border-gray-100 my-1"></div>
                                             <button 
                                                 onClick={handleSignOut}
@@ -240,25 +273,46 @@ const Navbar = () => {
                         {currentUser ? (
                             <>
                                 <div className="border-t border-blue-700 pt-4 mt-2"></div>
-                                <Link to="/dashboard" className="text-white hover:text-yellow-300 transition-colors flex items-center">
-                                    <i className="fas fa-tachometer-alt mr-2"></i> Dashboard
-                                </Link>
-                                <Link to="/profile" className="text-white hover:text-yellow-300 transition-colors flex items-center">
-                                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-2">
-                                        <span className="text-white text-xs font-bold">
-                                            {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.email.charAt(0).toUpperCase()}
-                                        </span>
-                                    </div>
-                                    My Profile
-                                </Link>
-                                <Link to="/dashboard/bookings" className="text-white hover:text-yellow-300 transition-colors">
-                                    My Bookings
-                                </Link>
+                                {currentUser.role === 'admin' ? (
+                                    /* Mobile Admin links */
+                                    <>
+                                        <Link to="/admin/dashboard" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-user-shield mr-2"></i> Admin Panel
+                                        </Link>
+                                        <Link to="/admin/activities" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-water mr-2"></i> Manage Activities
+                                        </Link>
+                                        <Link to="/admin/bookings" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-calendar-check mr-2"></i> Manage Bookings
+                                        </Link>
+                                        <Link to="/admin/users" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-users mr-2"></i> Manage Users
+                                        </Link>
+                                    </>
+                                ) : (
+                                    /* Mobile user links */
+                                    <>
+                                        <Link to="/dashboard" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-tachometer-alt mr-2"></i> Dashboard
+                                        </Link>
+                                        <Link to="/profile" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-2">
+                                                <span className="text-white text-xs font-bold">
+                                                    {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.email.charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+                                            My Profile
+                                        </Link>
+                                        <Link to="/dashboard/bookings" className="text-white hover:text-yellow-300 transition-colors">
+                                            My Bookings
+                                        </Link>
+                                    </>
+                                )}
                                 <button 
                                     onClick={handleSignOut} 
-                                    className="text-white hover:text-yellow-300 transition-colors text-left"
+                                    className="text-white hover:text-yellow-300 transition-colors text-left flex items-center"
                                 >
-                                    Sign Out
+                                    <i className="fas fa-sign-out-alt mr-2"></i> Sign Out
                                 </button>
                             </>
                         ) : (

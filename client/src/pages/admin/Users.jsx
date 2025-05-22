@@ -120,31 +120,23 @@ const AdminUsers = () => {
     <AdminLayout>
       <div className="pb-5 border-b border-gray-200 sm:flex sm:items-center sm:justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-        <div className="mt-3 sm:mt-0 sm:ml-4">
-          <button
-            type="button"
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            onClick={handleAddUser}
-          >
-            <i className="fas fa-plus mr-2"></i> Add New User
-          </button>
-        </div>
+        
       </div>
 
       {/* Filters and Search */}
       <div className="bg-white shadow rounded-lg mb-6">
         <div className="px-4 py-5 sm:p-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="col-span-1 md:col-span-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="col-span-1 md:col-span-3">
               <label htmlFor="search" className="sr-only">Search Users</label>
               <div className="relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <i className="fas fa-search text-gray-400"></i>
                 </div>
                 <input
                   type="text"
                   id="search"
-                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2.5 text-base border-gray-300 rounded-lg h-12"
                   placeholder="Search users by name or email"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
