@@ -31,6 +31,17 @@ exports.getUserBookingHistory = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // First, automatically mark past confirmed bookings as completed
+    await Booking.updateMany(
+      {
+        email: req.user.email,
+        status: 'confirmed',
+        date: { $lt: today }
+      },
+      { status: 'completed' }
+    );
+
+    // Then fetch all completed, cancelled, or past bookings
     const bookings = await Booking.find({
       email: req.user.email,
       $or: [
@@ -42,12 +53,15 @@ exports.getUserBookingHistory = async (req, res) => {
     .populate('activity')
     .sort({ date: -1 });
     
+    console.log(`Found ${bookings.length} history bookings for user ${req.user.email}`);
+    
     res.status(200).json({
       success: true,
       count: bookings.length,
       data: bookings
     });
   } catch (err) {
+    console.error('Error fetching user booking history:', err);
     res.status(500).json({
       success: false,
       error: 'Server Error'

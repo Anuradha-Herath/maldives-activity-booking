@@ -21,7 +21,23 @@ const BookingHistory = () => {
       const response = await userBookingsAPI.getHistory();
       
       if (response.data.success) {
-        setBookings(response.data.data);
+        console.log('Booking history data:', response.data.data);
+        
+        // Process bookings to ensure visual status is correct
+        const processedBookings = response.data.data.map(booking => {
+          // If booking date is in the past and status is confirmed, display as completed
+          const bookingDate = new Date(booking.date);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (bookingDate < today && booking.status === 'confirmed') {
+            return { ...booking, status: 'completed' };
+          }
+          
+          return booking;
+        });
+        
+        setBookings(processedBookings || []);
       } else {
         setError('Failed to fetch booking history');
       }
@@ -33,25 +49,59 @@ const BookingHistory = () => {
     }
   };
   
-  // Get array of unique years from booking dates
-  const years = [...new Set(bookings.map(booking => 
-    new Date(booking.date).getFullYear().toString()
-  ))].sort((a, b) => b - a); // Sort in descending order (newest first)
+  // Extract years from bookings, but ensure dates are valid first
+  const getValidYears = () => {
+    const validBookings = bookings.filter(booking => 
+      booking.date && !isNaN(new Date(booking.date).getTime())
+    );
+    
+    return [...new Set(validBookings.map(booking => 
+      new Date(booking.date).getFullYear().toString()
+    ))].sort((a, b) => b - a); // Sort in descending order (newest first)
+  };
   
-  // Filter bookings by year
+  const years = getValidYears();
+  
+  // Filter bookings by year, with proper date validation
   const filteredBookings = yearFilter === 'all' 
     ? bookings 
     : bookings.filter(booking => {
+        // Check if date is valid before filtering
+        if (!booking.date || isNaN(new Date(booking.date).getTime())) {
+          return false;
+        }
         const bookingYear = new Date(booking.date).getFullYear().toString();
         return bookingYear === yearFilter;
       });
   
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short', 
-      day: 'numeric'
-    });
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short', 
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+  
+  // Check if a booking is past date
+  const isPastBooking = (dateString) => {
+    try {
+      const bookingDate = new Date(dateString);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return bookingDate < today;
+    } catch (error) {
+      return false;
+    }
   };
   
   const renderRatingStars = (rating) => {
@@ -69,11 +119,49 @@ const BookingHistory = () => {
     );
   };
 
+  // handle rating submission
+  const handleRateBooking = (bookingId) => {
+    // In a real implementation, this would open a modal or navigate to rating page
+    alert(`Rating functionality for booking ${bookingId} would be implemented here.`);
+  };
+
+  // handle booking again
+  const handleBookAgain = (activityId) => {
+    if (!activityId) {
+      alert("Sorry, we couldn't find the activity information for this booking.");
+      return;
+    }
+    window.location.href = `/activities/${activityId}`;
+  };
+
+  // Group bookings by status for easier filtering
+  const getStatusGroupedBookings = () => {
+    const grouped = {
+      completed: [],
+      cancelled: [],
+      past: [] // past bookings that were confirmed but now should be seen as completed
+    };
+    
+    filteredBookings.forEach(booking => {
+      if (booking.status === 'completed') {
+        grouped.completed.push(booking);
+      } else if (booking.status === 'cancelled') {
+        grouped.cancelled.push(booking);
+      } else if (booking.status === 'confirmed' && isPastBooking(booking.date)) {
+        grouped.past.push({...booking, status: 'completed'});
+      }
+    });
+    
+    return [...grouped.completed, ...grouped.past, ...grouped.cancelled];
+  };
+  
+  const displayBookings = getStatusGroupedBookings();
+
   return (
     <DashboardLayout title="Booking History">
       <div>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-800">Your Past Bookings</h2>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-2 md:mb-0">Your Past Bookings</h2>
           
           {/* Year Filter */}
           <div className="flex items-center space-x-2">
@@ -115,12 +203,34 @@ const BookingHistory = () => {
           </div>
         )}
         
+        {/* Summary Stats */}
+        <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex flex-wrap gap-4">
+            <div>
+              <span className="text-sm text-gray-500">Total:</span>{' '}
+              <span className="font-medium">{displayBookings.length} past bookings</span>
+            </div>
+            <div>
+              <span className="text-sm text-gray-500">Completed:</span>{' '}
+              <span className="font-medium text-green-600">
+                {displayBookings.filter(b => b.status === 'completed').length}
+              </span>
+            </div>
+            <div>
+              <span className="text-sm text-gray-500">Cancelled:</span>{' '}
+              <span className="font-medium text-red-600">
+                {displayBookings.filter(b => b.status === 'cancelled').length}
+              </span>
+            </div>
+          </div>
+        </div>
+        
         {/* Bookings History Table */}
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
-        ) : filteredBookings.length > 0 ? (
+        ) : displayBookings.length > 0 ? (
           <div className="overflow-x-auto rounded-lg border border-gray-200">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -149,7 +259,7 @@ const BookingHistory = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredBookings.map((booking) => (
+                {displayBookings.map((booking) => (
                   <tr key={booking._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{booking.activity?.title || "Unknown Activity"}</div>
@@ -173,16 +283,27 @@ const BookingHistory = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                      <button
+                        onClick={() => window.location.href = `/dashboard/booking/${booking._id}`} 
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
                         View Details
                       </button>
+                      
                       {booking.status === 'completed' && !booking.rating && (
-                        <button className="ml-3 text-yellow-600 hover:text-yellow-800 text-sm font-medium">
+                        <button 
+                          onClick={() => handleRateBooking(booking._id)} 
+                          className="ml-3 text-yellow-600 hover:text-yellow-800 text-sm font-medium"
+                        >
                           Rate
                         </button>
                       )}
-                      {booking.status === 'completed' && (
-                        <button className="ml-3 text-green-600 hover:text-green-800 text-sm font-medium">
+                      
+                      {booking.activity?._id && (
+                        <button 
+                          onClick={() => handleBookAgain(booking.activity._id)} 
+                          className="ml-3 text-green-600 hover:text-green-800 text-sm font-medium"
+                        >
                           Book Again
                         </button>
                       )}
