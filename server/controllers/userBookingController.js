@@ -6,6 +6,7 @@ const User = require('../models/User');
 // @access  Private
 exports.getUserBookings = async (req, res) => {
   try {
+    // For your reference, fetch ALL user bookings regardless of status
     const bookings = await Booking.find({ email: req.user.email })
       .populate('activity')
       .sort({ date: 1 });
@@ -16,6 +17,7 @@ exports.getUserBookings = async (req, res) => {
       data: bookings
     });
   } catch (err) {
+    console.error('Error fetching user bookings:', err);
     res.status(500).json({
       success: false,
       error: 'Server Error'
@@ -183,24 +185,18 @@ exports.cancelBooking = async (req, res) => {
       });
     }
     
-    // Check if booking is in the past
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (new Date(booking.date) < today) {
-      return res.status(400).json({
-        success: false,
-        error: 'Cannot cancel a past booking'
-      });
-    }
-    
     booking.status = 'cancelled';
     await booking.save();
+
+    // Get updated booking with populated activity data
+    const updatedBooking = await Booking.findById(req.params.id).populate('activity');
     
     res.status(200).json({
       success: true,
-      data: booking
+      data: updatedBooking
     });
   } catch (err) {
+    console.error('Error cancelling booking:', err);
     res.status(500).json({
       success: false,
       error: 'Server Error'

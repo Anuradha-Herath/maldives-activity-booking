@@ -21,6 +21,7 @@ const MyBookings = () => {
       const response = await userBookingsAPI.getUpcoming();
       
       if (response.data.success) {
+        console.log('Fetched bookings:', response.data.data);
         setBookings(response.data.data);
       } else {
         setError('Failed to fetch bookings');
@@ -33,9 +34,18 @@ const MyBookings = () => {
     }
   };
   
+  // Filter bookings based on the active tab
   const filteredBookings = activeTab === 'all' 
     ? bookings 
     : bookings.filter(booking => booking.status === activeTab);
+
+  // Count bookings by status for the tabs
+  const bookingCounts = {
+    all: bookings.length,
+    pending: bookings.filter(booking => booking.status === 'pending').length,
+    confirmed: bookings.filter(booking => booking.status === 'confirmed').length,
+    cancelled: bookings.filter(booking => booking.status === 'cancelled').length
+  };
   
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm('Are you sure you want to cancel this booking?')) {
@@ -43,20 +53,29 @@ const MyBookings = () => {
     }
     
     try {
+      setLoading(true);
       const response = await userBookingsAPI.cancelBooking(bookingId);
       
       if (response.data.success) {
+        // Replace the cancelled booking with the updated one from the server
+        const updatedBooking = response.data.data;
+        
         setBookings(prevBookings => 
           prevBookings.map(booking => 
-            booking._id === bookingId ? { ...booking, status: 'cancelled' } : booking
+            booking._id === bookingId ? updatedBooking : booking
           )
         );
+        
+        // Show a success message
+        alert('Booking cancelled successfully');
       } else {
         setError('Failed to cancel booking');
       }
     } catch (error) {
       console.error('Error cancelling booking:', error);
       setError('Failed to cancel booking. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -83,7 +102,7 @@ const MyBookings = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              All Bookings
+              All Bookings ({bookingCounts.all})
             </button>
             <button
               onClick={() => setActiveTab('pending')}
@@ -93,7 +112,7 @@ const MyBookings = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Pending
+              Pending ({bookingCounts.pending})
             </button>
             <button
               onClick={() => setActiveTab('confirmed')}
@@ -103,7 +122,7 @@ const MyBookings = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Confirmed
+              Confirmed ({bookingCounts.confirmed})
             </button>
             <button
               onClick={() => setActiveTab('cancelled')}
@@ -113,7 +132,7 @@ const MyBookings = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Cancelled
+              Cancelled ({bookingCounts.cancelled})
             </button>
           </nav>
         </div>
@@ -204,7 +223,10 @@ const MyBookings = () => {
                             Cancel
                           </button>
                         )}
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                        <button 
+                          onClick={() => window.location.href = `/dashboard/booking/${booking._id}`}
+                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        >
                           View Details
                         </button>
                       </div>
