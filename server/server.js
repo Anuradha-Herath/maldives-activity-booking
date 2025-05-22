@@ -18,6 +18,7 @@ const authRoutes = require('./routes/auth.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const testUploadRoutes = require('./routes/testUpload.routes');
 const bookingRoutes = require('./routes/booking.routes');
+const userRoutes = require('./routes/user.routes');
 
 const app = express();
 
@@ -61,6 +62,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/test-upload', testUploadRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
+app.use('/api/v1/users', userRoutes);
 
 // Add debug routes in non-production environments
 if (process.env.NODE_ENV !== 'production') {

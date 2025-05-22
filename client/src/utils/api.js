@@ -40,6 +40,17 @@ export const bookingsAPI = {
   delete: (id) => API.delete(`/bookings/${id}`)
 };
 
+// Users API
+export const usersAPI = {
+  getAll: () => API.get('/users'),
+  getById: (id) => API.get(`/users/${id}`),
+  create: (userData) => API.post('/users', userData),
+  update: (id, userData) => API.put(`/users/${id}`, userData),
+  updateRole: (id, role) => API.put(`/users/${id}/role`, { role }),
+  delete: (id) => API.delete(`/users/${id}`),
+  getBookingCount: (id) => API.get(`/users/${id}/bookings/count`)
+};
+
 // Function to upload image to Cloudinary
 export const uploadImage = async (file) => {
   const formData = new FormData();
