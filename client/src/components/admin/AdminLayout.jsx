@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const location = useLocation();
   const { currentUser } = useAuth();
   
@@ -18,11 +19,16 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/activities', icon: 'fa-umbrella-beach', text: 'Activities' },
     { path: '/admin/bookings', icon: 'fa-calendar-check', text: 'Bookings' },
     { path: '/admin/users', icon: 'fa-users', text: 'Users' },
-    
   ];
 
   // Check if link is active
   const isActive = (path) => location.pathname === path;
+
+  // Get current page title
+  const getCurrentPageTitle = () => {
+    const currentLink = navLinks.find(link => isActive(link.path));
+    return currentLink ? currentLink.text : 'Admin Panel';
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -151,7 +157,8 @@ const AdminLayout = ({ children }) => {
 
       {/* Main content */}
       <div className="flex flex-col w-0 flex-1 overflow-hidden">
-        <div className="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3">
+        {/* Mobile top bar */}
+        <div className="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 flex justify-between items-center bg-white shadow-sm">
           <button
             className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900"
             onClick={() => setSidebarOpen(true)}
@@ -159,6 +166,98 @@ const AdminLayout = ({ children }) => {
             <span className="sr-only">Open sidebar</span>
             <i className="fas fa-bars text-gray-600 text-xl"></i>
           </button>
+          
+          <div className="px-4 py-2 text-lg font-semibold text-gray-700">
+            {getCurrentPageTitle()}
+          </div>
+          
+          <div className="relative">
+            <button 
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="p-2 mr-2 flex items-center focus:outline-none"
+            >
+              <span className="inline-block h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center shadow-sm">
+                <i className="fas fa-user text-white text-sm"></i>
+              </span>
+            </button>
+            
+            {userMenuOpen && (
+              <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                <Link to="/admin/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</Link>
+                <Link to="/admin/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
+                <Link to="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View Site</Link>
+                <div className="border-t border-gray-100"></div>
+                <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Desktop top bar */}
+        <div className="hidden md:flex md:flex-shrink-0">
+          <div className="flex-1 flex">
+            <div className="w-full bg-white shadow-sm">
+              <div className="h-16 flex justify-between px-4">
+                <div className="flex items-center">
+                  <h1 className="text-xl font-semibold text-gray-800">{getCurrentPageTitle()}</h1>
+                </div>
+                <div className="ml-4 flex items-center md:ml-6 space-x-4">
+                  {/* Search */}
+                  
+                  
+                  {/* Notification bell */}
+                  <button className="p-1 rounded-full text-gray-500 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 relative">
+                    <span className="sr-only">View notifications</span>
+                    <i className="fas fa-bell text-lg"></i>
+                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 transform -translate-y-1/2 translate-x-1/2"></span>
+                  </button>
+                  
+                  {/* User dropdown */}
+                  <div className="ml-3 relative">
+                    <div>
+                      <button 
+                        onClick={() => setUserMenuOpen(!userMenuOpen)}
+                        className="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        id="user-menu"
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                      >
+                        <span className="sr-only">Open user menu</span>
+                        <div className="flex items-center">
+                          <span className="inline-block h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center shadow-md mr-2">
+                            <span className="text-white font-medium">
+                              {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.email.charAt(0).toUpperCase()}
+                            </span>
+                          </span>
+                          <span className="hidden md:block text-sm font-medium text-gray-700 mr-1">{currentUser.name || currentUser.email}</span>
+                          <i className="fas fa-chevron-down text-xs text-gray-500"></i>
+                        </div>
+                      </button>
+                    </div>
+                    
+                    {userMenuOpen && (
+                      <div 
+                        className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                        role="menu" 
+                        aria-orientation="vertical" 
+                        aria-labelledby="user-menu"
+                      >
+                        
+                        
+                        <Link to="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">View Site</Link>
+                        <div className="border-t border-gray-100"></div>
+                        <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                          Sign out
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         
         <main className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
