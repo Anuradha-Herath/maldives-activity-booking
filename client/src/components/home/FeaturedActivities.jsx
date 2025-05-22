@@ -28,10 +28,10 @@ const FeaturedActivities = () => {
                 <h2 className="text-3xl font-bold text-center mb-8 text-primary font-display">Featured Activities</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {activities.map(activity => (
-                        <div key={activity.id} className="activity-card shadow-lg hover:shadow-xl transition-shadow">
+                        <div key={activity.id} className="activity-card shadow-lg hover:shadow-xl transition-shadow flex flex-col h-full">
                             <h3 className="text-xl font-bold mb-2 text-secondary">{activity.title}</h3>
-                            <p className="mb-4 text-text">{activity.description}</p>
-                            <div className="flex justify-between items-center">
+                            <p className="mb-4 text-text flex-grow">{activity.description}</p>
+                            <div className="flex justify-between items-center mt-auto">
                                 <span className="text-xl font-bold text-secondary">${activity.price}</span>
                                 <button className="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors">
                                     Book Now

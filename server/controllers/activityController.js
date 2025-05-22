@@ -1,61 +1,200 @@
 const Activity = require('../models/Activity');
 
-// Function to get all activities
+// @desc    Get all activities with filtering options
+// @route   GET /api/v1/activities
+// @access  Public
 exports.getAllActivities = async (req, res) => {
-    try {
-        const activities = await Activity.find();
-        res.status(200).json(activities);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    let query = {};
+    
+    // Filter by activity type
+    if (req.query.type) {
+      if (Array.isArray(req.query.type)) {
+        query.type = { $in: req.query.type };
+      } else {
+        query.type = req.query.type;
+      }
     }
+    
+    // Filter by price range
+    if (req.query.minPrice || req.query.maxPrice) {
+      query.price = {};
+      if (req.query.minPrice) query.price.$gte = Number(req.query.minPrice);
+      if (req.query.maxPrice) query.price.$lte = Number(req.query.maxPrice);
+    }
+    
+    // Filter by duration
+    if (req.query.minDuration || req.query.maxDuration) {
+      query.duration = {};
+      if (req.query.minDuration) query.duration.$gte = Number(req.query.minDuration);
+      if (req.query.maxDuration) query.duration.$lte = Number(req.query.maxDuration);
+    }
+    
+    // Filter by location
+    if (req.query.location) {
+      query.location = { $regex: req.query.location, $options: 'i' };
+    }
+    
+    // Search by title or description
+    if (req.query.search) {
+      const searchRegex = { $regex: req.query.search, $options: 'i' };
+      query.$or = [
+        { title: searchRegex },
+        { description: searchRegex },
+        { shortDescription: searchRegex },
+        { location: searchRegex }
+      ];
+    }
+    
+    // Filter by featured
+    if (req.query.featured) {
+      query.featured = req.query.featured === 'true';
+    }
+    
+    // Filter by status
+    if (req.query.status) {
+      query.status = req.query.status;
+    } else {
+      // By default, only show active activities
+      query.status = 'active';
+    }
+    
+    // Sorting options
+    let sortOptions = {};
+    const sortBy = req.query.sortBy || 'popularity';
+    
+    switch (sortBy) {
+      case 'price-asc':
+        sortOptions.price = 1;
+        break;
+      case 'price-desc':
+        sortOptions.price = -1;
+        break;
+      case 'duration':
+        sortOptions.duration = 1;
+        break;
+      case 'popularity':
+      default:
+        sortOptions.rating = -1;
+        break;
+    }
+    
+    const activities = await Activity.find(query).sort(sortOptions);
+    
+    res.status(200).json({
+      success: true,
+      count: activities.length,
+      data: activities
+    });
+  } catch (err) {
+    console.error('Error fetching activities:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
 };
 
-// Function to get a single activity by ID
+// @desc    Get single activity by ID
+// @route   GET /api/v1/activities/:id
+// @access  Public
 exports.getActivityById = async (req, res) => {
-    try {
-        const activity = await Activity.findById(req.params.id);
-        if (!activity) {
-            return res.status(404).json({ message: 'Activity not found' });
-        }
-        res.status(200).json(activity);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const activity = await Activity.findById(req.params.id);
+    
+    if (!activity) {
+      return res.status(404).json({
+        success: false,
+        error: 'Activity not found'
+      });
     }
+    
+    res.status(200).json({
+      success: true,
+      data: activity
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
 };
 
-// Function to create a new activity
+// @desc    Create new activity
+// @route   POST /api/v1/activities
+// @access  Private (Admin only)
 exports.createActivity = async (req, res) => {
-    const activity = new Activity(req.body);
-    try {
-        const savedActivity = await activity.save();
-        res.status(201).json(savedActivity);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+  try {
+    const activity = await Activity.create(req.body);
+    
+    res.status(201).json({
+      success: true,
+      data: activity
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
 };
 
-// Function to update an activity
+// @desc    Update activity
+// @route   PUT /api/v1/activities/:id
+// @access  Private (Admin only)
 exports.updateActivity = async (req, res) => {
-    try {
-        const updatedActivity = await Activity.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedActivity) {
-            return res.status(404).json({ message: 'Activity not found' });
-        }
-        res.status(200).json(updatedActivity);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+  try {
+    const activity = await Activity.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+    
+    if (!activity) {
+      return res.status(404).json({
+        success: false,
+        error: 'Activity not found'
+      });
     }
+    
+    res.status(200).json({
+      success: true,
+      data: activity
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
 };
 
-// Function to delete an activity
+// @desc    Delete activity
+// @route   DELETE /api/v1/activities/:id
+// @access  Private (Admin only)
 exports.deleteActivity = async (req, res) => {
-    try {
-        const deletedActivity = await Activity.findByIdAndDelete(req.params.id);
-        if (!deletedActivity) {
-            return res.status(404).json({ message: 'Activity not found' });
-        }
-        res.status(204).send();
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const activity = await Activity.findByIdAndDelete(req.params.id);
+    
+    if (!activity) {
+      return res.status(404).json({
+        success: false,
+        error: 'Activity not found'
+      });
     }
+    
+    res.status(200).json({
+      success: true,
+      data: {}
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
 };
