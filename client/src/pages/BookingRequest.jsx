@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { activitiesData } from '../data/activitiesData';
+import { activitiesAPI } from '../utils/api';
 import ConfirmationModal from '../components/booking/ConfirmationModal';
 
 const BookingRequest = () => {
@@ -33,15 +33,27 @@ const BookingRequest = () => {
 
     // Fetch activity data
     useEffect(() => {
-        setLoading(true);
-        // In a real app, this would be an API call
-        setTimeout(() => {
-            const foundActivity = activitiesData.find(act => act.id.toString() === id);
-            if (foundActivity) {
-                setActivity(foundActivity);
+        const fetchActivity = async () => {
+            setLoading(true);
+            try {
+                // Get the activity by its ID using the API
+                const activityResponse = await activitiesAPI.getById(id);
+                const foundActivity = activityResponse.data.data;
+                
+                if (foundActivity) {
+                    setActivity(foundActivity);
+                }
+            } catch (error) {
+                console.error('Error fetching activity details:', error);
+                // Error handling will be done in the UI
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
-        }, 300);
+        };
+
+        if (id) {
+            fetchActivity();
+        }
     }, [id]);
 
     const handleInputChange = (e) => {
