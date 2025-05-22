@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import axios from 'axios';
+import { dashboardAPI } from '../../utils/api';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -11,38 +11,46 @@ const AdminDashboard = () => {
     pendingBookings: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [recentBookings, setRecentBookings] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // In a real app, these would be API calls
-        // For now just simulate API calls with setTimeout
-        setTimeout(() => {
-          setStats({
-            totalActivities: 24,
-            totalBookings: 158,
-            totalUsers: 423,
-            pendingBookings: 17,
-          });
-          
-          setRecentBookings([
-            { id: 'BK123', activityName: 'Sunset Cruise', customerName: 'John Smith', date: '2023-12-10', status: 'confirmed', amount: 198 },
-            { id: 'BK124', activityName: 'Scuba Diving', customerName: 'Alice Johnson', date: '2023-12-12', status: 'pending', amount: 299 },
-            { id: 'BK125', activityName: 'Snorkeling Tour', customerName: 'Robert Davis', date: '2023-12-15', status: 'pending', amount: 149 },
-            { id: 'BK126', activityName: 'Fishing Trip', customerName: 'Emma Wilson', date: '2023-12-18', status: 'confirmed', amount: 225 },
-          ]);
-          
-          setLoading(false);
-        }, 800);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await dashboardAPI.getStats();
+      
+      if (response.data.success) {
+        const { 
+          totalActivities, 
+          totalBookings, 
+          totalUsers, 
+          pendingBookings, 
+          recentBookings 
+        } = response.data.data;
+        
+        setStats({
+          totalActivities,
+          totalBookings,
+          totalUsers,
+          pendingBookings
+        });
+        
+        setRecentBookings(recentBookings);
+      } else {
+        setError('Failed to fetch dashboard data');
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      setError('Error connecting to the server. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Format date
   const formatDate = (dateString) => {
@@ -73,6 +81,35 @@ const AdminDashboard = () => {
           {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <div className="-mx-1.5 -my-1.5">
+                <button 
+                  onClick={() => setError('')}
+                  className="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-12">
@@ -139,56 +176,62 @@ const AdminDashboard = () => {
                 View all <i className="fas fa-arrow-right ml-1"></i>
               </Link>
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Booking ID
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Activity
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {recentBookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                        <Link to={`/admin/bookings/${booking.id}`}>{booking.id}</Link>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {booking.activityName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {booking.customerName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(booking.date)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <StatusBadge status={booking.status} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${booking.amount}
-                      </td>
+            {recentBookings.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Booking ID
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Activity
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Customer
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {recentBookings.map((booking) => (
+                      <tr key={booking._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                          <Link to={`/admin/bookings/${booking._id}`}>{booking.bookingReference}</Link>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {booking.activity ? booking.activity.title : 'Unknown Activity'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {booking.fullName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(booking.date)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <StatusBadge status={booking.status} />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ${booking.totalPrice}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="py-6 px-4 text-center text-gray-500">
+                No recent bookings found.
+              </div>
+            )}
           </div>
 
           {/* Quick Actions */}
@@ -232,6 +275,19 @@ const AdminDashboard = () => {
                 </Link>
               </div>
             </div>
+          </div>
+
+          {/* Refresh Button */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={fetchDashboardData}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="mr-2 -ml-1 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh Dashboard Data
+            </button>
           </div>
         </>
       )}

@@ -1,38 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { usersAPI } from '../../utils/api';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        // In a real app, this would be an API call
-        // For now just simulate API call with setTimeout
-        setTimeout(() => {
-          const mockUsers = [
-            { id: '1', name: 'John Smith', email: 'john@example.com', role: 'user', createdAt: '2023-01-15T12:00:00Z', bookingsCount: 3 },
-            { id: '2', name: 'Alice Johnson', email: 'alice@example.com', role: 'admin', createdAt: '2022-11-20T10:30:00Z', bookingsCount: 0 },
-            { id: '3', name: 'Robert Davis', email: 'robert@example.com', role: 'user', createdAt: '2023-02-05T15:45:00Z', bookingsCount: 5 },
-            { id: '4', name: 'Emma Wilson', email: 'emma@example.com', role: 'user', createdAt: '2023-03-12T09:20:00Z', bookingsCount: 2 },
-            { id: '5', name: 'Michael Brown', email: 'michael@example.com', role: 'user', createdAt: '2023-01-30T11:15:00Z', bookingsCount: 1 },
-            { id: '6', name: 'Sophia Lee', email: 'sophia@example.com', role: 'admin', createdAt: '2022-12-05T14:00:00Z', bookingsCount: 0 },
-            { id: '7', name: 'William Miller', email: 'william@example.com', role: 'user', createdAt: '2023-02-28T16:30:00Z', bookingsCount: 4 },
-          ];
-          setUsers(mockUsers);
-          setLoading(false);
-        }, 800);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await usersAPI.getAll();
+      
+      if (response.data.success) {
+        // For each user, add a bookings count if available
+        const usersWithBookingCounts = await Promise.all(
+          response.data.data.map(async (user) => {
+            try {
+              const bookingCountResponse = await usersAPI.getBookingCount(user._id);
+              return {
+                ...user,
+                bookingsCount: bookingCountResponse.data.data.count
+              };
+            } catch (error) {
+              console.error(`Failed to get booking count for user ${user._id}:`, error);
+              return {
+                ...user,
+                bookingsCount: 0
+              };
+            }
+          })
+        );
+        
+        setUsers(usersWithBookingCounts);
+      } else {
+        setError('Failed to fetch users');
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setError('Error connecting to the server. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter users based on search and role filter
   const filteredUsers = users.filter(user => {
@@ -54,24 +71,49 @@ const AdminUsers = () => {
   };
 
   // Handle user delete
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      // In a real app, this would be an API call
-      setUsers(users.filter(user => user.id !== userId));
+      try {
+        const response = await usersAPI.delete(userId);
+        if (response.data.success) {
+          setUsers(users.filter(user => user._id !== userId));
+        } else {
+          setError('Failed to delete user');
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        setError('Failed to delete user. Please try again.');
+      }
     }
   };
 
   // Handle role change
-  const handleRoleChange = (userId, newRole) => {
+  const handleRoleChange = async (userId, newRole) => {
     if (window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
-      setUsers(
-        users.map(user => 
-          user.id === userId 
-            ? { ...user, role: newRole } 
-            : user
-        )
-      );
+      try {
+        const response = await usersAPI.updateRole(userId, newRole);
+        if (response.data.success) {
+          setUsers(
+            users.map(user => 
+              user._id === userId 
+                ? { ...user, role: newRole } 
+                : user
+            )
+          );
+        } else {
+          setError('Failed to update user role');
+        }
+      } catch (error) {
+        console.error('Error updating user role:', error);
+        setError('Failed to update user role. Please try again.');
+      }
     }
+  };
+
+  // Handle adding a new user
+  const handleAddUser = () => {
+    // In a real app, this would open a modal or redirect to a new user form
+    alert('Add new user functionality would be implemented here');
   };
 
   return (
@@ -82,6 +124,7 @@ const AdminUsers = () => {
           <button
             type="button"
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            onClick={handleAddUser}
           >
             <i className="fas fa-plus mr-2"></i> Add New User
           </button>
@@ -126,6 +169,35 @@ const AdminUsers = () => {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <div className="-mx-1.5 -my-1.5">
+                <button 
+                  onClick={() => setError('')}
+                  className="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Users Table */}
       {loading ? (
         <div className="flex justify-center py-12">
@@ -157,7 +229,7 @@ const AdminUsers = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                    <tr key={user._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
@@ -179,7 +251,7 @@ const AdminUsers = () => {
                         {formatDate(user.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.bookingsCount}
+                        {user.bookingsCount || 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-3">
@@ -188,21 +260,21 @@ const AdminUsers = () => {
                           </button>
                           {user.role === 'user' ? (
                             <button 
-                              onClick={() => handleRoleChange(user.id, 'admin')}
+                              onClick={() => handleRoleChange(user._id, 'admin')}
                               className="text-purple-600 hover:text-purple-900"
                             >
                               Make Admin
                             </button>
                           ) : (
                             <button 
-                              onClick={() => handleRoleChange(user.id, 'user')}
+                              onClick={() => handleRoleChange(user._id, 'user')}
                               className="text-green-600 hover:text-green-900"
                             >
                               Make User
                             </button>
                           )}
                           <button 
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={() => handleDeleteUser(user._id)}
                             className="text-red-600 hover:text-red-900"
                           >
                             Delete
@@ -220,6 +292,19 @@ const AdminUsers = () => {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Refresh Button */}
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <button
+              onClick={fetchUsers}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="mr-2 -ml-1 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh Users
+            </button>
           </div>
         </div>
       )}
