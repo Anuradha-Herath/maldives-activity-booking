@@ -27,6 +27,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminActivities from './pages/admin/Activities';
 import ActivityForm from './pages/admin/ActivityForm';
 import AdminBookings from './pages/admin/Bookings';
+import AdminBookingDetail from './pages/admin/BookingDetail'; // Add this import
 import AdminUsers from './pages/admin/Users';
 import AdminActivityView from './pages/admin/AdminActivityView';
 
@@ -73,6 +74,7 @@ const AppContent = () => {
           <Route path="/admin/activities/:id" element={<AdminRoute><ActivityForm /></AdminRoute>} />
           <Route path="/admin/activities/view/:id" element={<AdminRoute><AdminActivityView /></AdminRoute>} />
           <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
+          <Route path="/admin/bookings/:id" element={<AdminRoute><AdminBookingDetail /></AdminRoute>} /> {/* Add this line */}
           <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
           
           <Route path="*" element={<NotFound />} />
