@@ -56,6 +56,15 @@ export const dashboardAPI = {
   getStats: () => API.get('/dashboard/stats')
 };
 
+// User Bookings API
+export const userBookingsAPI = {
+  getAll: () => API.get('/user/bookings'),
+  getHistory: () => API.get('/user/bookings/history'),
+  getUpcoming: () => API.get('/user/bookings/upcoming'),
+  getStats: () => API.get('/user/bookings/stats'),
+  cancelBooking: (id) => API.put(`/user/bookings/${id}/cancel`)
+};
+
 // Function to upload image to Cloudinary
 export const uploadImage = async (file) => {
   const formData = new FormData();
