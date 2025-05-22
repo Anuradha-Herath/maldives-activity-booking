@@ -19,6 +19,7 @@ const uploadRoutes = require('./routes/upload.routes');
 const testUploadRoutes = require('./routes/testUpload.routes');
 const bookingRoutes = require('./routes/booking.routes');
 const userRoutes = require('./routes/user.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/test-upload', testUploadRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
 
 // Add debug routes in non-production environments
 if (process.env.NODE_ENV !== 'production') {

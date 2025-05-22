@@ -51,6 +51,11 @@ export const usersAPI = {
   getBookingCount: (id) => API.get(`/users/${id}/bookings/count`)
 };
 
+// Dashboard API
+export const dashboardAPI = {
+  getStats: () => API.get('/dashboard/stats')
+};
+
 // Function to upload image to Cloudinary
 export const uploadImage = async (file) => {
   const formData = new FormData();
