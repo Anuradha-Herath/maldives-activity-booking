@@ -30,6 +30,16 @@ export const activitiesAPI = {
   delete: (id) => API.delete(`/activities/${id}`)
 };
 
+// Bookings API
+export const bookingsAPI = {
+  create: (bookingData) => API.post('/bookings', bookingData),
+  getAll: () => API.get('/bookings'),
+  getById: (id) => API.get(`/bookings/${id}`),
+  getByReference: (reference) => API.get(`/bookings/reference/${reference}`),
+  updateStatus: (id, status) => API.put(`/bookings/${id}`, { status }),
+  delete: (id) => API.delete(`/bookings/${id}`)
+};
+
 // Function to upload image to Cloudinary
 export const uploadImage = async (file) => {
   const formData = new FormData();

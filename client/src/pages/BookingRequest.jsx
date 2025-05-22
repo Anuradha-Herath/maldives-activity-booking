@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { activitiesAPI } from '../utils/api';
+import { activitiesAPI, bookingsAPI } from '../utils/api';
 import ConfirmationModal from '../components/booking/ConfirmationModal';
 
 const BookingRequest = () => {
@@ -9,6 +9,8 @@ const BookingRequest = () => {
     const location = useLocation();
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         date: '',
         guests: 2,
@@ -19,6 +21,7 @@ const BookingRequest = () => {
     });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [bookingReference, setBookingReference] = useState('');
+    const [bookingId, setBookingId] = useState('');
 
     // Get pre-selected data from state if available (from the activity detail page)
     useEffect(() => {
@@ -45,7 +48,7 @@ const BookingRequest = () => {
                 }
             } catch (error) {
                 console.error('Error fetching activity details:', error);
-                // Error handling will be done in the UI
+                setError('Failed to load activity details. Please try again later.');
             } finally {
                 setLoading(false);
             }
@@ -64,23 +67,42 @@ const BookingRequest = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitting(true);
+        setError('');
         
         // Generate a random booking reference
         const reference = `BOOK-${Math.floor(100000 + Math.random() * 900000)}`;
-        setBookingReference(reference);
         
-        // In a real app, you would send this data to your backend
-        console.log('Submitting booking request:', { 
-            activityId: id,
-            ...formData,
-            bookingReference: reference,
-            totalPrice: activity.price * formData.guests
-        });
-        
-        // Show confirmation modal
-        setIsModalOpen(true);
+        try {
+            // Create booking data object
+            const bookingData = {
+                activityId: id,
+                bookingReference: reference,
+                date: formData.date,
+                guests: parseInt(formData.guests),
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                specialRequests: formData.specialRequests,
+                totalPrice: activity.price * formData.guests
+            };
+            
+            // Send booking data to the API
+            const response = await bookingsAPI.create(bookingData);
+            
+            if (response.data.success) {
+                setBookingReference(reference);
+                setBookingId(response.data.data._id);
+                setIsModalOpen(true);
+            }
+        } catch (error) {
+            console.error('Error creating booking:', error);
+            setError('Failed to create booking. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const handleModalClose = () => {
@@ -93,6 +115,23 @@ const BookingRequest = () => {
         return (
             <div className="container mx-auto px-4 py-12 flex justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container mx-auto px-4 py-12">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    <h2 className="text-xl font-bold mb-2">Error</h2>
+                    <p>{error}</p>
+                    <button 
+                        onClick={() => window.location.reload()}
+                        className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    >
+                        Try Again
+                    </button>
+                </div>
             </div>
         );
     }
@@ -257,17 +296,27 @@ const BookingRequest = () => {
                                 type="button"
                                 onClick={() => navigate(`/activities/${id}`)}
                                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                disabled={submitting}
                             >
                                 Back to Activity
                             </button>
                             
                             <button
                                 type="submit"
-                                className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                                className={`px-6 py-3 bg-blue-600 text-white font-medium rounded-lg ${
+                                    submitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                                } transition-colors`}
+                                disabled={submitting}
                             >
-                                Send Booking Request
+                                {submitting ? 'Processing...' : 'Send Booking Request'}
                             </button>
                         </div>
+                        
+                        {error && (
+                            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
+                                {error}
+                            </div>
+                        )}
                     </form>
                 </div>
             </div>
@@ -281,6 +330,7 @@ const BookingRequest = () => {
                 date={formData.date}
                 guests={formData.guests}
                 totalPrice={activity.price * formData.guests}
+                bookingId={bookingId}
             />
         </div>
     );
