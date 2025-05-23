@@ -164,6 +164,35 @@ server/
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:5000
 
+### 👨‍💼 Admin Panel Access
+
+To access the admin panel and test administrative features:
+
+1. **Create an Admin Account**:
+   - Register a new user account through the signup page
+   - Manually update the user's role in MongoDB to 'admin':
+   ```javascript
+   // In MongoDB Compass or MongoDB shell
+   db.users.updateOne(
+     { email: "admin@example.com" },
+     { $set: { role: "admin" } }
+   )
+   ```
+
+2. **Login with Admin Credentials**:
+   - Use the admin account credentials to login
+   - You will automatically be redirected to the admin dashboard
+
+3. **Admin Panel Features**:
+   - **Dashboard**: `/admin/dashboard` - Analytics and overview
+   - **Activities Management**: `/admin/activities` - Create, edit, and delete activities
+   - **Bookings Management**: `/admin/bookings` - View and manage all bookings
+   - **Users Management**: `/admin/users` - Manage user accounts
+
+4. **Admin Routes**:
+   - All admin routes are protected and require admin role authentication
+   - Non-admin users will be redirected to the home page if they try to access admin routes
+
 ## 🛠️ Technologies Used
 
 ### Frontend
