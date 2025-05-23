@@ -161,7 +161,7 @@ server/
    ```
 
 3. **Access the application**:
-   - Frontend: http://localhost:5173
+   - Frontend: http://localhost:3000
    - Backend API: http://localhost:5000
 
 ### 👨‍💼 Admin Panel Access
@@ -181,7 +181,7 @@ To access the admin panel and test administrative features:
 
 2. **Login with Admin Credentials**:
    - Use the admin account credentials to login
-   - You will automatically be redirected to the admin dashboard
+   
 
 3. **Admin Panel Features**:
    - **Dashboard**: `/admin/dashboard` - Analytics and overview
@@ -271,19 +271,6 @@ To access the admin panel and test administrative features:
 | `VITE_API_URL` | Backend API base URL | Yes |
 | `VITE_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name | No |
 
-## 🚀 Deployment
-
-### Production Build
-```bash
-# Build client
-cd client
-npm run build
-
-# The built files will be in client/dist/
-```
-
-### Docker Support
-The application can be containerized using Docker. Refer to the included Dockerfile and docker-compose.yml for containerization setup.
 
 ## 🤝 Contributing
 
@@ -295,10 +282,6 @@ The application can be containerized using Docker. Refer to the included Dockerf
 
 
 
-## 🆘 Support
 
-For support and questions, please open an issue in the repository or contact the development team.
-
----
 
 *Built with ❤️ for travelers exploring the beautiful Maldives*
