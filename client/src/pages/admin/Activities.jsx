@@ -164,109 +164,136 @@ const AdminActivities = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Activity
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Type
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Price
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredActivities.length > 0 ? (
-                  filteredActivities.map((activity) => (
-                    <tr key={activity._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                  filteredActivities.map((activity, index) => (
+                    <tr key={activity._id} className={`hover:bg-blue-50 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
+                          <div className="flex-shrink-0 h-12 w-12 mr-3">
                             <img 
-                              className="h-10 w-10 rounded-full object-cover" 
+                              className="h-12 w-12 rounded-md object-cover shadow-sm border border-gray-200" 
                               src={activity.image} 
                               alt={activity.title} 
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'https://via.placeholder.com/40?text=NA';
+                                e.target.src = 'https://via.placeholder.com/48?text=NA';
                               }}
                             />
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 flex items-center flex-wrap">
                               {activity.title}
                               {activity.featured && (
-                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-600 mr-1"></span>
                                   Featured
                                 </span>
                               )}
                             </div>
+                            <div className="text-xs text-gray-500 flex items-center">
+                              <svg className="h-3 w-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              {activity.location}
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {activity.location}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium
+                          ${activity.type === 'water-sports' ? 'bg-blue-100 text-blue-800 border border-blue-200' : ''}
+                          ${activity.type === 'cruises' ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' : ''}
+                          ${activity.type === 'island-tours' ? 'bg-green-100 text-green-800 border border-green-200' : ''}
+                          ${activity.type === 'diving' ? 'bg-cyan-100 text-cyan-800 border border-cyan-200' : ''}
+                          ${activity.type === 'cultural' ? 'bg-purple-100 text-purple-800 border border-purple-200' : ''}
+                          ${activity.type === 'adventure' ? 'bg-orange-100 text-orange-800 border border-orange-200' : ''}
+                          ${activity.type === 'wellness' ? 'bg-pink-100 text-pink-800 border border-pink-200' : ''}
+                        `}>
+                          {activity.type.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {activity.type.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          ${activity.price}<span className="text-xs text-gray-500">/person</span>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${activity.price}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
                           activity.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-green-100 text-green-800 border border-green-200' 
+                            : 'bg-red-100 text-red-800 border border-red-200'
                         }`}>
+                          <span className={`h-1.5 w-1.5 rounded-full mr-1.5 ${
+                            activity.status === 'active' ? 'bg-green-600' : 'bg-red-600'
+                          }`}></span>
                           {activity.status ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1) : 'Active'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link
                           to={`/admin/activities/view/${activity._id}`}
-                          className="text-blue-600 hover:text-blue-900 mr-3"
+                          className="text-blue-600 hover:text-blue-900 mr-2"
+                          title="View"
                         >
-                          View
+                          <svg className="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
                         </Link>
                         <Link
                           to={`/admin/activities/${activity._id}`}
-                          className="text-blue-600 hover:text-blue-900 mr-3"
+                          className="text-blue-600 hover:text-blue-900 mr-2"
+                          title="Edit"
                         >
-                          Edit
+                          <svg className="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
                         </Link>
                         <button
                           onClick={() => handleDelete(activity._id)}
                           className="text-red-600 hover:text-red-900"
+                          title="Delete"
                         >
-                          Delete
+                          <svg className="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
                         </button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colSpan="5" className="px-4 py-4 text-center text-sm text-gray-500">
                       No activities found. {searchTerm && 'Try a different search term.'}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          </div>
-          
-          {/* Activity count */}
-          <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
-            Showing {filteredActivities.length} of {activities.length} activities
+            
+            {/* Activity count */}
+            <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
+              Showing {filteredActivities.length} of {activities.length} activities
+            </div>
           </div>
         </div>
       )}

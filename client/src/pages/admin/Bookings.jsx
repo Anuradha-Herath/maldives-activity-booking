@@ -266,74 +266,89 @@ const AdminBookings = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Booking ID
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Activity
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Guests
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredBookings.length > 0 ? (
-                  filteredBookings.map((booking) => (
+                  filteredBookings.map((booking, index) => (
                     <tr 
                       key={booking._id} 
-                      className="hover:bg-gray-50 cursor-pointer"
+                      className={`hover:bg-blue-50 transition-colors duration-150 cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                       onClick={(e) => handleRowClick(booking._id, e)}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                        <Link to={`/admin/bookings/${booking._id}`} onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
+                        <Link to={`/admin/bookings/${booking._id}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
                           {booking.bookingReference}
                         </Link>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {booking.activity?.title || "Unknown Activity"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{booking.fullName}</div>
-                        <div className="text-sm text-gray-500">{booking.email}</div>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{booking.fullName}</div>
+                        <div className="text-xs text-gray-500 truncate max-w-[200px]">{booking.email}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{formatDate(booking.date)}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {booking.guests}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900 text-center">{booking.guests}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${booking.totalPrice}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm font-semibold text-gray-900">${booking.totalPrice}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusBadge status={booking.status} />
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${
+                          booking.status === 'confirmed' 
+                            ? 'bg-green-100 text-green-800 border-green-200' 
+                            : booking.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                              : 'bg-red-100 text-red-800 border-red-200'
+                        }`}>
+                          <span className={`h-1.5 w-1.5 rounded-full mr-1.5 ${
+                            booking.status === 'confirmed' ? 'bg-green-600' : 
+                            booking.status === 'pending' ? 'bg-yellow-600' : 'bg-red-600'
+                          }`}></span>
+                          {booking.status ? booking.status.charAt(0).toUpperCase() + booking.status.slice(1) : ''}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         {booking.status === 'pending' && (
-                          <div className="space-x-2">
+                          <div className="flex justify-end space-x-1">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleStatusChange(booking._id, 'confirmed');
                               }}
-                              className="text-green-600 hover:text-green-900"
+                              className="inline-flex items-center px-2 py-1 rounded text-xs text-green-700 bg-green-50 hover:bg-green-100 transition-colors"
                             >
+                              <svg className="h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
                               Confirm
                             </button>
                             <button
@@ -341,8 +356,11 @@ const AdminBookings = () => {
                                 e.stopPropagation();
                                 handleStatusChange(booking._id, 'cancelled');
                               }}
-                              className="text-red-600 hover:text-red-900"
+                              className="inline-flex items-center px-2 py-1 rounded text-xs text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
                             >
+                              <svg className="h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
                               Cancel
                             </button>
                           </div>
@@ -353,8 +371,11 @@ const AdminBookings = () => {
                               e.stopPropagation();
                               handleStatusChange(booking._id, 'cancelled');
                             }}
-                            className="text-red-600 hover:text-red-900"
+                            className="inline-flex items-center px-2 py-1 rounded text-xs text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
                           >
+                            <svg className="h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                             Cancel
                           </button>
                         )}
@@ -364,8 +385,11 @@ const AdminBookings = () => {
                               e.stopPropagation();
                               handleStatusChange(booking._id, 'confirmed');
                             }}
-                            className="text-green-600 hover:text-green-900"
+                            className="inline-flex items-center px-2 py-1 rounded text-xs text-green-700 bg-green-50 hover:bg-green-100 transition-colors"
                           >
+                            <svg className="h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
                             Reactivate
                           </button>
                         )}
@@ -374,7 +398,7 @@ const AdminBookings = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colSpan="8" className="px-4 py-4 text-center text-sm text-gray-500">
                       No bookings found.
                     </td>
                   </tr>
@@ -384,12 +408,15 @@ const AdminBookings = () => {
           </div>
           
           {/* Refresh Button */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <div className="px-4 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+            <span className="text-xs text-gray-500">
+              Showing {filteredBookings.length} of {bookings.length} bookings
+            </span>
             <button
               onClick={fetchBookings}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <svg className="mr-2 -ml-1 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="mr-2 -ml-1 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               Refresh Bookings
