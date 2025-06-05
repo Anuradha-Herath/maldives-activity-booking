@@ -10,7 +10,7 @@ const AdminActivities = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
   
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/v1';
+  const API_URL = 'http://localhost:5000/api/v1';
 
   useEffect(() => {
     const fetchActivities = async () => {

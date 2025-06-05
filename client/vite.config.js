@@ -20,10 +20,11 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['axios']
-  },  define: {
+  },
+  define: {
     // Make env variables available in your client code
-    'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL || 'https://maldives-activity-booking-production.up.railway.app/api/v1'),
-    'process.env.REACT_APP_CLOUDINARY_CLOUD_NAME': JSON.stringify(process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || 'dwzhs42tz'),
-    'process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'maldives_activities'),
+    'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL),
+    'process.env.REACT_APP_CLOUDINARY_CLOUD_NAME': JSON.stringify(process.env.REACT_APP_CLOUDINARY_CLOUD_NAME),
+    'process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET),
   }
 });
