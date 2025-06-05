@@ -10,7 +10,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: process.env.PORT || 5173,
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
@@ -20,5 +20,11 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['axios']
+  },
+  define: {
+    // Make env variables available in your client code
+    'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL),
+    'process.env.REACT_APP_CLOUDINARY_CLOUD_NAME': JSON.stringify(process.env.REACT_APP_CLOUDINARY_CLOUD_NAME),
+    'process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET),
   }
 });
