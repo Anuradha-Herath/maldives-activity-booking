@@ -1,8 +1,12 @@
 import axios from 'axios';
 
-// Create axios instance with base URL
+// Create axios instance with base URL using environment variable
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/v1';
+
+console.log('API URL being used:', API_URL); // Debug log
+
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api/v1',
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -67,13 +71,18 @@ export const userBookingsAPI = {
 
 // Function to upload image to Cloudinary
 export const uploadImage = async (file) => {
+  const cloudName = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || 'dwzhs42tz';
+  const uploadPreset = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'maldives_activities';
+  
+  console.log('Cloudinary upload using:', { cloudName, uploadPreset }); // Debug log
+  
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('upload_preset', 'maldives_activities');
+  formData.append('upload_preset', uploadPreset);
   
   try {
     const response = await axios.post(
-      `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || 'dwzhs42tz'}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
       formData
     );
     return response.data.secure_url;

@@ -39,7 +39,8 @@ if (process.env.NODE_ENV === 'development') {
 const corsOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [
   'http://localhost:3000', 
   'http://localhost:5173',
-  'https://maldives-activity-booking.vercel.app'
+  'https://maldives-activity-booking.vercel.app',
+  'https://maldives-activity-booking-client.vercel.app'
 ];
 
 app.use(cors({

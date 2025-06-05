@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/v1';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/v1';
+
+console.log('Auth Service using API URL:', API_URL); // Debug log
 
 // Configure axios with credentials
 axios.defaults.withCredentials = true;

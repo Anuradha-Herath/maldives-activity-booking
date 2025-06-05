@@ -7,7 +7,7 @@ const DebugUpload = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   
-  const API_URL = 'http://localhost:5000/api/v1';
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/v1';
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
