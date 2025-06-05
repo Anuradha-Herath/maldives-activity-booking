@@ -36,13 +36,14 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Enable CORS
+const corsOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [
+  'http://localhost:3000', 
+  'http://localhost:5173',
+  'https://maldives-activity-booking.vercel.app'
+];
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000', 
-    'http://localhost:5173',
-    'https://maldives-activity-booking.vercel.app',
-    'https://maldives-activity-booking-production.up.railway.app'
-  ], // Add all your frontend URLs
+  origin: corsOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
