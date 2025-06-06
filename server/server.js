@@ -27,6 +27,19 @@ const app = express();
 // Body parser
 app.use(express.json());
 
+// Diagnostic root endpoint to check if the server is running
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Server is running', 
+    apiEndpoints: [
+      '/api/v1/activities',
+      '/api/v1/auth',
+      '/api/v1/bookings',
+      '/api/v1/users'
+    ] 
+  });
+});
+
 // Cookie parser
 app.use(cookieParser());
 
@@ -80,6 +93,19 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/user/bookings', userBookingRoutes);
 
+// Add a test endpoint specifically for checking CORS
+app.get('/api/v1/cors-test', (req, res) => {
+  res.json({ 
+    message: 'CORS is working!',
+    origin: req.headers.origin || 'No origin in request',
+    headers: {
+      'access-control-allow-origin': res.getHeader('Access-Control-Allow-Origin'),
+      'access-control-allow-methods': res.getHeader('Access-Control-Allow-Methods'),
+      'access-control-allow-headers': res.getHeader('Access-Control-Allow-Headers')
+    }
+  });
+});
+
 // Add debug routes in non-production environments
 if (process.env.NODE_ENV !== 'production') {
   const debugRoutes = require('./routes/debug.routes');
@@ -98,14 +124,10 @@ app.use((err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
   
-  // Ensure CORS headers are set even in error responses
-  const origin = req.headers.origin;
-  if (origin === 'https://maldives-activity-booking-frontend.onrender.com') {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
+  // Always set CORS headers in error responses
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   res.status(err.statusCode).json({
     success: false,
