@@ -24,19 +24,37 @@ const userBookingRoutes = require('./routes/userBooking.routes');
 
 const app = express();
 
+// Add root endpoint to check if server is running
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Maldives Activity Booking API Server',
+    status: 'Running',
+    endpoints: [
+      '/api/v1/activities',
+      '/api/v1/server-status',
+      '/api/v1/auth',
+      '/api/v1/bookings'
+    ],
+    documentation: 'API documentation coming soon'
+  });
+});
+
 // Body parser
 app.use(express.json());
 
 // Diagnostic root endpoint to check if the server is running
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Server is running', 
-    apiEndpoints: [
-      '/api/v1/activities',
-      '/api/v1/auth',
-      '/api/v1/bookings',
-      '/api/v1/users'
-    ] 
+app.get('/api/v1/server-status', (req, res) => {
+  res.json({
+    status: 'Server is running',
+    timestamp: new Date().toISOString(),
+    cors: {
+      allowedOrigins,
+      requestOrigin: req.headers.origin || 'No origin in request'
+    },
+    env: {
+      nodeEnv: process.env.NODE_ENV,
+      corsOriginEnv: process.env.CORS_ORIGIN
+    }
   });
 });
 
@@ -48,25 +66,30 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Enable CORS - Simple wildcard configuration for public API
+// Enable CORS
+// Read allowed origins from environment variable or use defaults
+const allowedOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',') 
+  : ['http://localhost:3000', 'http://localhost:5173', 'https://maldives-activity-booking-frontend.onrender.com'];
+
+console.log('CORS Origins allowed:', allowedOrigins);
+
+// Use CORS middleware with proper configuration
 app.use(cors({
-  origin: '*', // Allow requests from any origin
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-// Add CORS headers to every response
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  next();
-});
 
 // File upload middleware
 app.use(fileUpload({
@@ -93,15 +116,18 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/user/bookings', userBookingRoutes);
 
-// Add a test endpoint specifically for checking CORS
-app.get('/api/v1/cors-test', (req, res) => {
-  res.json({ 
-    message: 'CORS is working!',
-    origin: req.headers.origin || 'No origin in request',
-    headers: {
-      'access-control-allow-origin': res.getHeader('Access-Control-Allow-Origin'),
-      'access-control-allow-methods': res.getHeader('Access-Control-Allow-Methods'),
-      'access-control-allow-headers': res.getHeader('Access-Control-Allow-Headers')
+// Add a diagnostic endpoint to check server status
+app.get('/api/v1/server-status', (req, res) => {
+  res.json({
+    status: 'Server is running',
+    timestamp: new Date().toISOString(),
+    cors: {
+      allowedOrigins,
+      requestOrigin: req.headers.origin || 'No origin in request'
+    },
+    env: {
+      nodeEnv: process.env.NODE_ENV,
+      corsOriginEnv: process.env.CORS_ORIGIN
     }
   });
 });
@@ -124,10 +150,16 @@ app.use((err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
   
-  // Always set CORS headers in error responses
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // Get origin from request headers
+  const origin = req.headers.origin;
+  
+  // Set CORS headers in error responses if the origin is allowed
+  if (origin && allowedOrigins.indexOf(origin) !== -1) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
   
   res.status(err.statusCode).json({
     success: false,

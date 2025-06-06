@@ -9,7 +9,7 @@ const API = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  withCredentials: false // Disable credentials since we're using wildcard CORS
+  withCredentials: true // Enable credentials for authentication
 });
 
 // Add request interceptor to include auth token if available
