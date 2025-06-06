@@ -30,10 +30,19 @@
 
 ## 🚀 CURRENT APPLICATION STATUS
 
+### **ISSUE RESOLVED: CORS Configuration**
+**Root Cause**: The backend CORS configuration was not allowing requests from `http://localhost:3001`
+
+**Solution Applied**:
+- ✅ Updated `server/.env` CORS_ORIGIN to include `http://localhost:3001`
+- ✅ Restarted backend server with updated configuration
+- ✅ Frontend can now successfully connect to the backend API
+
 ### **Servers Running Successfully**
 - ✅ **Backend API**: `http://localhost:5000` 
 - ✅ **Frontend App**: `http://localhost:3001`
 - ✅ **Database**: MongoDB connected successfully
+- ✅ **CORS**: Now allows requests from localhost:3001
 
 ### **API Endpoints Tested**
 - ✅ **GET /api/v1/activities** - Returns 10 activities

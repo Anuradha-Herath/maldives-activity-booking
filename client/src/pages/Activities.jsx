@@ -44,8 +44,7 @@ const Activities = () => {
                 if (type) params.type = type;
                 
                 // Handle location search
-                if (locationParam) params.location = locationParam;
-                  // If there's a search term, we'll filter results client-side
+                if (locationParam) params.location = locationParam;                // If there's a search term, we'll filter results client-side
                 const response = await activitiesAPI.getAll(params);
                 
                 // Set initial data - ensure response data exists and has the expected structure

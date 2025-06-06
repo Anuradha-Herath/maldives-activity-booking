@@ -44,7 +44,7 @@ This guide will help you deploy your Maldives Activity Booking application to Re
    CLOUDINARY_API_KEY=your_cloudinary_api_key
    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
    CLOUDINARY_UPLOAD_PRESET=maldives_activities
-   CORS_ORIGIN=https://maldives-activity-booking-client.onrender.com,http://localhost:3000,http://localhost:5173
+   CORS_ORIGIN=https://maldives-activity-booking-client.onrender.com,http://localhost:3000,http://localhost:3001,http://localhost:5173
    ```
 
 6. Click "Create Web Service"

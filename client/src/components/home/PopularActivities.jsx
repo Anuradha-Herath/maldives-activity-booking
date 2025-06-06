@@ -6,10 +6,9 @@ const PopularActivities = () => {
     const carouselRef = useRef(null);
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    
-    useEffect(() => {
-        const fetchPopularActivities = async () => {            try {
+    const [error, setError] = useState(null);    useEffect(() => {
+        const fetchPopularActivities = async () => {
+            try {
                 setLoading(true);
                 const response = await activitiesAPI.getAll();
                 
