@@ -1,0 +1,48 @@
+services:
+  # Backend API service
+  - type: web
+    name: maldives-activity-booking-api
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_URI
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRE
+        value: 30d
+      - key: JWT_COOKIE_EXPIRE
+        value: 30
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_UPLOAD_PRESET
+        value: maldives_activities
+      - key: CORS_ORIGIN
+        value: https://maldives-activity-booking-client.onrender.com,http://localhost:3000,http://localhost:5173
+  
+  # Frontend service
+  - type: web
+    name: maldives-activity-booking-client
+    env: node
+    plan: free
+    buildCommand: cd client && npm install && npm run build
+    startCommand: cd client && npm run preview -- --port $PORT --host 0.0.0.0
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://maldives-activity-booking-api.onrender.com/api/v1
+      - key: REACT_APP_CLOUDINARY_CLOUD_NAME
+        value: dwzhs42tz
+      - key: REACT_APP_CLOUDINARY_UPLOAD_PRESET
+        value: maldives_activities
