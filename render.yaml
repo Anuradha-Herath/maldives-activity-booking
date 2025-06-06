@@ -31,12 +31,12 @@ services:
         value: maldives_activities
       - key: CORS_ORIGIN
         value: https://maldives-activity-booking-client.onrender.com,http://localhost:3000,http://localhost:5173
-    # Frontend service
+  # Frontend service
   - type: web
     name: maldives-activity-booking-client
     env: node
     plan: free
-    buildCommand: cd client && npm install && npm run build
+    buildCommand: cd client && chmod +x build.sh && ./build.sh
     startCommand: cd client && npm run start
     envVars:
       - key: REACT_APP_API_URL

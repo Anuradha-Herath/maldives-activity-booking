@@ -34,13 +34,19 @@ export default defineConfig({
       },
       output: {
         assetFileNames: (assetInfo) => {
-          // Ensure CSS files keep their extension during build
+          // Special handling for the main index.css - place it at the root for direct access
+          if (assetInfo.name === 'index.css') {
+            return '[name][extname]';
+          }
+          // Ensure other CSS files keep their extension during build
           if (assetInfo.name.endsWith('.css')) {
             return 'assets/css/[name][extname]';
           }
           return 'assets/[name]-[hash][extname]';
         }
       }
-    }
+    },
+    // Ensure proper manifest generation
+    manifest: true
   }
 });
