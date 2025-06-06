@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+        button { padding: 10px 20px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Maldives Activities - Frontend API Test</h1>
+    
+    <div class="info">
+        <strong>Instructions:</strong>
+        <ol>
+            <li>Open this file in your deployed frontend's browser (not locally)</li>
+            <li>Click "Test API Connection" to check if your frontend can reach the backend</li>
+            <li>Check the results and console logs</li>
+        </ol>
+    </div>
+    
+    <button onclick="testAPI()">🧪 Test API Connection</button>
+    <button onclick="checkEnvironment()">🔧 Check Environment Variables</button>
+    <button onclick="testCORS()">🛡️ Test CORS</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        const BACKEND_URL = 'https://maldives-activity-booking-backend.onrender.com';
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+            console.log(message);
+        }
+        
+        async function testAPI() {
+            log('🧪 Testing API Connection...', 'info');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/activities`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ API Working! Found ${data.count} activities`, 'success');
+                    log(`<pre>${JSON.stringify(data.data?.[0], null, 2)}</pre>`, 'info');
+                } else {
+                    log(`❌ API Error: ${response.status} - ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Connection Failed: ${error.message}`, 'error');
+                log('This is likely a CORS issue - your frontend URL is not allowed by the backend', 'error');
+            }
+        }
+        
+        function checkEnvironment() {
+            log('🔧 Checking Environment Variables...', 'info');
+            
+            // Check if running in production
+            const currentURL = window.location.href;
+            log(`Current URL: ${currentURL}`, 'info');
+            
+            // Try to access Vite environment variables (this might not work in production)
+            if (typeof import !== 'undefined' && import.meta?.env) {
+                log(`VITE_API_URL: ${import.meta.env.VITE_API_URL || 'Not set'}`, 'info');
+                log(`Environment: ${import.meta.env.MODE || 'Unknown'}`, 'info');
+            } else {
+                log('Environment variables not accessible from this test', 'info');
+                log('This is normal in production builds', 'info');
+            }
+        }
+        
+        async function testCORS() {
+            log('🛡️ Testing CORS Configuration...', 'info');
+            
+            const currentOrigin = window.location.origin;
+            log(`Testing from origin: ${currentOrigin}`, 'info');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/activities`, {
+                    method: 'GET',
+                    headers: {
+                        'Origin': currentOrigin,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                log('CORS Headers received:', 'info');
+                log(`<pre>${JSON.stringify(corsHeaders, null, 2)}</pre>`, 'info');
+                
+                if (response.ok) {
+                    log('✅ CORS is working correctly', 'success');
+                } else {
+                    log(`❌ CORS Issue: ${response.status}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ CORS Test Failed: ${error.message}`, 'error');
+                log(`You need to add "${currentOrigin}" to your backend CORS_ORIGIN environment variable`, 'error');
+            }
+        }
+        
+        // Auto-run environment check on load
+        window.onload = function() {
+            checkEnvironment();
+        };
+    </script>
+</body>
+</html>

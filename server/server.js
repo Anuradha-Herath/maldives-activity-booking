@@ -42,6 +42,12 @@ app.get('/', (req, res) => {
 // Body parser
 app.use(express.json());
 
+// Enable CORS
+// Read allowed origins from environment variable or use defaults
+const allowedOrigins = process.env.CORS_ORIGIN 
+  ? (process.env.CORS_ORIGIN === '*' ? '*' : process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()))
+  : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'https://maldives-activity-booking-frontend.onrender.com'];
+
 // Diagnostic root endpoint to check if the server is running
 app.get('/api/v1/server-status', (req, res) => {
   res.json({
@@ -66,12 +72,6 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Enable CORS
-// Read allowed origins from environment variable or use defaults
-const allowedOrigins = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',') 
-  : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'https://maldives-activity-booking-frontend.onrender.com'];
-
 console.log('CORS Origins allowed:', allowedOrigins);
 
 // Use CORS middleware with proper configuration
@@ -79,6 +79,9 @@ app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps, curl requests)
     if (!origin) return callback(null, true);
+    
+    // If allowedOrigins is '*', allow all origins
+    if (allowedOrigins === '*') return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
