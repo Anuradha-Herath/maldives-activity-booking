@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Create axios instance with base URL - use environment variable or fallback to local development
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
 // Create axios instance with base URL
 const API = axios.create({
@@ -73,9 +73,9 @@ export const userBookingsAPI = {
 export const uploadImage = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'maldives_activities');
+  formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'maldives_activities');
   
-  const cloudName = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || 'dwzhs42tz';
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dwzhs42tz';
   
   try {
     const response = await axios.post(

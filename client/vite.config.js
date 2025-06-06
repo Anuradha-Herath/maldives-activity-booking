@@ -24,14 +24,22 @@ export default defineConfig({
   css: {
     // Enable CSS processing
     postcss: './postcss.config.js',
-  },
-  build: {
+  },  build: {
     outDir: 'dist',
     assetsDir: 'assets',
     // Ensure the index.css is properly included in the build
     rollupOptions: {
       input: {
         main: './index.html',
+      },
+      output: {
+        assetFileNames: (assetInfo) => {
+          // Ensure CSS files keep their extension during build
+          if (assetInfo.name.endsWith('.css')) {
+            return 'assets/css/[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        }
       }
     }
   }
