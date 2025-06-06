@@ -62,16 +62,16 @@ This guide will help you deploy your Maldives Activity Booking application to Re
 
 5. Add the following environment variables:
    ```
-   REACT_APP_API_URL=https://maldives-activity-booking-api.onrender.com/api/v1
-   REACT_APP_CLOUDINARY_CLOUD_NAME=dwzhs42tz
-   REACT_APP_CLOUDINARY_UPLOAD_PRESET=maldives_activities
+   VITE_API_URL=https://maldives-activity-booking-backend.onrender.com/api/v1
+   VITE_CLOUDINARY_CLOUD_NAME=dwzhs42tz
+   VITE_CLOUDINARY_UPLOAD_PRESET=maldives_activities
    ```
 
 6. Click "Create Static Site"
 
 ## Post-Deployment
 
-1. Once deployed, go to the backend service settings and copy the URL (e.g., `https://maldives-activity-booking-api.onrender.com`)
+1. Once deployed, go to the backend service settings and copy the URL (e.g., `https://maldives-activity-booking-backend.onrender.com`)
 2. Update the frontend environment variable `REACT_APP_API_URL` to point to this URL with `/api/v1` appended
 
 3. If needed, update the CORS settings in the backend to include any additional frontend URLs

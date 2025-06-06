@@ -26,20 +26,22 @@ services:
       - key: CLOUDINARY_API_KEY
         sync: false
       - key: CLOUDINARY_API_SECRET
-        sync: false
-      - key: CLOUDINARY_UPLOAD_PRESET
-        value: maldives_activities      - key: CORS_ORIGIN
-        value: https://maldives-activity-booking-frontend.onrender.com,http://localhost:3000,http://localhost:5173  # Frontend service
+        sync: false      - key: CLOUDINARY_UPLOAD_PRESET
+        value: maldives_activities
+      - key: CORS_ORIGIN
+        value: https://maldives-activity-booking-frontend.onrender.com,http://localhost:3000,http://localhost:5173
+
+  # Frontend static site
   - type: web
     name: maldives-activity-booking-frontend
-    env: node
+    env: static
     plan: free
-    buildCommand: cd client && chmod +x build.sh && ./build.sh
-    startCommand: cd client && npm run start
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: client/dist
     envVars:
-      - key: REACT_APP_API_URL
-        value: https://maldives-activity-booking-api.onrender.com/api/v1
-      - key: REACT_APP_CLOUDINARY_CLOUD_NAME
+      - key: VITE_API_URL
+        value: https://maldives-activity-booking-backend.onrender.com/api/v1
+      - key: VITE_CLOUDINARY_CLOUD_NAME
         value: dwzhs42tz
-      - key: REACT_APP_CLOUDINARY_UPLOAD_PRESET
+      - key: VITE_CLOUDINARY_UPLOAD_PRESET
         value: maldives_activities

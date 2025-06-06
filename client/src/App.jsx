@@ -1,5 +1,11 @@
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+
+// Import environment checker for development debugging
+if (import.meta.env.DEV) {
+  import('./utils/envCheck.js');
+}
+
 import Home from './pages/Home';
 import Activities from './pages/Activities';
 import ActivityDetail from './pages/ActivityDetail';
