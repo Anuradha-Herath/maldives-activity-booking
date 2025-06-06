@@ -20,8 +20,21 @@ API.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
+  },  (error) => Promise.reject(error)
+);
+
+// Add response interceptor for error handling
+API.interceptors.response.use(
+  (response) => {
+    return response;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    // Only log errors in development mode
+    if (import.meta.env.DEV) {
+      console.error('API Error:', error.config?.url, error.response?.status, error.message);
+    }
+    return Promise.reject(error);
+  }
 );
 
 // Activities API

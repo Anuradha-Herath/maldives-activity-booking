@@ -9,14 +9,17 @@ const PopularActivities = () => {
     const [error, setError] = useState(null);
     
     useEffect(() => {
-        const fetchPopularActivities = async () => {
-            try {
+        const fetchPopularActivities = async () => {            try {
                 setLoading(true);
                 const response = await activitiesAPI.getAll();
                 
-                const popularActivities = response.data.data
-                    .filter(activity => activity.status === 'active')
-                    .sort((a, b) => b.rating - a.rating)
+                // Ensure response data exists and has the expected structure
+                const activitiesData = response?.data?.data || [];
+                
+                // Filter for active activities and sort by rating
+                const popularActivities = activitiesData
+                    .filter(activity => activity?.status === 'active')
+                    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
                     .slice(0, 6);
                 
                 setActivities(popularActivities);

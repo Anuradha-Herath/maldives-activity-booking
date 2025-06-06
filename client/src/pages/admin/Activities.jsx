@@ -17,9 +17,8 @@ const AdminActivities = () => {
       try {
         setLoading(true);
         const response = await axios.get(`${API_URL}/activities`);
-        
-        if (response.data.success) {
-          setActivities(response.data.data);
+          if (response.data.success) {
+          setActivities(response.data.data || []);
         } else {
           throw new Error('Failed to fetch activities');
         }
@@ -33,18 +32,17 @@ const AdminActivities = () => {
 
     fetchActivities();
   }, []);
-
   // Filter activities based on search term and filter
-  const filteredActivities = activities.filter(activity => {
-    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (activity.location && activity.location.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredActivities = (activities || []).filter(activity => {
+    const matchesSearch = (activity?.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (activity?.location && activity.location.toLowerCase().includes(searchTerm.toLowerCase()));
     
     if (filter === 'all') return matchesSearch;
-    if (filter === 'featured') return matchesSearch && activity.featured;
-    if (filter === 'active') return matchesSearch && activity.status === 'active';
-    if (filter === 'inactive') return matchesSearch && activity.status === 'inactive';
+    if (filter === 'featured') return matchesSearch && activity?.featured;
+    if (filter === 'active') return matchesSearch && activity?.status === 'active';
+    if (filter === 'inactive') return matchesSearch && activity?.status === 'inactive';
     
-    return matchesSearch && activity.type === filter;
+    return matchesSearch && activity?.type === filter;
   });
 
   // Delete activity handler - now calls the API

@@ -17,21 +17,20 @@ const ActivityDetail = () => {
             setLoading(true);
             try {
                 // Get the activity by its ID
-                const activityResponse = await activitiesAPI.getById(id);
-                const foundActivity = activityResponse.data.data;
+                const activityResponse = await activitiesAPI.getById(id);                const foundActivity = activityResponse?.data?.data;
                 
                 if (foundActivity) {
                     setActivity(foundActivity);
                     
                     // Fetch all activities to find related ones (same type or location)
                     const allActivitiesResponse = await activitiesAPI.getAll();
-                    const allActivities = allActivitiesResponse.data.data;
+                    const allActivities = allActivitiesResponse?.data?.data || [];
                     
                     // Find related activities (same type or location)
                     const related = allActivities
                         .filter(act => 
-                            act._id !== foundActivity._id && 
-                            (act.type === foundActivity.type || act.location === foundActivity.location)
+                            act?._id !== foundActivity._id && 
+                            (act?.type === foundActivity.type || act?.location === foundActivity.location)
                         )
                         .slice(0, 4); // Limit to 4 related activities
                     

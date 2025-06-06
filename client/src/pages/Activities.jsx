@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ActivityFilters from '../components/activities/ActivityFilters';
 import ActivitySorting from '../components/activities/ActivitySorting';
 import ActivityList from '../components/activities/ActivityList';
+import ErrorBoundary from '../components/common/ErrorBoundary';
 import { activitiesAPI } from '../utils/api';
 
 const Activities = () => {
@@ -44,21 +45,20 @@ const Activities = () => {
                 
                 // Handle location search
                 if (locationParam) params.location = locationParam;
-                
-                // If there's a search term, we'll filter results client-side
+                  // If there's a search term, we'll filter results client-side
                 const response = await activitiesAPI.getAll(params);
                 
-                // Set initial data
-                const activitiesData = response.data.data;
+                // Set initial data - ensure response data exists and has the expected structure
+                const activitiesData = response?.data?.data || [];
                 setActivities(activitiesData);
                 
                 // Handle client-side filtering for search term
                 let filtered = activitiesData;
                 if (searchQuery) {
                     filtered = activitiesData.filter(activity => 
-                        activity.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        activity.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        activity.shortDescription?.toLowerCase().includes(searchQuery.toLowerCase())
+                        activity?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        activity?.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        activity?.shortDescription?.toLowerCase().includes(searchQuery.toLowerCase())
                     );
                 }
                 
@@ -80,51 +80,50 @@ const Activities = () => {
         
         fetchActivities();
     }, [location.search]);
-    
-    // Apply filters, search query, and sorting whenever relevant values change
+      // Apply filters, search query, and sorting whenever relevant values change
     useEffect(() => {
-        if (activities.length > 0) {
+        if (activities && activities.length > 0) {
             let result = [...activities];
             // Apply search query filter first
             if (searchQuery) {
                 const q = searchQuery.toLowerCase();
                 result = result.filter(activity =>
-                    activity.title.toLowerCase().includes(q) ||
-                    activity.description.toLowerCase().includes(q) ||
-                    activity.shortDescription?.toLowerCase().includes(q)
+                    activity?.title?.toLowerCase().includes(q) ||
+                    activity?.description?.toLowerCase().includes(q) ||
+                    activity?.shortDescription?.toLowerCase().includes(q)
                 );
             }
             // Apply activity type filter
-            if (filters.activityTypes.length > 0) {
-                result = result.filter(activity => filters.activityTypes.includes(activity.type));
+            if (filters.activityTypes && filters.activityTypes.length > 0) {
+                result = result.filter(activity => filters.activityTypes.includes(activity?.type));
             }
              
              // Apply price range filter
              result = result.filter(
-                 activity => activity.price >= filters.priceRange[0] && 
-                             activity.price <= filters.priceRange[1]
+                 activity => (activity?.price || 0) >= filters.priceRange[0] && 
+                             (activity?.price || 0) <= filters.priceRange[1]
              );
              
              // Apply duration filter
              result = result.filter(
-                 activity => activity.duration >= filters.duration[0] && 
-                             activity.duration <= filters.duration[1]
+                 activity => (activity?.duration || 0) >= filters.duration[0] && 
+                             (activity?.duration || 0) <= filters.duration[1]
              );
              
              // Apply sorting
              switch (sortOption) {
                  case 'price-asc':
-                     result.sort((a, b) => a.price - b.price);
+                     result.sort((a, b) => (a?.price || 0) - (b?.price || 0));
                      break;
                  case 'price-desc':
-                     result.sort((a, b) => b.price - a.price);
+                     result.sort((a, b) => (b?.price || 0) - (a?.price || 0));
                      break;
                  case 'duration':
-                     result.sort((a, b) => a.duration - b.duration);
+                     result.sort((a, b) => (a?.duration || 0) - (b?.duration || 0));
                      break;
                  case 'popularity':
                  default:
-                     result.sort((a, b) => b.rating - a.rating);
+                     result.sort((a, b) => (b?.rating || 0) - (a?.rating || 0));
                      break;
              }
              
@@ -208,9 +207,10 @@ const Activities = () => {
                                 >
                                     Try Again
                                 </button>
-                            </div>
-                        ) : (
-                            <ActivityList activities={filteredActivities} />
+                            </div>                        ) : (
+                            <ErrorBoundary>
+                                <ActivityList activities={filteredActivities} />
+                            </ErrorBoundary>
                         )}
                     </div>
                 </div>
