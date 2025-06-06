@@ -44,8 +44,14 @@ app.use(express.json());
 
 // Enable CORS
 // Read allowed origins from environment variable or use defaults
-const allowedOrigins = process.env.CORS_ORIGIN 
-  ? (process.env.CORS_ORIGIN === '*' ? '*' : process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()))
+// Handle case where CORS_ORIGIN might include the key name (Render deployment issue)
+let corsOriginValue = process.env.CORS_ORIGIN;
+if (corsOriginValue && corsOriginValue.startsWith('CORS_ORIGIN=')) {
+  corsOriginValue = corsOriginValue.replace('CORS_ORIGIN=', '');
+}
+
+const allowedOrigins = corsOriginValue 
+  ? (corsOriginValue === '*' ? '*' : corsOriginValue.split(',').map(origin => origin.trim()))
   : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'https://maldives-activity-booking-frontend.onrender.com'];
 
 // Diagnostic root endpoint to check if the server is running
@@ -59,7 +65,8 @@ app.get('/api/v1/server-status', (req, res) => {
     },
     env: {
       nodeEnv: process.env.NODE_ENV,
-      corsOriginEnv: process.env.CORS_ORIGIN
+      corsOriginRaw: process.env.CORS_ORIGIN,
+      corsOriginProcessed: corsOriginValue
     }
   });
 });
