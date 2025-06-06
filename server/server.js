@@ -39,7 +39,7 @@ if (process.env.NODE_ENV === 'development') {
 // Read allowed origins from environment variable or use defaults
 const allowedOrigins = process.env.CORS_ORIGIN 
   ? process.env.CORS_ORIGIN.split(',') 
-  : ['http://localhost:3000', 'http://localhost:5173'];
+  : ['http://localhost:3000', 'http://localhost:5173', 'https://maldives-activity-booking-frontend.onrender.com'];
 
 app.use(cors({
   origin: function(origin, callback) {
