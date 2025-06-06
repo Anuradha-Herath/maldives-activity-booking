@@ -7,3 +7,9 @@
   for = "*.js"
   [headers.values]
     Content-Type = "application/javascript"
+
+# SPA redirect rule - serve index.html for all routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
