@@ -20,5 +20,19 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['axios']
+  },
+  css: {
+    // Enable CSS processing
+    postcss: './postcss.config.js',
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    // Ensure the index.css is properly included in the build
+    rollupOptions: {
+      input: {
+        main: './index.html',
+      }
+    }
   }
 });
