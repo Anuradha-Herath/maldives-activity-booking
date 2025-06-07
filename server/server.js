@@ -66,7 +66,8 @@ app.get('/api/v1/server-status', (req, res) => {
     env: {
       nodeEnv: process.env.NODE_ENV,
       corsOriginRaw: process.env.CORS_ORIGIN,
-      corsOriginProcessed: corsOriginValue
+      corsOriginProcessed: corsOriginValue,
+      port: process.env.PORT || 5000
     }
   });
 });
@@ -126,22 +127,6 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/user/bookings', userBookingRoutes);
 
-// Add a diagnostic endpoint to check server status
-app.get('/api/v1/server-status', (req, res) => {
-  res.json({
-    status: 'Server is running',
-    timestamp: new Date().toISOString(),
-    cors: {
-      allowedOrigins,
-      requestOrigin: req.headers.origin || 'No origin in request'
-    },
-    env: {
-      nodeEnv: process.env.NODE_ENV,
-      corsOriginEnv: process.env.CORS_ORIGIN
-    }
-  });
-});
-
 // Add debug routes in non-production environments
 if (process.env.NODE_ENV !== 'production') {
   const debugRoutes = require('./routes/debug.routes');
@@ -179,10 +164,29 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
+console.log('🚀 Starting Maldives Activity Booking Server...');
+console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`🌐 Port: ${PORT}`);
+console.log(`🔗 Database: ${process.env.MONGODB_URI ? 'Configured' : 'NOT CONFIGURED'}`);
+console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? 'Configured' : 'NOT CONFIGURED'}`);
+console.log(`☁️ Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? 'Configured' : 'NOT CONFIGURED'}`);
+
 const server = app.listen(
   PORT,
-  console.log(`Server running on port ${PORT}`)
+  () => {
+    console.log(`✅ Server successfully running on port ${PORT}`);
+    console.log(`🌍 Server URL: ${process.env.NODE_ENV === 'production' ? 'https://maldives-activity-booking-backend.onrender.com' : `http://localhost:${PORT}`}`);
+  }
 );
+
+// Handle server startup errors
+server.on('error', (error) => {
+  console.error('❌ Server startup error:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+  }
+  process.exit(1);
+});
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {

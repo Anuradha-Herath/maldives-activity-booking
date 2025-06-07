@@ -32,13 +32,33 @@ API.interceptors.request.use(
 // Add response interceptor for error handling
 API.interceptors.response.use(
   (response) => {
+    // Log successful responses in development
+    if (import.meta.env.DEV) {
+      console.log('✅ API Success:', response.config?.method?.toUpperCase(), response.config?.url, response.status);
+    }
     return response;
   },
   (error) => {
-    // Only log errors in development mode
-    if (import.meta.env.DEV) {
-      console.error('API Error:', error.config?.url, error.response?.status, error.message);
+    // Enhanced error logging
+    console.error('❌ API Error Details:', {
+      url: error.config?.url,
+      method: error.config?.method?.toUpperCase(),
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      message: error.message,
+      data: error.response?.data,
+      baseURL: error.config?.baseURL
+    });
+    
+    // Additional debugging for CORS and network errors
+    if (error.message.includes('Network Error') || !error.response) {
+      console.error('🌐 Network Error - Possible causes:');
+      console.error('- Backend server is down');
+      console.error('- CORS configuration issue');
+      console.error('- Network connectivity problem');
+      console.error('- Incorrect API URL:', error.config?.baseURL);
     }
+    
     return Promise.reject(error);
   }
 );
@@ -46,7 +66,19 @@ API.interceptors.response.use(
 // Activities API
 export const activitiesAPI = {
   // fetch all activities or filter by query params (e.g., type)
-  getAll: (params) => API.get('/activities', { params }),
+  getAll: async (params) => {
+    console.log('🚀 Fetching all activities with params:', params);
+    console.log('🔗 Using API base URL:', API.defaults.baseURL);
+    
+    try {
+      const response = await API.get('/activities', { params });
+      console.log('📦 Activities API response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('💥 Activities API getAll failed:', error);
+      throw error;
+    }
+  },
   getById: (id) => API.get(`/activities/${id}`),
   create: (data) => API.post('/activities', data),
   update: (id, data) => API.put(`/activities/${id}`, data),

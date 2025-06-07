@@ -28,13 +28,15 @@ const Activities = () => {
     const typeParam = queryParams.get('type');
     const locationParam = queryParams.get('location');
     const categoryParam = queryParams.get('category');
-    
-    // Fetch activities from the backend API with search params
+      // Fetch activities from the backend API with search params
     useEffect(() => {
         const fetchActivities = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
+                
+                console.log('🔍 Activities Page: Starting to fetch activities...');
+                console.log('🌐 API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1');
                 
                 // Build params object from URL query parameters
                 const params = {};
@@ -44,11 +46,21 @@ const Activities = () => {
                 if (type) params.type = type;
                 
                 // Handle location search
-                if (locationParam) params.location = locationParam;                // If there's a search term, we'll filter results client-side
+                if (locationParam) params.location = locationParam;
+                
+                console.log('📋 Activities Page: Request params:', params);
+                
+                // If there's a search term, we'll filter results client-side
                 const response = await activitiesAPI.getAll(params);
+                
+                console.log('📡 Activities Page: API Response received:', response);
                 
                 // Set initial data - ensure response data exists and has the expected structure
                 const activitiesData = response?.data?.data || [];
+                
+                console.log('📊 Activities Page: Activities data:', activitiesData);
+                console.log('📈 Activities Page: Total activities count:', activitiesData.length);
+                
                 setActivities(activitiesData);
                 
                 // Handle client-side filtering for search term
@@ -59,6 +71,7 @@ const Activities = () => {
                         activity?.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         activity?.shortDescription?.toLowerCase().includes(searchQuery.toLowerCase())
                     );
+                    console.log('🔍 Activities Page: Filtered activities for search:', filtered.length);
                 }
                 
                 // Update active filters based on URL parameters
@@ -69,9 +82,17 @@ const Activities = () => {
                 setFilters(updatedFilters);
                 
                 setFilteredActivities(filtered);
+                console.log('✅ Activities Page: Successfully loaded activities');
             } catch (err) {
-                console.error('Error fetching activities:', err);
-                setError('Failed to load activities. Please try again later.');
+                console.error('❌ Activities Page: Error fetching activities:', err);
+                console.error('❌ Activities Page: Error details:', {
+                    message: err.message,
+                    status: err.response?.status,
+                    statusText: err.response?.statusText,
+                    data: err.response?.data,
+                    config: err.config
+                });
+                setError(`Failed to load activities: ${err.message}`);
             } finally {
                 setIsLoading(false);
             }

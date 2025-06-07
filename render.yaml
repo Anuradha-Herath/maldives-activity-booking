@@ -1,7 +1,6 @@
-services:
-  # Backend API service
+services:  # Backend API service
   - type: web
-    name: maldives-activity-booking-api
+    name: maldives-activity-booking-backend
     env: node
     plan: free
     buildCommand: cd server && npm install

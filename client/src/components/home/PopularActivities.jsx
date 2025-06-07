@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { activitiesAPI } from '../../utils/api';
 
@@ -10,10 +10,20 @@ const PopularActivities = () => {
         const fetchPopularActivities = async () => {
             try {
                 setLoading(true);
+                setError(null);
+                
+                console.log('🔍 PopularActivities: Starting to fetch activities...');
+                console.log('🌐 API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1');
+                
                 const response = await activitiesAPI.getAll();
+                
+                console.log('📡 PopularActivities: API Response received:', response);
                 
                 // Ensure response data exists and has the expected structure
                 const activitiesData = response?.data?.data || [];
+                
+                console.log('📊 PopularActivities: Activities data:', activitiesData);
+                console.log('📈 PopularActivities: Total activities count:', activitiesData.length);
                 
                 // Filter for active activities and sort by rating
                 const popularActivities = activitiesData
@@ -21,11 +31,21 @@ const PopularActivities = () => {
                     .sort((a, b) => (b.rating || 0) - (a.rating || 0))
                     .slice(0, 6);
                 
+                console.log('⭐ PopularActivities: Popular activities (filtered & sorted):', popularActivities);
+                
                 setActivities(popularActivities);
                 setLoading(false);
             } catch (err) {
-                console.error('Error fetching popular activities:', err);
-                setError('Failed to load popular activities');
+                console.error('❌ PopularActivities: Error fetching activities:', err);
+                console.error('❌ PopularActivities: Error details:', {
+                    message: err.message,
+                    status: err.response?.status,
+                    statusText: err.response?.statusText,
+                    data: err.response?.data,
+                    config: err.config
+                });
+                
+                setError(`Failed to load activities: ${err.message}`);
                 setLoading(false);
             }
         };
@@ -88,14 +108,27 @@ const PopularActivities = () => {
                 </div>
                 
                 {loading ? (
-                    <LoadingSkeleton />
-                ) : error ? (
-                    <div className="bg-red-50 border border-red-200 text-red-600 p-6 rounded-xl text-center">
-                        <svg className="w-12 h-12 mx-auto mb-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <LoadingSkeleton />                ) : error ? (
+                    <div className="bg-red-50 border border-red-200 text-red-600 p-8 rounded-xl text-center">
+                        <svg className="w-16 h-16 mx-auto mb-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <h3 className="text-lg font-semibold mb-2">Oops! Something went wrong</h3>
-                        <p>{error}</p>
+                        <h3 className="text-xl font-semibold mb-3">Unable to Load Activities</h3>
+                        <p className="text-red-600 mb-4">{error}</p>
+                        <div className="space-y-2 text-sm text-red-500 mb-6">
+                            <p>Please check:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                                <li>Your internet connection</li>
+                                <li>Browser console for detailed errors</li>
+                                <li>Try refreshing the page</li>
+                            </ul>
+                        </div>
+                        <button 
+                            onClick={() => window.location.reload()} 
+                            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                        >
+                            Retry
+                        </button>
                     </div>
                 ) : (
                     <div className="relative">
