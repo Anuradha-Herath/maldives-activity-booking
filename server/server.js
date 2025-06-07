@@ -30,10 +30,10 @@ app.get('/', (req, res) => {
     message: 'Maldives Activity Booking API Server',
     status: 'Running',
     endpoints: [
-      '/activities',
-      '/server-status',
-      '/auth',
-      '/bookings'
+      '/api/v1/activities',
+      '/api/v1/server-status',
+      '/api/v1/auth',
+      '/api/v1/bookings'
     ],
     documentation: 'API documentation coming soon'
   });

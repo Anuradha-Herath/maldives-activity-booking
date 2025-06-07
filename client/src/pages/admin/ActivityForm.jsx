@@ -16,7 +16,7 @@ const ActivityForm = () => {
   const [error, setError] = useState(null);
   const isNew = !id;
   
-  const API_URL = 'https://maldives-activity-booking-backend.onrender.com';
+  const API_URL = 'https://maldives-activity-booking-backend.onrender.com/api/v1';
 
   useEffect(() => {
     // Fetch activity data if editing
