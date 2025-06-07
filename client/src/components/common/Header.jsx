@@ -27,15 +27,17 @@ const Header = () => {
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
                         </Link>
                     </div>
-                    <div className="flex space-x-3">
-                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110">
+                    <div className="flex space-x-3">                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our Facebook page" title="Facebook">
                             <i className="fab fa-facebook-f"></i>
+                            <span className="sr-only">Facebook</span>
                         </a>
-                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110">
+                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our Twitter page" title="Twitter">
                             <i className="fab fa-twitter"></i>
+                            <span className="sr-only">Twitter</span>
                         </a>
-                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110">
+                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our Instagram page" title="Instagram">
                             <i className="fab fa-instagram"></i>
+                            <span className="sr-only">Instagram</span>
                         </a>
                     </div>
                 </div>
