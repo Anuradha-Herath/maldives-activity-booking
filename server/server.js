@@ -39,21 +39,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Add root endpoint to check if server is running
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Maldives Activity Booking API Server',
-    status: 'Running',
-    endpoints: [
-      '/api/v1/activities',
-      '/api/v1/server-status',
-      '/api/v1/auth',
-      '/api/v1/bookings'
-    ],
-    documentation: 'API documentation coming soon'
-  });
-});
-
 // Body parser
 app.use(express.json());
 
@@ -148,6 +133,21 @@ app.use(fileUpload({
 }));
 
 // Add API root endpoint
+// Add root endpoint to check if server is running
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Maldives Activity Booking API Server',
+    status: 'Running',
+    endpoints: [
+      '/api/v1/activities',
+      '/api/v1/server-status',
+      '/api/v1/auth',
+      '/api/v1/bookings'
+    ],
+    documentation: 'API documentation coming soon'
+  });
+});
+
 app.get('/api/v1', (req, res) => {
   res.json({
     message: 'Maldives Activity Booking API',
