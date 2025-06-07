@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
+import tokenManager from '../../utils/tokenManager';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -26,14 +27,14 @@ const Signup = () => {
     agreeTerms: Yup.boolean()
       .oneOf([true], 'You must agree to the terms and conditions')
   });
-    // Handle email/password signup
+  // Handle email/password signup
   const handleSignup = async (values, { setSubmitting, setFieldError }) => {
     setIsLoading(true);
     clearError();
     
     try {
       console.log('Starting registration process...');
-        // Display API URL being used in deployment for debugging
+      // Display API URL being used in deployment for debugging
       if (import.meta.env?.VITE_API_URL) {
         let apiUrlValue = import.meta.env.VITE_API_URL;
         
@@ -51,19 +52,53 @@ const Signup = () => {
         email: values.email,
         password: values.password
       });
+        console.log('Registration successful:', result);
       
-      console.log('Registration successful:', result ? 'Yes' : 'No');
+      // Verify authentication data was properly saved
+      if (!tokenManager.isAuthenticated()) {
+        console.warn('Authentication data not properly saved after registration');
+        
+        // Attempt to save it manually if we have the data
+        if (result?.token && result?.user) {
+          console.log('Manually saving authentication data');
+          const saveResult = tokenManager.saveAuthData(result);
+          
+          if (!saveResult) {
+            console.error('Failed to manually save authentication data');
+            setError('Authentication failed. Please try logging in manually.');
+            return;
+          }
+        } else {
+          console.error('Missing token or user data in registration result');
+          setError('Authentication failed. Please try logging in manually.');
+          return;
+        }
+      }
       
-      // Check if we have a token before redirecting
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn('No token received after successful registration');
+      // Double-check we have the auth data we need
+      if (!tokenManager.getToken()) {
+        console.error('Token still not available after registration');
         setError('Authentication failed. Please try logging in manually.');
         return;
       }
+        console.log('Authentication complete, redirecting to home page...');
       
-      // Redirect to home page
-      navigate('/');
+      // Add a small delay to ensure all state updates are complete
+      // This helps ensure the AuthContext has time to update before navigation
+      setTimeout(() => {
+        // Double check authentication before navigating
+        if (tokenManager.isAuthenticated()) {
+          console.log('Authentication confirmed, redirecting to home page');
+          navigate('/');
+        } else {
+          console.warn('Authentication state inconsistent before redirect');
+          // Try one more time with a longer delay
+          setTimeout(() => {
+            console.log('Final redirect attempt');
+            navigate('/');
+          }, 500);
+        }
+      }, 100);
     } catch (error) {
       console.error('Registration error:', error);
       

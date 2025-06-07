@@ -357,6 +357,10 @@ const sendTokenResponse = (user, statusCode, res) => {
     path: '/',  // Ensure cookie is available across the entire site
   };
   
+  // Determine the client origin for debugging
+  const clientOrigin = res.req.headers.origin || 'Unknown origin';
+  console.log(`Request from client origin: ${clientOrigin}`);
+  
   // Apply production settings for cookies
   if (process.env.NODE_ENV === 'production') {
     options.secure = true;
@@ -366,14 +370,26 @@ const sendTokenResponse = (user, statusCode, res) => {
     console.log('Using development cookie settings');
   }
   
+  // Enhanced logging for authentication
   console.log('Cookie options:', {
     ...options,
     expires: options.expires.toISOString(),
+  });
+  
+  // Always verify the JWT_SECRET is set
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+    console.warn('WARNING: JWT_SECRET is missing or too short. Authentication may fail!');
+  }
+
+  // Log CORS settings
+  console.log('Current CORS settings:', {
+    allowedOrigins: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : 'Not configured'
   });
 
   // Log the response being sent
   console.log(`Sending authentication response with status code ${statusCode}`);
   
+  // Set both cookie and return token in body for more flexible client handling
   res
     .status(statusCode)
     .cookie('token', token, options)

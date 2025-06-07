@@ -99,19 +99,28 @@ if (process.env.NODE_ENV === 'development') {
 console.log('CORS Origins allowed:', allowedOrigins);
 
 // Use CORS middleware with proper configuration
-app.use(cors({  origin: function(origin, callback) {
+app.use(cors({
+  origin: function(origin, callback) {
+    // Log every origin request for debugging
+    console.log(`CORS request from origin: ${origin || 'No origin (direct request)'}`);
+    
     // Allow requests with no origin (like mobile apps, curl requests)
     if (!origin) return callback(null, true);
     
     // If allowedOrigins is '*', allow all origins
-    if (allowedOrigins === '*') return callback(null, true);
+    if (allowedOrigins === '*') {
+      console.log('CORS: Allowing all origins due to wildcard configuration');
+      return callback(null, true);
+    }
     
     // Check if origin is in the allowed origins list
-    if (allowedOrigins.indexOf(origin) === -1) {
+    if (Array.isArray(allowedOrigins) && allowedOrigins.indexOf(origin) === -1) {
       console.log(`CORS request from non-allowed origin: ${origin}`);
+      console.log(`Configured allowed origins: ${allowedOrigins.join(', ')}`);
       
-      // For production, temporarily allow all origins while in debugging mode
+      // For production, accept unknown origins for now to help diagnose issues
       // This is more permissive but helps diagnose deployment issues
+      console.log('CORS: Allowing request despite origin mismatch (debugging mode)');
       return callback(null, true);
       
       // Once everything is working, you can enable strict CORS by uncommenting below:
@@ -122,11 +131,13 @@ app.use(cors({  origin: function(origin, callback) {
     }
     
     // Origin is allowed
+    console.log(`CORS: Origin ${origin} is allowed`);
     return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with'],
+  exposedHeaders: ['set-cookie']
 }));
 
 // File upload middleware
@@ -143,6 +154,41 @@ app.get('/api/v1', (req, res) => {
     status: 'Running',
     version: 'v1',
     documentation: '/api/v1/server-status for more details'
+  });
+});
+
+// Diagnostic endpoint for CORS and authentication testing
+app.get('/api/v1/test-connection', (req, res) => {
+  // Extract token if present
+  let token;
+  const authHeader = req.headers.authorization;
+  
+  if (authHeader && authHeader.startsWith('Bearer')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.cookies.token) {
+    token = req.cookies.token;
+  }
+  
+  // Detailed connection information
+  res.json({
+    success: true,
+    message: 'Connection successful',
+    server: {
+      environment: process.env.NODE_ENV,
+      timestamp: new Date().toISOString()
+    },
+    request: {
+      origin: req.headers.origin || 'No origin header',
+      referer: req.headers.referer || 'No referer',
+      userAgent: req.headers['user-agent'],
+      contentType: req.headers['content-type'],
+      cookies: req.cookies ? Object.keys(req.cookies) : [],
+      hasAuthorizationHeader: !!authHeader,
+      hasToken: !!token
+    },
+    cors: {
+      configuredOrigins: Array.isArray(allowedOrigins) ? allowedOrigins : 'Wildcard (*)'
+    }
   });
 });
 

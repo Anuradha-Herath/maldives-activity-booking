@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import { wakeUpBackend } from './utils/wakeUpBackend';
 
 // Add Google Fonts for the display font
 const fontLink = document.createElement('link');
@@ -25,6 +26,26 @@ if (import.meta.env.DEV) {
     console.log('API URL:', apiUrl);
   } else {
     console.warn('⚠️ API URL not set correctly in environment variables');
+  }
+  
+  // Wake up the backend server if it's in sleep mode (common with free deployment services)
+  try {
+    console.log('Attempting to wake up backend server...');
+    wakeUpBackend()
+      .then(result => {
+        if (result.success) {
+          console.log('✅ Backend server is awake and ready:', result.message);
+        } else {
+          console.warn('⚠️ Backend server may be initializing:', result.message);
+          console.log('The application will continue loading, but some features may be delayed.');
+        }
+      })
+      .catch(error => {
+        console.error('❌ Failed to wake up backend server:', error);
+        console.log('The application will continue loading, but API features may not work immediately.');
+      });
+  } catch (error) {
+    console.error('Error in wake up process:', error);
   }
 }
 

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import tokenManager from '../utils/tokenManager';
 
 // More robust API URL handling
 let apiUrl = import.meta.env.VITE_API_URL;
@@ -45,13 +46,30 @@ export const register = async (userData) => {
     // Make request with credentials to ensure cookies are sent/received
     const response = await axios.post(`${API_URL}/auth/register`, userData);
     console.log('Registration response:', response.data);
-    
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      // Also store basic user info
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Enhanced token handling with tokenManager
+    if (response.data) {
+      console.log('Authentication response received from server');
+      
+      // Use tokenManager to handle storage with validation
+      const saveResult = tokenManager.saveAuthData(response.data);
+      
+      if (saveResult) {
+        console.log('Authentication data successfully saved');
+        
+        // Get the token and set it in axios headers
+        const token = tokenManager.getToken();
+        if (token) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          console.log('Authorization header set for subsequent requests');
+        }
+      } else {
+        console.error('Failed to save authentication data');
+      }
+    } else {
+      console.error('Empty response data received from registration');
     }
-    return response.data;  } catch (error) {
+    
+    return response.data;} catch (error) {
     console.error('Registration error:', error.response?.data || error.message);
     console.error('Full error details:', error);
     
@@ -91,10 +109,22 @@ export const login = async (email, password) => {
     const response = await axios.post(`${API_URL}/auth/login`, { email, password });
     console.log('Login response:', response.data);
     
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      // Also store basic user info
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+    // Use tokenManager for enhanced storage and validation
+    if (response.data) {
+      const saveResult = tokenManager.saveAuthData(response.data);
+      
+      if (saveResult) {
+        console.log('Login successful - auth data saved');
+        
+        // Set authorization header for subsequent requests
+        const token = tokenManager.getToken();
+        if (token) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          console.log('Authorization header set after login');
+        }
+      } else {
+        console.error('Failed to save login authentication data');
+      }
     }
     return response.data;
   } catch (error) {
@@ -117,26 +147,54 @@ export const login = async (email, password) => {
 // Logout user
 export const logout = async () => {
   try {
+    console.log('Logging out user...');
     await axios.get(`${API_URL}/auth/logout`);
+    console.log('Logout API call successful');
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error('Logout API error:', error);
+    // Continue with local logout even if API fails
   }
-  localStorage.removeItem('token');
+  
+  // Use tokenManager to clear auth data
+  tokenManager.clearAuth();
+  
+  // Also clear the authorization header
+  delete axios.defaults.headers.common['Authorization'];
+  console.log('User logged out successfully');
 };
 
 // Get current user
 export const getCurrentUser = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
+  // Use tokenManager to get token
+  const token = tokenManager.getToken();
+  
+  if (!token) {
+    console.log('No token available, user is not authenticated');
+    return null;
+  }
 
   try {
+    console.log('Fetching current user data...');
     const response = await axios.get(`${API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return response.data.data;
+    
+    if (response.data && response.data.data) {
+      console.log('User data retrieved successfully');
+      return response.data.data;
+    } else {
+      console.warn('User data endpoint returned unexpected format');
+      return null;
+    }
   } catch (error) {
-    console.error('Get current user error:', error);
-    localStorage.removeItem('token');
+    console.error('Get current user error:', error.response?.data || error.message);
+    
+    // If unauthorized or token invalid, clear auth data
+    if (error.response?.status === 401) {
+      console.log('Token invalid or expired, clearing auth data');
+      tokenManager.clearAuth();
+    }
+    
     return null;
   }
 };
@@ -167,26 +225,48 @@ export const resetPassword = async (token, password) => {
 
 // Setup axios interceptor for adding token to requests
 export const setupAxiosInterceptors = () => {
+  // Store interceptor IDs for future reference
+  let requestInterceptorId = null;
+  let responseInterceptorId = null;
+  
   // Remove any previous interceptors to avoid duplicates
-  axios.interceptors.request.eject(axios.interceptors.request.handlers?.[0]);
-  axios.interceptors.response.eject(axios.interceptors.response.handlers?.[0]);
+  if (axios.interceptors.request.handlers && axios.interceptors.request.handlers.length > 0) {
+    axios.interceptors.request.handlers.forEach((handler, i) => {
+      axios.interceptors.request.eject(i);
+    });
+  }
+  
+  if (axios.interceptors.response.handlers && axios.interceptors.response.handlers.length > 0) {
+    axios.interceptors.response.handlers.forEach((handler, i) => {
+      axios.interceptors.response.eject(i);
+    });
+  }
+    console.log('Setting up axios interceptors for authentication');
   
   // Setup request interceptor with enhanced token handling
-  axios.interceptors.request.use(
+  requestInterceptorId = axios.interceptors.request.use(
     (config) => {
       // Always ensure credentials are sent
       config.withCredentials = true;
       
-      // Add Authorization header with token if available
-      const token = localStorage.getItem('token');
+      // Ensure common headers are set for all requests
+      config.headers = {
+        ...config.headers,
+        'Content-Type': 'application/json',
+      };
+      
+      // Add Authorization header with token if available - using tokenManager
+      const token = tokenManager.getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        // Debug log for auth headers
+        console.log(`Request to ${config.url} includes Authorization header`);
+      } else {
+        console.log(`No token available for request to ${config.url}`);
       }
       
-      // Log request in deployed environment
-      if (import.meta.env.PROD) {
-        console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
-      }
+      // Log all requests in deployment
+      console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
       
       return config;
     },
@@ -197,17 +277,32 @@ export const setupAxiosInterceptors = () => {
   );
 
   // Setup response interceptor with better error handling
-  axios.interceptors.response.use(
-    (response) => response,
+  responseInterceptorId = axios.interceptors.response.use(
+    (response) => {
+      // Check for token in response and save it if present
+      if (response.data?.token && !localStorage.getItem('token')) {
+        console.log('Token received in response, storing in localStorage');
+        localStorage.setItem('token', response.data.token);
+        
+        // Set for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      }
+      
+      // Check for user data in response
+      if (response.data?.user && !localStorage.getItem('user')) {
+        console.log('User data received in response, storing in localStorage');
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      
+      return response;
+    },
     (error) => {
       // Handle specific API errors
       if (error.response) {
         const { status, data } = error.response;
         
-        // Log all API errors in deployed environment
-        if (import.meta.env.PROD) {
-          console.error(`API Error ${status}:`, data);
-        }
+        // Log all API errors
+        console.error(`API Error ${status}:`, data);
         
         if (status === 401) {
           // Unauthorized - clear token and redirect to login
@@ -218,15 +313,21 @@ export const setupAxiosInterceptors = () => {
           // Only redirect if not already on auth pages
           const currentPath = window.location.pathname;
           if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
+            console.log('Redirecting to login page due to authentication error');
             window.location.href = '/login';
           }
         }
       } else if (error.request) {
         // Request was made but no response received (network error)
-        console.error('Network error: No response received from server');
+        console.error('Network error: No response received from server', error.request);
       }
       
       return Promise.reject(error);
     }
   );
+  
+  console.log('Axios interceptors setup complete', { 
+    requestInterceptorId, 
+    responseInterceptorId 
+  });
 };

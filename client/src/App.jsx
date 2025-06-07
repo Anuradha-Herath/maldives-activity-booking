@@ -1,9 +1,28 @@
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { useEffect } from 'react';
+import authDiagnostic from './utils/authDiagnostic';
+import AuthMonitor from './components/auth/AuthMonitor';
 
 // Import environment checker for development debugging
 if (import.meta.env.DEV) {
   import('./utils/envCheck.js');
+}
+
+// Run auth diagnostics in production
+if (!import.meta.env.DEV) {
+  // Initial diagnostic check with a small delay to allow app to initialize
+  setTimeout(() => {
+    authDiagnostic.testApiConnection()
+      .then(result => {
+        if (result.success) {
+          console.log('API connection test successful');
+        } else {
+          console.warn('API connection test failed, authentication may not work properly');
+        }
+      })
+      .catch(error => console.error('Error testing API connection:', error));
+  }, 2000);
 }
 
 import Home from './pages/Home';
@@ -96,6 +115,7 @@ function App() {
     <AuthProvider>
       <Router>
         <AppContent />
+        <AuthMonitor />
       </Router>
     </AuthProvider>
   );
