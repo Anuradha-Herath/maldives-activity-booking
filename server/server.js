@@ -30,10 +30,10 @@ app.get('/', (req, res) => {
     message: 'Maldives Activity Booking API Server',
     status: 'Running',
     endpoints: [
-      '/api/v1/activities',
-      '/api/v1/server-status',
-      '/api/v1/auth',
-      '/api/v1/bookings'
+      '/activities',
+      '/server-status',
+      '/auth',
+      '/bookings'
     ],
     documentation: 'API documentation coming soon'
   });
@@ -55,7 +55,7 @@ const allowedOrigins = corsOriginValue
   : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'https://maldives-activity-booking-frontend.onrender.com'];
 
 // Diagnostic root endpoint to check if the server is running
-app.get('/api/v1/server-status', (req, res) => {
+app.get('/server-status', (req, res) => {
   res.json({
     status: 'Server is running',
     timestamp: new Date().toISOString(),
@@ -118,19 +118,19 @@ app.use((req, res, next) => {
 });
 
 // Mount routers
-app.use('/api/v1/activities', activityRoutes);
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/upload', uploadRoutes);
-app.use('/api/v1/test-upload', testUploadRoutes);
-app.use('/api/v1/bookings', bookingRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/dashboard', dashboardRoutes);
-app.use('/api/v1/user/bookings', userBookingRoutes);
+app.use('/activities', activityRoutes);
+app.use('/auth', authRoutes);
+app.use('/upload', uploadRoutes);
+app.use('/test-upload', testUploadRoutes);
+app.use('/bookings', bookingRoutes);
+app.use('/users', userRoutes);
+app.use('/dashboard', dashboardRoutes);
+app.use('/user/bookings', userBookingRoutes);
 
 // Add debug routes in non-production environments
 if (process.env.NODE_ENV !== 'production') {
   const debugRoutes = require('./routes/debug.routes');
-  app.use('/api/v1/debug', debugRoutes);
+  app.use('/debug', debugRoutes);
 }
 
 // Handle 404 errors - Route not found
