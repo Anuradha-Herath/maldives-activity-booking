@@ -1,7 +1,7 @@
 // Production Deployment Verification Script
 // Run this after deploying to verify everything is working
 
-const PRODUCTION_FRONTEND_URL = 'https://your-frontend-domain.netlify.app'; // Update this
+const PRODUCTION_FRONTEND_URL = 'https://maldives-activity-booking-frontend.onrender.com'; // Update this
 const PRODUCTION_BACKEND_URL = 'https://maldives-activity-booking-backend.onrender.com';
 
 async function verifyDeployment() {
