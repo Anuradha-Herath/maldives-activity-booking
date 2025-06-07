@@ -9,25 +9,65 @@ axios.defaults.withCredentials = true;
 export const register = async (userData) => {
   try {
     console.log('Attempting to register with data:', userData);
+    console.log('API URL being used:', API_URL);
+    
     const response = await axios.post(`${API_URL}/auth/register`, userData);
     console.log('Registration response:', response.data);
+    
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
+      // Also store basic user info
+      localStorage.setItem('user', JSON.stringify(response.data.user));
     }
     return response.data;
   } catch (error) {
     console.error('Registration error:', error.response?.data || error.message);
+    console.error('Full error details:', error);
+    
+    // Log the request details that failed
+    if (error.config) {
+      console.log('Request that failed:', {
+        url: error.config.url,
+        method: error.config.method,
+        headers: { ...error.config.headers, Authorization: 'REDACTED' },
+        data: { ...error.config.data, password: 'REDACTED' }
+      });
+    }
+    
     throw error;
   }
 };
 
 // Login user
 export const login = async (email, password) => {
-  const response = await axios.post(`${API_URL}/auth/login`, { email, password });
-  if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
+  try {
+    console.log('Attempting login for email:', email);
+    console.log('API URL being used:', API_URL);
+    
+    const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+    console.log('Login response:', response.data);
+    
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      // Also store basic user info
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  } catch (error) {
+    console.error('Login error:', error.response?.data || error.message);
+    console.error('Full error details:', error);
+    
+    // Log the request details that failed
+    if (error.config) {
+      console.log('Request that failed:', {
+        url: error.config.url,
+        method: error.config.method,
+        headers: error.config.headers
+      });
+    }
+    
+    throw error;
   }
-  return response.data;
 };
 
 // Logout user

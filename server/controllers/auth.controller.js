@@ -17,7 +17,9 @@ exports.register = async (req, res, next) => {
       password,
     });
     
-    console.log('User created successfully:', user);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('User created successfully:', { id: user._id, name: user.name, email: user.email });
+    }
     sendTokenResponse(user, 200, res);
   } catch (error) {
     console.error('Error in registration:', error);
@@ -85,10 +87,18 @@ exports.getMe = async (req, res, next) => {
 // @route     GET /api/v1/auth/logout
 // @access    Private
 exports.logout = async (req, res, next) => {
-  res.cookie('token', 'none', {
+  const options = {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
-  });
+  };
+  
+  // Match cookie settings with login for consistent behavior
+  if (process.env.NODE_ENV === 'production') {
+    options.secure = true;
+    options.sameSite = 'none';
+  }
+  
+  res.cookie('token', 'none', options);
 
   res.status(200).json({
     success: true,
@@ -237,9 +247,9 @@ const sendTokenResponse = (user, statusCode, res) => {
     ),
     httpOnly: true,
   };
-
   if (process.env.NODE_ENV === 'production') {
     options.secure = true;
+    options.sameSite = 'none'; // Required for cross-site cookies in modern browsers
   }
 
   res
