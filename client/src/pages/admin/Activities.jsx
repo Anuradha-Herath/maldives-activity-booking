@@ -1,23 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import axios from 'axios';
+import { activitiesAPI } from '../../utils/api';
 
 const AdminActivities = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all');
-  
-  const API_URL = 'https://maldives-activity-booking-backend.onrender.com/api/v1';
-
-  useEffect(() => {
+  const [searchTerm, setSearchTerm] = useState('');  const [filter, setFilter] = useState('all');
+    useEffect(() => {
     const fetchActivities = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/activities`);
-          if (response.data.success) {
+        const response = await activitiesAPI.getAll();
+        if (response.data.success) {
           setActivities(response.data.data || []);
         } else {
           throw new Error('Failed to fetch activities');
@@ -44,13 +40,12 @@ const AdminActivities = () => {
     
     return matchesSearch && activity?.type === filter;
   });
-
   // Delete activity handler - now calls the API
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this activity?')) {
       try {
         setLoading(true);
-        const response = await axios.delete(`${API_URL}/activities/${id}`);
+        const response = await activitiesAPI.delete(id);
         
         if (response.data.success) {
           setActivities(activities.filter(activity => activity._id !== id));
