@@ -42,6 +42,21 @@ app.get('/', (req, res) => {
 // Body parser
 app.use(express.json());
 
+// Add cache-control middleware for API endpoints
+app.use((req, res, next) => {
+  // For API endpoints, set proper cache headers 
+  // For GET requests to /api/v1/activities, cache for 5 minutes
+  if (req.method === 'GET' && req.url.match(/^\/api\/v1\/activities/)) {
+    res.setHeader('Cache-Control', 'public, max-age=300');
+  } else {
+    // For other API endpoints (especially those that modify data), don't cache
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+
 // Enable CORS
 // Read allowed origins from environment variable or use defaults
 // Handle case where CORS_ORIGIN might include the key name (Render deployment issue)

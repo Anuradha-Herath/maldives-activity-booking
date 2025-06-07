@@ -151,9 +151,8 @@ const PopularActivities = () => {
                                     className="flex-none w-full sm:w-1/2 md:w-1/3 lg:w-1/4 bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col group transform hover:scale-105"
                                     style={{ animationDelay: `${index * 0.1}s` }}
                                 >
-                                    <div className="relative h-48 overflow-hidden">
-                                        <img 
-                                            src={activity.image} 
+                                    <div className="relative h-48 overflow-hidden">                                        <img 
+                                            src={activity.image.includes('?') ? activity.image : `${activity.image}?v=1.0.0`} 
                                             alt={activity.title} 
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             loading="lazy"

@@ -24,7 +24,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files with proper MIME types
+// Serve static files with proper MIME types and cache headers
 app.use(express.static(path.join(__dirname, 'dist'), {
   setHeaders: (res, filePath) => {
     const ext = path.extname(filePath).toLowerCase();
@@ -32,6 +32,14 @@ app.use(express.static(path.join(__dirname, 'dist'), {
       res.setHeader('Content-Type', 'text/css');
     } else if (ext === '.js') {
       res.setHeader('Content-Type', 'application/javascript');
+    }
+    
+    // Add aggressive cache headers for static assets
+    if (['.js', '.css', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.ico', '.woff', '.woff2', '.ttf', '.eot'].includes(ext)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else {
+      // For HTML and other dynamic files, use a shorter cache time
+      res.setHeader('Cache-Control', 'public, max-age=0');
     }
   }
 }));
