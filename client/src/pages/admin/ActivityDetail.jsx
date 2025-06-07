@@ -10,7 +10,7 @@ const AdminActivityDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const API_URL = 'https://maldives-activity-booking-backend.onrender.com/api/v1';
+  const API_URL = 'https://maldives-activity-booking-backend.onrender.com';
 
   useEffect(() => {
     const fetchActivity = async () => {
