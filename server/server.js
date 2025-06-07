@@ -125,11 +125,16 @@ app.use(cors({
   exposedHeaders: ['set-cookie']
 }));
 
-// File upload middleware
+// File upload middleware with improved configuration
 app.use(fileUpload({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max file size
   abortOnLimit: true,
-  useTempFiles: false
+  useTempFiles: false,
+  createParentPath: true,
+  debug: process.env.NODE_ENV !== 'production',
+  responseOnLimit: 'File size limit exceeded (max 10MB)',
+  safeFileNames: true,
+  preserveExtension: true
 }));
 
 // Add API root endpoint
@@ -232,6 +237,10 @@ if (process.env.NODE_ENV !== 'production') {
   const debugRoutes = require('./routes/debug.routes');
   app.use('/api/v1/debug', debugRoutes);
 }
+
+// Always include debug upload routes for troubleshooting
+const debugUploadRoutes = require('./routes/debugUpload.routes');
+app.use('/api/v1/debug', debugUploadRoutes);
 
 // Handle 404 errors - Route not found
 app.all('*', (req, res, next) => {

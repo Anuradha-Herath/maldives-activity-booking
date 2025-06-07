@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Test - Maldives Activity Booking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        h1, h2, h3 {
+            color: #2563eb;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .error {
+            color: #dc2626;
+        }
+        .success {
+            color: #16a34a;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #93c5fd;
+            cursor: not-allowed;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        .progress {
+            height: 20px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #2563eb;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <h1>Maldives Activity Booking - Upload Test</h1>
+    <p>This page helps diagnose issues with the file upload functionality.</p>
+
+    <div class="container">
+        <h2>Test Standard Upload</h2>
+        <form id="uploadForm">
+            <div>
+                <label for="fileInput">Select Image:</label><br>
+                <input type="file" id="fileInput" accept="image/*" />
+            </div>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+            </div>
+            <button type="submit" id="uploadButton">Upload File</button>
+        </form>
+        <div class="result" id="uploadResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>Test Debug Upload</h2>
+        <form id="debugUploadForm">
+            <div>
+                <label for="debugFileInput">Select Image:</label><br>
+                <input type="file" id="debugFileInput" accept="image/*" />
+            </div>
+            <button type="submit" id="debugUploadButton">Upload to Debug Endpoint</button>
+        </form>
+        <div class="result" id="debugUploadResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>Test Direct Cloudinary Upload</h2>
+        <form id="cloudinaryUploadForm">
+            <div>
+                <label for="cloudinaryFileInput">Select Image:</label><br>
+                <input type="file" id="cloudinaryFileInput" accept="image/*" />
+            </div>
+            <button type="submit" id="cloudinaryUploadButton">Upload to Cloudinary</button>
+        </form>
+        <div class="result" id="cloudinaryUploadResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>Current Environment</h2>
+        <pre id="environmentInfo">Loading environment info...</pre>
+    </div>
+
+    <div class="container">
+        <h2>Upload Diagnostics</h2>
+        <button id="checkServerButton">Check Server Status</button>
+        <div class="result" id="serverStatusResult"></div>
+        
+        <button id="checkUploadInfoButton">Check Upload Configuration</button>
+        <div class="result" id="uploadConfigResult"></div>
+    </div>
+
+    <script>
+        // API Base URL for test
+        const API_URL = 'https://maldives-activity-booking-backend.onrender.com/api/v1';
+
+        // Cloudinary default settings if not available in environment
+        const CLOUDINARY_CLOUD_NAME = 'dwzhs42tz';
+        const CLOUDINARY_UPLOAD_PRESET = 'maldives_activities';
+        
+        // Show environment info
+        document.getElementById('environmentInfo').textContent = 
+            `API URL: ${API_URL}\n` +
+            `Cloudinary Cloud Name: ${CLOUDINARY_CLOUD_NAME}\n` +
+            `Cloudinary Upload Preset: ${CLOUDINARY_UPLOAD_PRESET}\n` +
+            `User Agent: ${navigator.userAgent}`;
+
+        // Standard upload form
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('fileInput');
+            const resultDiv = document.getElementById('uploadResult');
+            const uploadButton = document.getElementById('uploadButton');
+            const progressBar = document.getElementById('progressBar');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<span class="error">Please select a file first</span>';
+                return;
+            }
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            // Disable button and show loading
+            uploadButton.disabled = true;
+            resultDiv.innerHTML = 'Uploading...';
+            progressBar.style.width = '0%';
+            
+            try {
+                // Make API request with progress tracking
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                    }
+                };
+                
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        resultDiv.innerHTML = `
+                            <span class="success">Upload successful!</span>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                            ${response.data && response.data.url ? 
+                                `<img src="${response.data.url}" alt="Uploaded" style="max-width:100%; max-height:200px;">` : ''}
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <span class="error">Upload failed with status: ${xhr.status}</span>
+                            <pre>${xhr.responseText}</pre>
+                        `;
+                    }
+                    uploadButton.disabled = false;
+                };
+                
+                xhr.onerror = function() {
+                    resultDiv.innerHTML = `
+                        <span class="error">Network error occurred</span>
+                    `;
+                    uploadButton.disabled = false;
+                };
+                
+                xhr.open('POST', `${API_URL}/upload`, true);
+                xhr.send(formData);
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <span class="error">Error: ${error.message}</span>
+                `;
+                uploadButton.disabled = false;
+            }
+        });
+
+        // Debug upload form
+        document.getElementById('debugUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('debugFileInput');
+            const resultDiv = document.getElementById('debugUploadResult');
+            const uploadButton = document.getElementById('debugUploadButton');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<span class="error">Please select a file first</span>';
+                return;
+            }
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            // Disable button and show loading
+            uploadButton.disabled = true;
+            resultDiv.innerHTML = 'Uploading to debug endpoint...';
+            
+            try {
+                const response = await fetch(`${API_URL}/debug/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <span class="success">Debug upload successful!</span>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <span class="error">Debug upload failed!</span>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <span class="error">Error: ${error.message}</span>
+                `;
+            } finally {
+                uploadButton.disabled = false;
+            }
+        });
+
+        // Direct Cloudinary upload
+        document.getElementById('cloudinaryUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('cloudinaryFileInput');
+            const resultDiv = document.getElementById('cloudinaryUploadResult');
+            const uploadButton = document.getElementById('cloudinaryUploadButton');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<span class="error">Please select a file first</span>';
+                return;
+            }
+            
+            // Create form data for Cloudinary
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            
+            // Disable button and show loading
+            uploadButton.disabled = true;
+            resultDiv.innerHTML = 'Uploading directly to Cloudinary...';
+            
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <span class="success">Cloudinary upload successful!</span>
+                        <pre>${JSON.stringify({ url: data.secure_url, public_id: data.public_id }, null, 2)}</pre>
+                        <img src="${data.secure_url}" alt="Uploaded" style="max-width:100%; max-height:200px;">
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <span class="error">Cloudinary upload failed!</span>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <span class="error">Error: ${error.message}</span>
+                `;
+            } finally {
+                uploadButton.disabled = false;
+            }
+        });
+
+        // Check server status
+        document.getElementById('checkServerButton').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('serverStatusResult');
+            resultDiv.innerHTML = 'Checking server status...';
+            
+            try {
+                const response = await fetch(`${API_URL}/server-status`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <span class="success">Server is online!</span>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <span class="error">Failed to connect to server: ${error.message}</span>
+                `;
+            }
+        });
+
+        // Check upload configuration
+        document.getElementById('checkUploadInfoButton').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('uploadConfigResult');
+            resultDiv.innerHTML = 'Checking upload configuration...';
+            
+            try {
+                const response = await fetch(`${API_URL}/debug/upload-info`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <span class="success">Upload configuration retrieved!</span>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <span class="error">Failed to get upload configuration: ${error.message}</span>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
