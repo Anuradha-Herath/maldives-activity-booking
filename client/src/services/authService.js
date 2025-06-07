@@ -4,9 +4,21 @@ import axios from 'axios';
 let apiUrl = import.meta.env.VITE_API_URL;
 
 // Handle common deployment issues with environment variables
-if (apiUrl && apiUrl.startsWith('VITE_API_URL=')) {
-  apiUrl = apiUrl.replace('VITE_API_URL=', '');
-  console.log('Fixed API URL format:', apiUrl);
+if (typeof apiUrl === 'string') {
+  // Fix case where the variable name is included in the value
+  if (apiUrl.startsWith('VITE_API_URL=')) {
+    apiUrl = apiUrl.replace('VITE_API_URL=', '');
+    console.log('Fixed API URL format (removed variable name):', apiUrl);
+  }
+  
+  // Fix case where there might be quotes in the string
+  apiUrl = apiUrl.replace(/^["'](.+)["']$/, '$1');
+  
+  // Fix case where API path might be duplicated
+  if (apiUrl.includes('/api/v1/api/v1')) {
+    apiUrl = apiUrl.replace('/api/v1/api/v1', '/api/v1');
+    console.log('Fixed duplicate API path:', apiUrl);
+  }
 }
 
 // Fallback to known deployed backend if variable is missing

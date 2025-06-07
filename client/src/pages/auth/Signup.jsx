@@ -33,10 +33,16 @@ const Signup = () => {
     
     try {
       console.log('Starting registration process...');
-      
-      // Display API URL being used in deployment for debugging
+        // Display API URL being used in deployment for debugging
       if (import.meta.env?.VITE_API_URL) {
-        console.log('Using API URL from env:', import.meta.env.VITE_API_URL);
+        let apiUrlValue = import.meta.env.VITE_API_URL;
+        
+        // Check if the value contains the variable name (deployment issue)
+        if (typeof apiUrlValue === 'string' && apiUrlValue.startsWith('VITE_API_URL=')) {
+          console.log('API URL has incorrect format (includes variable name). Will be fixed by authService.');
+        }
+        
+        console.log('Using API URL from env:', apiUrlValue);
       }
       
       // Create user account with MongoDB backend
