@@ -26,26 +26,50 @@ const Signup = () => {
     agreeTerms: Yup.boolean()
       .oneOf([true], 'You must agree to the terms and conditions')
   });
-  
-  // Handle email/password signup
+    // Handle email/password signup
   const handleSignup = async (values, { setSubmitting, setFieldError }) => {
     setIsLoading(true);
     clearError();
     
     try {
+      console.log('Starting registration process...');
+      
+      // Display API URL being used in deployment for debugging
+      if (import.meta.env?.VITE_API_URL) {
+        console.log('Using API URL from env:', import.meta.env.VITE_API_URL);
+      }
+      
       // Create user account with MongoDB backend
-      await register({
+      const result = await register({
         name: values.name,
         email: values.email,
         password: values.password
       });
       
+      console.log('Registration successful:', result ? 'Yes' : 'No');
+      
+      // Check if we have a token before redirecting
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No token received after successful registration');
+        setError('Authentication failed. Please try logging in manually.');
+        return;
+      }
+      
       // Redirect to home page
       navigate('/');
     } catch (error) {
-      console.error(error);
-      if (error.response?.data?.error?.includes('email')) {
+      console.error('Registration error:', error);
+      
+      // Enhanced error handling for deployment issues
+      if (error.message?.includes('Network Error')) {
+        setError('Network error: Could not connect to the server. Please check your internet connection and try again.');
+      } else if (error.response?.status === 0 || error.message?.includes('CORS')) {
+        setError('Cross-Origin Request Blocked: The server may be down or misconfigured. Please try again later.');
+      } else if (error.response?.data?.error?.includes('email')) {
         setFieldError('email', 'Email address is already in use');
+      } else if (error.response?.status === 500) {
+        setError('Server error: The server encountered an unexpected condition. Please try again later.');
       } else {
         setError(error.response?.data?.error || 'Registration failed');
       }
