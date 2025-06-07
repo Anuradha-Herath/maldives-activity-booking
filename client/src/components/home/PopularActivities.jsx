@@ -10,10 +10,9 @@ const PopularActivities = () => {
         const fetchPopularActivities = async () => {
             try {
                 setLoading(true);
-                setError(null);
-                
-                console.log('🔍 PopularActivities: Starting to fetch activities...');
-                console.log('🌐 API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1');
+                setError(null);                console.log('🔍 PopularActivities: Starting to fetch activities...');
+                // Don't log the raw env variable, log the processed URL from the API utility
+                console.log('🌐 API Base URL:', activitiesAPI.baseUrl || 'Using default API configuration');
                 
                 const response = await activitiesAPI.getAll();
                 

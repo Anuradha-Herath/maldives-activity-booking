@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { activitiesAPI } from './api';
 
 const DebugUpload = () => {
   const [file, setFile] = useState(null);
@@ -7,7 +8,8 @@ const DebugUpload = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+  // Use the API utility for consistent URL handling
+  const API_URL = activitiesAPI.baseUrl;
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);

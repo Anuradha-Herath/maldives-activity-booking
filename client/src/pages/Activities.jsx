@@ -36,7 +36,7 @@ const Activities = () => {
                 setError(null);
                 
                 console.log('🔍 Activities Page: Starting to fetch activities...');
-                console.log('🌐 API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1');
+                console.log('🌐 API Base URL:', activitiesAPI.baseUrl);
                 
                 // Build params object from URL query parameters
                 const params = {};

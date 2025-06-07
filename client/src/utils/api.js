@@ -1,7 +1,11 @@
 import axios from 'axios';
 
 // Create axios instance with base URL - use environment variable or fallback to local development
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+// Check if the environment variable is being properly loaded, otherwise use a fallback
+const envApiUrl = import.meta.env.VITE_API_URL;
+const API_URL = (typeof envApiUrl === 'string' && !envApiUrl.startsWith('VITE_API_URL=')) 
+  ? envApiUrl 
+  : 'https://maldives-activity-booking-backend.onrender.com/api/v1';
 
 // Debug: Log the API URL being used (only in development)
 if (import.meta.env.DEV) {
@@ -65,12 +69,16 @@ API.interceptors.response.use(
 
 // Activities API
 export const activitiesAPI = {
+  // Store the base URL for external access
+  baseUrl: API_URL,
+  
   // fetch all activities or filter by query params (e.g., type)
   getAll: async (params) => {
     console.log('🚀 Fetching all activities with params:', params);
     console.log('🔗 Using API base URL:', API.defaults.baseURL);
     
     try {
+      // Use the full endpoint - Vite will proxy /api/ requests to the backend
       const response = await API.get('/activities', { params });
       console.log('📦 Activities API response:', response.data);
       return response;
