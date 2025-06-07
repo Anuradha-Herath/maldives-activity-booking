@@ -29,8 +29,8 @@ export const register = async (userData) => {
       console.log('Request that failed:', {
         url: error.config.url,
         method: error.config.method,
-        headers: error.config.headers,
-        data: error.config.data
+        headers: { ...error.config.headers, Authorization: 'REDACTED' },
+        data: { ...error.config.data, password: 'REDACTED' }
       });
     }
     

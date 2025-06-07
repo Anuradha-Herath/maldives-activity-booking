@@ -17,7 +17,9 @@ exports.register = async (req, res, next) => {
       password,
     });
     
-    console.log('User created successfully:', user);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('User created successfully:', { id: user._id, name: user.name, email: user.email });
+    }
     sendTokenResponse(user, 200, res);
   } catch (error) {
     console.error('Error in registration:', error);

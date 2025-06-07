@@ -56,20 +56,7 @@ const allowedOrigins = corsOriginValue
 
 // Diagnostic root endpoint to check if the server is running
 app.get('/server-status', (req, res) => {
-  res.json({
-    status: 'Server is running',
-    timestamp: new Date().toISOString(),
-    cors: {
-      allowedOrigins,
-      requestOrigin: req.headers.origin || 'No origin in request'
-    },
-    env: {
-      nodeEnv: process.env.NODE_ENV,
-      corsOriginRaw: process.env.CORS_ORIGIN,
-      corsOriginProcessed: corsOriginValue,
-      port: process.env.PORT || 5000
-    }
-  });
+  res.redirect('/api/v1/server-status');
 });
 
 // Cookie parser
@@ -96,7 +83,11 @@ app.use(cors({
       return callback(null, true);
       // Uncomment below to enforce strict CORS once everything is working
       // const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      // return callback(new Error(msg), false);
+      if (process.env.NODE_ENV === 'production') {
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true); // Allow all origins in non-production environments
     }
     return callback(null, true);
   },
