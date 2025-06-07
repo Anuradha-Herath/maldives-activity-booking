@@ -1,4 +1,5 @@
 const express = require('express');
+const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -109,6 +110,33 @@ app.use(fileUpload({
   useTempFiles: false
 }));
 
+// Add API root endpoint
+app.get('/api/v1', (req, res) => {
+  res.json({
+    message: 'Maldives Activity Booking API',
+    status: 'Running',
+    version: 'v1',
+    documentation: '/api/v1/server-status for more details'
+  });
+});
+
+// Add server status endpoint
+app.get('/api/v1/server-status', (req, res) => {
+  res.json({
+    status: 'Server is running',
+    timestamp: new Date().toISOString(),
+    cors: {
+      allowedOrigins,
+      requestOrigin: req.headers.origin || 'No origin in request'
+    },
+    env: {
+      nodeEnv: process.env.NODE_ENV,
+      corsOriginRaw: process.env.CORS_ORIGIN,
+      port: process.env.PORT || 5000
+    }
+  });
+});
+
 // Debug middleware to log file uploads
 app.use((req, res, next) => {
   if (req.files) {
@@ -118,19 +146,19 @@ app.use((req, res, next) => {
 });
 
 // Mount routers
-app.use('/activities', activityRoutes);
-app.use('/auth', authRoutes);
-app.use('/upload', uploadRoutes);
-app.use('/test-upload', testUploadRoutes);
-app.use('/bookings', bookingRoutes);
-app.use('/users', userRoutes);
-app.use('/dashboard', dashboardRoutes);
-app.use('/user/bookings', userBookingRoutes);
+app.use('/api/v1/activities', activityRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/test-upload', testUploadRoutes);
+app.use('/api/v1/bookings', bookingRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/user/bookings', userBookingRoutes);
 
 // Add debug routes in non-production environments
 if (process.env.NODE_ENV !== 'production') {
   const debugRoutes = require('./routes/debug.routes');
-  app.use('/debug', debugRoutes);
+  app.use('/api/v1/debug', debugRoutes);
 }
 
 // Handle 404 errors - Route not found

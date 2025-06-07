@@ -37,8 +37,7 @@ services:  # Backend API service
     plan: free
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: client/dist
-    envVars:
-      - key: VITE_API_URL
+    envVars:      - key: VITE_API_URL
         value: https://maldives-activity-booking-backend.onrender.com/api/v1
       - key: VITE_CLOUDINARY_CLOUD_NAME
         value: dwzhs42tz

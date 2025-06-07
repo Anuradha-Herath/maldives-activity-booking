@@ -8,11 +8,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'src')
     },
-  },
-  server: {
+  },  server: {
     port: 3000,
     proxy: {
-      '/api': {
+      '/api/v1': {
         target: 'https://maldives-activity-booking-backend.onrender.com',
         changeOrigin: true
       }
