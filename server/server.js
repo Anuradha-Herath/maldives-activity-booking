@@ -99,25 +99,29 @@ if (process.env.NODE_ENV === 'development') {
 console.log('CORS Origins allowed:', allowedOrigins);
 
 // Use CORS middleware with proper configuration
-app.use(cors({
-  origin: function(origin, callback) {
+app.use(cors({  origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps, curl requests)
     if (!origin) return callback(null, true);
     
     // If allowedOrigins is '*', allow all origins
     if (allowedOrigins === '*') return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
+    
+    // Check if origin is in the allowed origins list
+    if (allowedOrigins.indexOf(origin) === -1) {
       console.log(`CORS request from non-allowed origin: ${origin}`);
-      // Allow all origins during deployment debugging
+      
+      // For production, temporarily allow all origins while in debugging mode
+      // This is more permissive but helps diagnose deployment issues
       return callback(null, true);
-      // Uncomment below to enforce strict CORS once everything is working
-      // const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      if (process.env.NODE_ENV === 'production') {
-        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true); // Allow all origins in non-production environments
+      
+      // Once everything is working, you can enable strict CORS by uncommenting below:
+      // if (process.env.NODE_ENV === 'production') {
+      //   const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      //   return callback(new Error(msg), false);
+      // }
     }
+    
+    // Origin is allowed
     return callback(null, true);
   },
   credentials: true,
