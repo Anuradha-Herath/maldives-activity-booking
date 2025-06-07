@@ -620,8 +620,7 @@ const ActivityForm = () => {
                     
                     {/* Upload button */}
                     {images.length === 0 && (
-                      <div className="h-32 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center">
-                        <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                      <div className="h-32 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center">                        <label htmlFor="mainImage" className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
                           {uploading ? (
                             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                           ) : (
@@ -631,9 +630,10 @@ const ActivityForm = () => {
                                 Add Main Image
                               </span>
                             </>
-                          )}
-                          <input
+                          )}<input
                             type="file"
+                            id="mainImage"
+                            name="mainImage"
                             className="hidden"
                             accept="image/*"
                             onChange={handleImageUpload}
@@ -672,8 +672,7 @@ const ActivityForm = () => {
                     ))}
                     
                     {/* Upload button */}
-                    <div className="h-32 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center">
-                      <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                    <div className="h-32 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center">                      <label htmlFor="galleryImages" className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
                         {uploading ? (
                           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                         ) : (
@@ -683,9 +682,10 @@ const ActivityForm = () => {
                               Add Gallery Images
                             </span>
                           </>
-                        )}
-                        <input
+                        )}<input
                           type="file"
+                          id="galleryImages"
+                          name="galleryImages"
                           className="hidden"
                           accept="image/*"
                           multiple

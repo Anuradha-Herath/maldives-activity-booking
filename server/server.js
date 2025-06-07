@@ -24,6 +24,21 @@ const userBookingRoutes = require('./routes/userBooking.routes');
 
 const app = express();
 
+// Disable X-Powered-By header
+app.disable('x-powered-by');
+
+// Add security headers middleware
+app.use((req, res, next) => {
+  // Add X-Content-Type-Options header to prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  
+  // Add other security headers
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  
+  next();
+});
+
 // Add root endpoint to check if server is running
 app.get('/', (req, res) => {
   res.json({
@@ -47,12 +62,11 @@ app.use((req, res, next) => {
   // For API endpoints, set proper cache headers 
   // For GET requests to /api/v1/activities, cache for 5 minutes
   if (req.method === 'GET' && req.url.match(/^\/api\/v1\/activities/)) {
-    res.setHeader('Cache-Control', 'public, max-age=300');
-  } else {
+    res.setHeader('Cache-Control', 'public, max-age=300');  } else {
     // For other API endpoints (especially those that modify data), don't cache
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
+    // Remove Expires header as Cache-Control is preferred
   }
   next();
 });

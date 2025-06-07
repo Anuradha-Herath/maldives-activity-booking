@@ -10,10 +10,28 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 4173;
 
+// Disable X-Powered-By header
+app.disable('x-powered-by');
+
 // Log server startup information
 console.log('Starting server with correct MIME types...');
 console.log('__dirname:', __dirname);
 console.log('Node version:', process.version);
+
+// Add security headers middleware
+app.use((req, res, next) => {
+  // Add X-Content-Type-Options header to prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  
+  // Add other security headers
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  
+  // Remove Expires header from responses, as we're using Cache-Control
+  res.removeHeader('Expires');
+  
+  next();
+});
 
 // Set correct MIME types for all requests
 app.use((req, res, next) => {
