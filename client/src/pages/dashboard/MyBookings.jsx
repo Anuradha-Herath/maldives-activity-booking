@@ -15,69 +15,30 @@ const MyBookings = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
-  useEffect(() => {
-    fetchBookings();
-
-    // Check if we came here from a booking creation
-    const hasNewBooking = localStorage.getItem('new_booking_created');
-    if (hasNewBooking === 'true') {
-      console.log('New booking detected, forcing refresh');
-      // Clear the flag
-      localStorage.removeItem('new_booking_created');
-      // Force refresh with a delay
-      setTimeout(() => {
-        fetchBookings();
-        refreshDashboard();
-      }, 500);
-    }
-  }, [currentUser, refreshDashboard]);
-
-  // Subscribe to booking events
-  useEffect(() => {
-    const unsubscribe = bookingEvents.on('booking_created', (bookingData) => {
-      console.log('MyBookings received booking_created event:', bookingData);
-
-      // Add the new booking to the list immediately
-      setBookings((prev) => [bookingData, ...prev]);
-
-      // Refresh bookings after a short delay
-      setTimeout(() => {
-        fetchBookings();
-      }, 500);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    // Check URL for refresh parameter
-    const query = new URLSearchParams(window.location.search);
-    if (query.get('refresh')) {
-      console.log('URL refresh parameter detected, forcing refresh');
-      fetchBookings();
-    }
-  }, []);
-
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      // Add cache busting parameter
-      const response = await userBookingsAPI.getUpcoming(`?_=${Date.now()}`);
+      // Simple API call without complex cache busting
+      const response = await userBookingsAPI.getUpcoming();
 
       if (response.data.success) {
         console.log('Fetched bookings:', response.data.data);
         setBookings(response.data.data);
-
-        // Also update the dashboard context to keep everything in sync
         refreshDashboard();
       } else {
         setError('Failed to fetch bookings');
       }
     } catch (error) {
       console.error('Error fetching bookings:', error);
-      setError('Error connecting to the server. Please try again.');
+
+      // Better error messages for production
+      if (error.message.includes('CORS')) {
+        setError('Connection issue. Please refresh the page.');
+      } else if (error.response?.status === 401) {
+        setError('Session expired. Please log in again.');
+      } else {
+        setError('Unable to load bookings. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -140,6 +101,50 @@ const MyBookings = () => {
       day: 'numeric',
     });
   };
+
+  // Simplified effect for detecting new bookings
+  useEffect(() => {
+    fetchBookings();
+
+    // Check for new booking completion
+    const bookingCompleted = localStorage.getItem('booking_completed');
+    if (bookingCompleted === 'true') {
+      console.log('New booking detected, refreshing bookings');
+      setTimeout(() => {
+        fetchBookings();
+      }, 1000); // Small delay to ensure backend is updated
+
+      localStorage.removeItem('booking_completed');
+    }
+  }, [currentUser, refreshDashboard]);
+
+  // Subscribe to booking events
+  useEffect(() => {
+    const unsubscribe = bookingEvents.on('booking_created', (bookingData) => {
+      console.log('MyBookings received booking_created event:', bookingData);
+
+      // Add the new booking to the list immediately
+      setBookings((prev) => [bookingData, ...prev]);
+
+      // Refresh bookings after a short delay
+      setTimeout(() => {
+        fetchBookings();
+      }, 500);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Check URL for refresh parameter
+    const query = new URLSearchParams(window.location.search);
+    if (query.get('refresh')) {
+      console.log('URL refresh parameter detected, forcing refresh');
+      fetchBookings();
+    }
+  }, []);
 
   return (
     <DashboardLayout title="My Bookings">

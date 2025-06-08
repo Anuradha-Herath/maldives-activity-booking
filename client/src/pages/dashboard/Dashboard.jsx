@@ -22,50 +22,43 @@ const Dashboard = () => {
   const [lastUpdated, setLastUpdated] = useState('');
   const [refreshSource, setRefreshSource] = useState(null);
   const { markDataLoaded, recordError } = useDashboardPerformanceTracking();
-  // Create a reusable fetch function
+  // Simplified fetch function
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     const startTime = performance.now();
     
     try {
-      // First check if we have prefetched data from a recent booking
-      const prefetchedData = localStorage.getItem('prefetched_dashboard_data');
+      // Check for new booking completion
+      const bookingCompleted = localStorage.getItem('booking_completed');
+      const newBookingData = localStorage.getItem('new_booking_data');
       
-      if (prefetchedData) {
-        console.log('Using prefetched dashboard data');
-        logMetric('dashboard_used_prefetched_data', { timestamp: performance.now() });
-        const data = JSON.parse(prefetchedData);
+      if (bookingCompleted === 'true' && newBookingData) {
+        console.log('New booking detected, updating stats immediately');
         
-        setStats({
-          pendingBookings: data.pendingBookings || 0,
-          confirmedBookings: data.confirmedBookings || 0,
-          totalBookings: data.totalBookings || 0
-        });
-        
-        setRecentBookings(data.recentBookings || []);
-        setLastUpdated(new Date().toLocaleTimeString());
-        
-        // Clear the prefetched data so we don't use it again
-        localStorage.removeItem('prefetched_dashboard_data');
-        
-        // Still make the API call in the background to ensure everything is fresh
-        // but don't wait for it
-        userBookingsAPI.getStats(`?_=${Date.now()}`).catch(e => console.error('Background refresh failed:', e));
-        
-        setLoading(false);
-        // Mark data loaded for performance tracking
-        markDataLoaded();
-        
-        // Log performance for prefetched data load
-        const endTime = performance.now();
-        logMetric('dashboard_prefetch_load_time', endTime - startTime);
-        return; // Exit early since we used prefetched data
+        try {
+          const booking = JSON.parse(newBookingData);
+          
+          // Update stats immediately for better UX
+          setStats(prev => ({
+            pendingBookings: (prev.pendingBookings || 0) + 1,
+            confirmedBookings: prev.confirmedBookings || 0,
+            totalBookings: (prev.totalBookings || 0) + 1
+          }));
+          
+          // Add to recent bookings
+          setRecentBookings(prev => [booking, ...prev.slice(0, 4)]);
+          setLastUpdated(new Date().toLocaleTimeString() + ' (Updated)');
+          
+          // Clear the flags
+          localStorage.removeItem('booking_completed');
+          localStorage.removeItem('new_booking_data');
+        } catch (e) {
+          console.error('Error parsing new booking data:', e);
+        }
       }
       
-      // If no prefetched data, proceed with normal API call with cache-busting
-      const apiStartTime = performance.now();
-      const timestamp = new Date().getTime();
-      const response = await userBookingsAPI.getStats(`?_=${timestamp}`);
+      // Fetch fresh data from API
+      const response = await userBookingsAPI.getStats();
       
       if (response.data.success) {
         const { 
@@ -83,25 +76,31 @@ const Dashboard = () => {
         
         setRecentBookings(recentBookings || []);
         setLastUpdated(new Date().toLocaleTimeString());
-        console.log('Dashboard data refreshed:', new Date().toISOString());
+        console.log('Dashboard data refreshed successfully');
         
-        // Log API performance
-        const apiEndTime = performance.now();
-        logMetric('dashboard_api_fetch_time', apiEndTime - apiStartTime);
         markDataLoaded();
       } else {
         setError('Failed to fetch dashboard data');
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      setError('Error connecting to the server. Please try again.');
+      
+      // More specific error handling for production
+      if (error.message.includes('CORS')) {
+        setError('Connection issue. Please refresh the page.');
+      } else if (error.response?.status === 401) {
+        setError('Session expired. Please log in again.');
+      } else {
+        setError('Unable to load dashboard data. Please try again.');
+      }
+      
       recordError(error);
     } finally {
       setLoading(false);
       const totalTime = performance.now() - startTime;
       logMetric('dashboard_total_load_time', totalTime);
     }
-  }, []);
+  }, [markDataLoaded, recordError]);
 
   // Manual refresh handler
   const handleManualRefresh = () => {
@@ -161,14 +160,13 @@ const Dashboard = () => {
     }
   }, [fetchDashboardData]);
   
-  // Effect for URL query parameters - most aggressive refresh trigger
+  // Simplified effect for URL parameters
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const refreshParam = queryParams.get('refresh');
+    const updatedParam = queryParams.get('updated');
     
-    if (refreshParam) {
-      console.log(`Dashboard loaded with refresh param: ${refreshParam}`);
-      setRefreshSource('url_param');
+    if (updatedParam) {
+      console.log('Dashboard loaded after booking completion');
       fetchDashboardData();
     }
   }, [location.search, fetchDashboardData]);

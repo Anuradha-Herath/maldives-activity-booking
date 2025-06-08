@@ -135,43 +135,34 @@ const BookingRequest = () => {
     };    const handleModalClose = async () => {
         setIsModalOpen(false);
         
-        // Create a timestamp marker for this booking completion
+        // Simplified approach - just set flags and redirect
         const bookingTimestamp = Date.now();
-        localStorage.setItem('booking_completed_at', bookingTimestamp.toString());
         
-        try {
-            // Force prefetch ALL relevant data BEFORE navigation
-            console.log('Prefetching all data after booking creation');
-            
-            // 1. First prefetch dashboard stats
-            const statsResponse = await userBookingsAPI.getStats(`?_=${bookingTimestamp}`);
-            if (statsResponse.data.success) {
-                console.log('Successfully prefetched dashboard stats:', statsResponse.data.data);
-                localStorage.setItem('prefetched_dashboard_data', JSON.stringify(statsResponse.data.data));
-            }
-            
-            // 2. Then prefetch upcoming bookings
-            const upcomingResponse = await userBookingsAPI.getUpcoming(`?_=${bookingTimestamp}`);
-            if (upcomingResponse.data.success) {
-                console.log('Successfully prefetched upcoming bookings:', upcomingResponse.data.data);
-                localStorage.setItem('prefetched_upcoming_bookings', JSON.stringify(upcomingResponse.data.data));
-            }
-        } catch (err) {
-            console.error('Error prefetching data:', err);
-        }
+        // Set simple flags for dashboard refresh
+        localStorage.setItem('booking_completed', 'true');
+        localStorage.setItem('booking_timestamp', bookingTimestamp.toString());
         
-        // Refresh dashboard state trigger
+        // Store minimal booking data for immediate display
+        const bookingData = {
+            id: bookingId,
+            reference: bookingReference,
+            activityTitle: activity.title,
+            date: formData.date,
+            guests: formData.guests,
+            totalPrice: activity.price * formData.guests,
+            status: 'pending'
+        };
+        
+        localStorage.setItem('new_booking_data', JSON.stringify(bookingData));
+        
+        // Emit simple event
+        bookingEvents.emit('booking_completed', bookingData);
+        
+        // Trigger dashboard refresh
         refreshDashboard();
         
-        // Set special flag for production environment
-        localStorage.setItem('force_dashboard_refresh', 'true');
-        sessionStorage.setItem('force_dashboard_refresh', 'true');
-        
-        // Emit a global event for any listening components
-        bookingEvents.emit('booking_completed', { timestamp: bookingTimestamp });
-        
-        // Force a hard reload to the dashboard to guarantee fresh data
-        window.location.href = `/dashboard?refresh=${bookingTimestamp}`;
+        // Simple redirect with timestamp
+        window.location.href = `/dashboard?updated=${bookingTimestamp}`;
     };
 
     if (loading) {

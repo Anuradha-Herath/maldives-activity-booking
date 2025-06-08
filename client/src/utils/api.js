@@ -36,6 +36,10 @@ API.interceptors.request.use(
       delete config.headers['Content-Type'];
     }
     
+    // Remove any problematic headers that might cause CORS issues
+    delete config.headers['expires'];
+    delete config.headers['cache-control'];
+    
     return config;
   },  (error) => Promise.reject(error)
 );
@@ -126,14 +130,33 @@ export const dashboardAPI = {
   getStats: () => API.get('/dashboard/stats')
 };
 
-// User Bookings API with cache-busting
+// User Bookings API with simplified cache-busting
 export const userBookingsAPI = {
-  // Add cache-busting query parameter to prevent caching
-  getAll: (queryParams = '') => API.get(`/user/bookings${queryParams || ('?_=' + Date.now())}`),
-  getHistory: (queryParams = '') => API.get(`/user/bookings/history${queryParams || ('?_=' + Date.now())}`),
-  getUpcoming: (queryParams = '') => API.get(`/user/bookings/upcoming${queryParams || ('?_=' + Date.now())}`),
-  getStats: (queryParams = '') => API.get(`/user/bookings/stats${queryParams || ('?_=' + Date.now())}`),
-  cancelBooking: (id) => API.put(`/user/bookings/${id}/cancel?_=${Date.now()}`)
+  // Simplified cache-busting using timestamp in query params only
+  getAll: (queryParams = '') => {
+    const timestamp = Date.now();
+    const separator = queryParams.includes('?') ? '&' : '?';
+    return API.get(`/user/bookings${queryParams}${separator}t=${timestamp}`);
+  },
+  getHistory: (queryParams = '') => {
+    const timestamp = Date.now();
+    const separator = queryParams.includes('?') ? '&' : '?';
+    return API.get(`/user/bookings/history${queryParams}${separator}t=${timestamp}`);
+  },
+  getUpcoming: (queryParams = '') => {
+    const timestamp = Date.now();
+    const separator = queryParams.includes('?') ? '&' : '?';
+    return API.get(`/user/bookings/upcoming${queryParams}${separator}t=${timestamp}`);
+  },
+  getStats: (queryParams = '') => {
+    const timestamp = Date.now();
+    const separator = queryParams.includes('?') ? '&' : '?';
+    return API.get(`/user/bookings/stats${queryParams}${separator}t=${timestamp}`);
+  },
+  cancelBooking: (id) => {
+    const timestamp = Date.now();
+    return API.put(`/user/bookings/${id}/cancel?t=${timestamp}`);
+  }
 };
 
 // Function to upload image to Cloudinary
