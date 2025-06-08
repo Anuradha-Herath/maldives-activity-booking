@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDashboard } from '../../contexts/DashboardContext';
 import BookingStatusBadge from '../../components/dashboard/BookingStatusBadge';
 import { userBookingsAPI } from '../../utils/api';
 
 const MyBookings = () => {
   const { currentUser } = useAuth();
+  const { refreshDashboard } = useDashboard();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -63,8 +65,10 @@ const MyBookings = () => {
         setBookings(prevBookings => 
           prevBookings.map(booking => 
             booking._id === bookingId ? updatedBooking : booking
-          )
-        );
+          )        );
+        
+        // Refresh dashboard data to reflect the change
+        refreshDashboard();
         
         // Show a success message
         alert('Booking cancelled successfully');

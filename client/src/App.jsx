@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { DashboardProvider } from './contexts/DashboardContext';
 import { useEffect } from 'react';
 import authDiagnostic from './utils/authDiagnostic';
 import AuthMonitor from './components/auth/AuthMonitor';
@@ -113,10 +114,12 @@ const AppContent = () => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppContent />
-        <AuthMonitor />
-      </Router>
+      <DashboardProvider>
+        <Router>
+          <AppContent />
+          <AuthMonitor />
+        </Router>
+      </DashboardProvider>
     </AuthProvider>
   );
 }

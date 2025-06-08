@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDashboard } from '../../contexts/DashboardContext';
 import { userBookingsAPI } from '../../utils/api';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
+  const { refreshTrigger } = useDashboard();
   const [stats, setStats] = useState({
     pendingBookings: 0,
     confirmedBookings: 0,
@@ -44,11 +46,10 @@ const Dashboard = () => {
         setError('Error connecting to the server. Please try again.');
       } finally {
         setLoading(false);
-      }
-    };
+      }    };
     
     fetchDashboardData();
-  }, [currentUser]);
+  }, [currentUser, refreshTrigger]);
   
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {

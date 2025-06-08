@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { activitiesAPI, bookingsAPI } from '../utils/api';
+import { useDashboard } from '../contexts/DashboardContext';
 import ConfirmationModal from '../components/booking/ConfirmationModal';
 
 const BookingRequest = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const { refreshDashboard } = useDashboard();
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -103,10 +105,10 @@ const BookingRequest = () => {
         } finally {
             setSubmitting(false);
         }
-    };
-
-    const handleModalClose = () => {
+    };    const handleModalClose = () => {
         setIsModalOpen(false);
+        // Refresh dashboard data to reflect the new booking
+        refreshDashboard();
         // Redirect to home page after successful booking
         navigate('/');
     };
