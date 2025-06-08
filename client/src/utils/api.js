@@ -126,13 +126,14 @@ export const dashboardAPI = {
   getStats: () => API.get('/dashboard/stats')
 };
 
-// User Bookings API
+// User Bookings API with cache-busting
 export const userBookingsAPI = {
-  getAll: () => API.get('/user/bookings'),
-  getHistory: () => API.get('/user/bookings/history'),
-  getUpcoming: () => API.get('/user/bookings/upcoming'),
-  getStats: () => API.get('/user/bookings/stats'),
-  cancelBooking: (id) => API.put(`/user/bookings/${id}/cancel`)
+  // Add cache-busting query parameter to prevent caching
+  getAll: (queryParams = '') => API.get(`/user/bookings${queryParams || ('?_=' + Date.now())}`),
+  getHistory: (queryParams = '') => API.get(`/user/bookings/history${queryParams || ('?_=' + Date.now())}`),
+  getUpcoming: (queryParams = '') => API.get(`/user/bookings/upcoming${queryParams || ('?_=' + Date.now())}`),
+  getStats: (queryParams = '') => API.get(`/user/bookings/stats${queryParams || ('?_=' + Date.now())}`),
+  cancelBooking: (id) => API.put(`/user/bookings/${id}/cancel?_=${Date.now()}`)
 };
 
 // Function to upload image to Cloudinary

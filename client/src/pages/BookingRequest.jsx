@@ -109,8 +109,12 @@ const BookingRequest = () => {
         setIsModalOpen(false);
         // Refresh dashboard data to reflect the new booking
         refreshDashboard();
-        // Redirect to home page after successful booking
-        navigate('/');
+        
+        // Add a small delay before navigation to ensure data refresh completes
+        setTimeout(() => {
+            // Redirect to dashboard after successful booking instead of home
+            navigate('/dashboard');
+        }, 300);
     };
 
     if (loading) {

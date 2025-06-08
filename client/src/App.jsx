@@ -112,6 +112,13 @@ const AppContent = () => {
 };
 
 function App() {
+  // Clear any potential cached states on app init
+  useEffect(() => {
+    console.log('App initialized, ensuring fresh dashboard data on load');
+    // Set a flag to force dashboard refresh on next visit
+    localStorage.setItem('dashboard_needs_refresh', 'true');
+  }, []);
+
   return (
     <AuthProvider>
       <DashboardProvider>

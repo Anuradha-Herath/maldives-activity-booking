@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,7 +7,7 @@ import { userBookingsAPI } from '../../utils/api';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
-  const { refreshTrigger } = useDashboard();
+  const { refreshTrigger, lastRefreshTime, refreshDashboard } = useDashboard();
   const [stats, setStats] = useState({
     pendingBookings: 0,
     confirmedBookings: 0,
@@ -16,40 +16,67 @@ const Dashboard = () => {
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setLoading(true);
-      try {
-        const response = await userBookingsAPI.getStats();
+  const [lastUpdated, setLastUpdated] = useState('');
+    // Create a reusable fetch function
+  const fetchDashboardData = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Clear cache by adding a timestamp to the request
+      const timestamp = new Date().getTime();
+      const response = await userBookingsAPI.getStats(`?_=${timestamp}`);
+      
+      if (response.data.success) {
+        const { 
+          pendingBookings, 
+          confirmedBookings, 
+          totalBookings,
+          recentBookings 
+        } = response.data.data;
         
-        if (response.data.success) {
-          const { 
-            pendingBookings, 
-            confirmedBookings, 
-            totalBookings,
-            recentBookings 
-          } = response.data.data;
-          
-          setStats({
-            pendingBookings,
-            confirmedBookings,
-            totalBookings
-          });
-          
-          setRecentBookings(recentBookings);
-        } else {
-          setError('Failed to fetch dashboard data');
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setError('Error connecting to the server. Please try again.');
-      } finally {
-        setLoading(false);
-      }    };
-    
+        setStats({
+          pendingBookings,
+          confirmedBookings,
+          totalBookings
+        });
+        
+        setRecentBookings(recentBookings);
+        setLastUpdated(new Date().toLocaleTimeString());
+        console.log('Dashboard data refreshed:', new Date().toISOString());
+      } else {
+        setError('Failed to fetch dashboard data');
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      setError('Error connecting to the server. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Manual refresh handler
+  const handleManualRefresh = () => {
+    refreshDashboard();
     fetchDashboardData();
-  }, [currentUser, refreshTrigger]);
+  };
+    // Effect for auto-refresh based on triggers
+  useEffect(() => {
+    fetchDashboardData();
+    // Log for debugging
+    if (lastRefreshTime) {
+      console.log(`Dashboard refreshed due to trigger change. Last refresh: ${new Date(lastRefreshTime).toISOString()}`);
+    }
+  }, [currentUser, refreshTrigger, lastRefreshTime, fetchDashboardData]);
+  
+  // Special effect for arriving from booking page
+  useEffect(() => {
+    // Check if we need to refresh on arrival (specifically for production)
+    const needsRefresh = localStorage.getItem('dashboard_needs_refresh');
+    if (needsRefresh === 'true') {
+      console.log('Detected return from booking page, forcing refresh');
+      fetchDashboardData();
+      localStorage.removeItem('dashboard_needs_refresh');
+    }
+  }, [fetchDashboardData]);
   
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -61,10 +88,29 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout title="Dashboard">
-      <div>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-1">Welcome back, {currentUser?.name || 'User'}!</h2>
-          <p className="text-gray-600">Here's an overview of your bookings and activities.</p>
+      <div>        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-1">Welcome back, {currentUser?.name || 'User'}!</h2>
+            <p className="text-gray-600">Here's an overview of your bookings and activities.</p>
+            {lastUpdated && <p className="text-xs text-gray-500">Last updated: {lastUpdated}</p>}
+          </div>
+          <button 
+            onClick={handleManualRefresh}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Refreshing...
+              </span>
+            ) : (
+              <span>Refresh Dashboard</span>
+            )}
+          </button>
         </div>
 
         {/* Error Message */}
