@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import AdminLayout from '../../components/admin/AdminLayout';
-import axios from 'axios';
+import API from '../../utils/api';
 
 const ActivityForm = () => {
   const { id } = useParams();
@@ -12,19 +12,15 @@ const ActivityForm = () => {
   const [loading, setLoading] = useState(id ? true : false);
   const [images, setImages] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(null);
+  const [uploading, setUploading] = useState(false);  const [error, setError] = useState(null);
   const isNew = !id;
-  
-  const API_URL = 'https://maldives-activity-booking-backend.onrender.com/api/v1';
 
   useEffect(() => {
     // Fetch activity data if editing
     if (id) {
-      const fetchActivity = async () => {
-        try {
+      const fetchActivity = async () => {        try {
           setLoading(true);
-          const response = await axios.get(`${API_URL}/activities/${id}`);
+          const response = await API.get(`/activities/${id}`);
           
           if (response.data.success) {
             const activityData = response.data.data;
@@ -92,15 +88,11 @@ const ActivityForm = () => {
       let retries = 0;
       const maxRetries = 2;
       
-      while (retries <= maxRetries) {
-        try {
+      while (retries <= maxRetries) {        try {
           console.log(`Upload attempt ${retries + 1} of ${maxRetries + 1}`);
           
-          response = await axios.post(`${API_URL}/upload`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            },
-            // Timeout after 30 seconds
+          response = await API.post('/upload', formData, {
+            // Don't set Content-Type header - let browser set it with boundary for FormData
             timeout: 30000
           });
           
@@ -187,14 +179,11 @@ const ActivityForm = () => {
           let retries = 0;
           const maxRetries = 2;
           
-          while (retries <= maxRetries) {
-            try {
+          while (retries <= maxRetries) {            try {
               console.log(`Gallery upload attempt ${retries + 1} of ${maxRetries + 1}`);
               
-              response = await axios.post(`${API_URL}/upload`, formData, {
-                headers: {
-                  'Content-Type': 'multipart/form-data'
-                },
+              response = await API.post('/upload', formData, {
+                // Don't set Content-Type header - let browser set it with boundary for FormData
                 timeout: 30000
               });
               
@@ -299,13 +288,12 @@ const ActivityForm = () => {
       };
       
       let response;
-      
-      if (isNew) {
+        if (isNew) {
         // Create new activity
-        response = await axios.post(`${API_URL}/activities`, activityData);
+        response = await API.post('/activities', activityData);
       } else {
         // Update existing activity
-        response = await axios.put(`${API_URL}/activities/${id}`, activityData);
+        response = await API.put(`/activities/${id}`, activityData);
       }
       
       if (response.data.success) {
