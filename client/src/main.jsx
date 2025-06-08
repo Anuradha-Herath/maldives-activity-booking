@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { wakeUpBackend } from './utils/wakeUpBackend';
+import './utils/registerServiceWorker';
 
 // Add Google Fonts for the display font
 const fontLink = document.createElement('link');

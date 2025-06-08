@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { activitiesAPI, bookingsAPI } from '../utils/api';
 import { useDashboard } from '../contexts/DashboardContext';
+import bookingEvents from '../utils/BookingEventEmitter';
 import ConfirmationModal from '../components/booking/ConfirmationModal';
 
 const BookingRequest = () => {
@@ -90,11 +91,37 @@ const BookingRequest = () => {
                 specialRequests: formData.specialRequests,
                 totalPrice: activity.price * formData.guests
             };
-            
-            // Send booking data to the API
+              // Send booking data to the API
             const response = await bookingsAPI.create(bookingData);
-            
-            if (response.data.success) {
+              if (response.data.success) {
+                // Set flag that a new booking was created
+                localStorage.setItem('new_booking_created', 'true');
+                
+                // Create booking data object for synchronization
+                const bookingData = {
+                    _id: response.data.data._id,
+                    reference,
+                    activity: {
+                        title: activity.title,
+                        image: activity.image,
+                        _id: activity._id
+                    },
+                    date: formData.date,
+                    guests: formData.guests,
+                    totalPrice: activity.price * formData.guests,
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                };
+                
+                // Store booking data for instant access
+                localStorage.setItem('latest_booking', JSON.stringify(bookingData));
+                
+                // Emit booking created event for direct data synchronization
+                bookingEvents.emit('booking_created', bookingData);
+                
+                // Also store in sessionStorage for more reliable cross-page persistence
+                sessionStorage.setItem('latest_booking', JSON.stringify(bookingData));
+                
                 setBookingReference(reference);
                 setBookingId(response.data.data._id);
                 setIsModalOpen(true);
@@ -105,16 +132,46 @@ const BookingRequest = () => {
         } finally {
             setSubmitting(false);
         }
-    };    const handleModalClose = () => {
+    };    const handleModalClose = async () => {
         setIsModalOpen(false);
-        // Refresh dashboard data to reflect the new booking
+        
+        // Create a timestamp marker for this booking completion
+        const bookingTimestamp = Date.now();
+        localStorage.setItem('booking_completed_at', bookingTimestamp.toString());
+        
+        try {
+            // Force prefetch ALL relevant data BEFORE navigation
+            console.log('Prefetching all data after booking creation');
+            
+            // 1. First prefetch dashboard stats
+            const statsResponse = await userBookingsAPI.getStats(`?_=${bookingTimestamp}`);
+            if (statsResponse.data.success) {
+                console.log('Successfully prefetched dashboard stats:', statsResponse.data.data);
+                localStorage.setItem('prefetched_dashboard_data', JSON.stringify(statsResponse.data.data));
+            }
+            
+            // 2. Then prefetch upcoming bookings
+            const upcomingResponse = await userBookingsAPI.getUpcoming(`?_=${bookingTimestamp}`);
+            if (upcomingResponse.data.success) {
+                console.log('Successfully prefetched upcoming bookings:', upcomingResponse.data.data);
+                localStorage.setItem('prefetched_upcoming_bookings', JSON.stringify(upcomingResponse.data.data));
+            }
+        } catch (err) {
+            console.error('Error prefetching data:', err);
+        }
+        
+        // Refresh dashboard state trigger
         refreshDashboard();
         
-        // Add a small delay before navigation to ensure data refresh completes
-        setTimeout(() => {
-            // Redirect to dashboard after successful booking instead of home
-            navigate('/dashboard');
-        }, 300);
+        // Set special flag for production environment
+        localStorage.setItem('force_dashboard_refresh', 'true');
+        sessionStorage.setItem('force_dashboard_refresh', 'true');
+        
+        // Emit a global event for any listening components
+        bookingEvents.emit('booking_completed', { timestamp: bookingTimestamp });
+        
+        // Force a hard reload to the dashboard to guarantee fresh data
+        window.location.href = `/dashboard?refresh=${bookingTimestamp}`;
     };
 
     if (loading) {
