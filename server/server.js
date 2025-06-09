@@ -118,10 +118,9 @@ app.use(cors({
     // Origin is allowed
     console.log(`CORS: Origin ${origin} is allowed`);
     return callback(null, true);
-  },
-  credentials: true,
+  },  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with', 'expires'],
   exposedHeaders: ['set-cookie']
 }));
 
