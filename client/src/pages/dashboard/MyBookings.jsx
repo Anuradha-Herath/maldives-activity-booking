@@ -15,27 +15,40 @@ const MyBookings = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
+  // Updated fetch bookings function with better error handling
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      // Simple API call without complex cache busting
-      const response = await userBookingsAPI.getUpcoming();
+      // Mark the start time for a simple performance measurement
+      const startTime = performance.now();
+      console.log('Fetching upcoming bookings...');
+
+      // Add a timestamp parameter to avoid caching in production
+      const timestamp = Date.now();
+      const response = await userBookingsAPI.getUserUpcoming();
 
       if (response.data.success) {
-        console.log('Fetched bookings:', response.data.data);
+        console.log(
+          `Fetched ${response.data.data.length} bookings in ${performance.now() - startTime}ms`
+        );
         setBookings(response.data.data);
+
+        // Also update dashboard data to keep everything in sync
         refreshDashboard();
+
+        // Clear any error flags
+        setError('');
       } else {
         setError('Failed to fetch bookings');
       }
     } catch (error) {
       console.error('Error fetching bookings:', error);
 
-      // Better error messages for production
-      if (error.message.includes('CORS')) {
-        setError('Connection issue. Please refresh the page.');
+      // Enhanced error message handling
+      if (error.message && error.message.includes('Network Error')) {
+        setError('Network connection issue. Please check your internet connection.');
       } else if (error.response?.status === 401) {
-        setError('Session expired. Please log in again.');
+        setError('Your session has expired. Please log in again.');
       } else {
         setError('Unable to load bookings. Please try again.');
       }
@@ -58,6 +71,7 @@ const MyBookings = () => {
     cancelled: bookings.filter((booking) => booking.status === 'cancelled').length,
   };
 
+  // Handle booking cancellation with better UI feedback
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm('Are you sure you want to cancel this booking?')) {
       return;
@@ -68,7 +82,7 @@ const MyBookings = () => {
       const response = await userBookingsAPI.cancelBooking(bookingId);
 
       if (response.data.success) {
-        // Replace the cancelled booking with the updated one from the server
+        // Update the local booking list with the updated booking
         const updatedBooking = response.data.data;
 
         setBookings((prevBookings) =>
@@ -77,13 +91,19 @@ const MyBookings = () => {
           )
         );
 
-        // Refresh dashboard data to reflect the change
+        // Emit an event so other components can update
+        bookingEvents.emit('booking_cancelled', {
+          bookingId,
+          status: 'cancelled',
+        });
+
+        // Force dashboard refresh
         refreshDashboard();
 
-        // Show a success message
+        // Show success message
         alert('Booking cancelled successfully');
       } else {
-        setError('Failed to cancel booking');
+        setError(response.data.error || 'Failed to cancel booking');
       }
     } catch (error) {
       console.error('Error cancelling booking:', error);
@@ -102,43 +122,36 @@ const MyBookings = () => {
     });
   };
 
-  // Simplified effect for detecting new bookings
+  // Enhanced useEffect for detecting and handling bookings
   useEffect(() => {
     fetchBookings();
 
-    // Check for new booking completion
-    const bookingCompleted = localStorage.getItem('booking_completed');
-    if (bookingCompleted === 'true') {
-      console.log('New booking detected, refreshing bookings');
-      setTimeout(() => {
-        fetchBookings();
-      }, 1000); // Small delay to ensure backend is updated
+    // Subscribe to booking events directly
+    const handleBookingCreated = (bookingData) => {
+      console.log('New booking event received:', bookingData._id);
 
-      localStorage.removeItem('booking_completed');
-    }
-  }, [currentUser, refreshDashboard]);
+      // Optimistically add the booking to the UI first
+      setBookings((prev) => {
+        // Only add if not already in the list
+        if (!prev.some((b) => b._id === bookingData._id)) {
+          return [bookingData, ...prev];
+        }
+        return prev;
+      });
 
-  // Subscribe to booking events
-  useEffect(() => {
-    const unsubscribe = bookingEvents.on('booking_created', (bookingData) => {
-      console.log('MyBookings received booking_created event:', bookingData);
+      // Then do a proper refresh to get the server state
+      fetchBookings();
+    };
 
-      // Add the new booking to the list immediately
-      setBookings((prev) => [bookingData, ...prev]);
-
-      // Refresh bookings after a short delay
-      setTimeout(() => {
-        fetchBookings();
-      }, 500);
-    });
+    const unsubscribe = bookingEvents.on('booking_created', handleBookingCreated);
 
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [refreshDashboard]);
 
+  // Check URL for refresh parameter
   useEffect(() => {
-    // Check URL for refresh parameter
     const query = new URLSearchParams(window.location.search);
     if (query.get('refresh')) {
       console.log('URL refresh parameter detected, forcing refresh');

@@ -111,7 +111,17 @@ export const bookingsAPI = {
   getById: (id) => API.get(`/bookings/${id}`),
   getByReference: (reference) => API.get(`/bookings/reference/${reference}`),
   updateStatus: (id, status) => API.put(`/bookings/${id}`, { status }),
-  delete: (id) => API.delete(`/bookings/${id}`)
+  delete: (id) => API.delete(`/bookings/${id}`),
+  
+  // User booking functions
+  getUserBookings: () => API.get(`/user/bookings`),
+  getUserHistory: () => API.get(`/user/bookings/history`),
+  getUserUpcoming: () => API.get(`/user/bookings/upcoming`),
+  getUserStats: () => API.get(`/user/bookings/stats`),
+  cancelBooking: (id) => API.put(`/user/bookings/${id}/cancel`),
+  
+  // New endpoint for latest booking
+  getLatestBooking: () => API.get(`/user/bookings/latest`),
 };
 
 // Users API

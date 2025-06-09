@@ -2,24 +2,13 @@
 // A simple event system for tracking booking events across the application in production
 // This helps synchronize components in an environment where React state updates might not propagate as expected
 
+/**
+ * A simple event emitter for booking-related events
+ * Used to synchronize booking data across components
+ */
 class BookingEventEmitter {
   constructor() {
     this.events = {};
-    this.lastBooking = null;
-    
-    // For cross-tab communication in production
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'booking_event') {
-        try {
-          const bookingEvent = JSON.parse(event.newValue);
-          if (bookingEvent && bookingEvent.type) {
-            this.emit(bookingEvent.type, bookingEvent.data);
-          }
-        } catch (e) {
-          console.error('Error parsing booking event:', e);
-        }
-      }
-    });
   }
 
   /**
@@ -48,14 +37,6 @@ class BookingEventEmitter {
   emit(event, data) {
     console.log(`[BookingEventEmitter] Emitting ${event}`, data);
     
-    if (event === 'booking_created') {
-      this.lastBooking = data;
-    }
-    
-    // Store in localStorage for cross-tab communication in production
-    const bookingEvent = { type: event, data, timestamp: Date.now() };
-    localStorage.setItem('booking_event', JSON.stringify(bookingEvent));
-    
     // Call all callbacks
     if (this.events[event]) {
       this.events[event].forEach(callback => {
@@ -68,19 +49,17 @@ class BookingEventEmitter {
     }
   }
   
-  /**
-   * Get the most recent booking
-   * @returns {Object|null} The last booking data or null
-   */
-  getLastBooking() {
-    return this.lastBooking;
+  // Remove all listeners for an event
+  clearEvent(event) {
+    this.events[event] = [];
   }
-  
-  /**
-   * Clear the last booking data
-   */
-  clearLastBooking() {
-    this.lastBooking = null;
+
+  // Debug method to see all registered events
+  listEvents() {
+    return Object.keys(this.events).map(event => ({
+      name: event,
+      listenerCount: this.events[event].length
+    }));
   }
 }
 

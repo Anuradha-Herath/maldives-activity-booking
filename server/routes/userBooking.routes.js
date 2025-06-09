@@ -15,6 +15,9 @@ router.get('/history', userBookingController.getUserBookingHistory);
 // Get upcoming bookings
 router.get('/upcoming', userBookingController.getUpcomingBookings);
 
+// Get latest booking (new endpoint)
+router.get('/latest', userBookingController.getLatestBooking);
+
 // Get booking stats
 router.get('/stats', userBookingController.getUserBookingStats);
 

@@ -10,183 +10,109 @@ import { useDashboardPerformanceTracking, logMetric } from '../../utils/performa
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const location = useLocation();
-  const { refreshTrigger, lastRefreshTime, refreshDashboard } = useDashboard();
-  const [stats, setStats] = useState({
-    pendingBookings: 0,
-    confirmedBookings: 0,
-    totalBookings: 0
-  });
+  const { 
+    stats,
+    loading, 
+    error, 
+    refreshDashboard, 
+    refreshTrigger, 
+    lastRefreshTime 
+  } = useDashboard();
+  
   const [recentBookings, setRecentBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState('');
-  const [refreshSource, setRefreshSource] = useState(null);
-  const { markDataLoaded, recordError } = useDashboardPerformanceTracking();
-  // Simplified fetch function
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Enhanced fetch function with better booking detection
   const fetchDashboardData = useCallback(async () => {
-    setLoading(true);
-    const startTime = performance.now();
+    setIsRefreshing(true);
     
     try {
-      // Check for new booking completion
-      const bookingCompleted = localStorage.getItem('booking_completed');
-      const newBookingData = localStorage.getItem('new_booking_data');
+      // Check URL parameters for booking=new
+      const queryParams = new URLSearchParams(location.search);
+      const isNewBooking = queryParams.get('booking') === 'new';
       
-      if (bookingCompleted === 'true' && newBookingData) {
-        console.log('New booking detected, updating stats immediately');
+      // Special case for new bookings
+      if (isNewBooking) {
+        console.log('New booking detected from URL parameters');
         
-        try {
-          const booking = JSON.parse(newBookingData);
-          
-          // Update stats immediately for better UX
-          setStats(prev => ({
-            pendingBookings: (prev.pendingBookings || 0) + 1,
-            confirmedBookings: prev.confirmedBookings || 0,
-            totalBookings: (prev.totalBookings || 0) + 1
-          }));
-          
-          // Add to recent bookings
-          setRecentBookings(prev => [booking, ...prev.slice(0, 4)]);
-          setLastUpdated(new Date().toLocaleTimeString() + ' (Updated)');
-          
-          // Clear the flags
-          localStorage.removeItem('booking_completed');
-          localStorage.removeItem('new_booking_data');
-        } catch (e) {
-          console.error('Error parsing new booking data:', e);
+        // Try to get booking directly from storage
+        const latestBookingJSON = localStorage.getItem('latest_booking');
+        if (latestBookingJSON) {
+          try {
+            const latestBooking = JSON.parse(latestBookingJSON);
+            console.log('Found latest booking in storage:', latestBooking._id);
+            
+            // Inject into recent bookings immediately for better UX
+            setRecentBookings(prev => {
+              // Only add if not already there
+              if (!prev.some(b => b._id === latestBooking._id)) {
+                return [latestBooking, ...prev.slice(0, 4)];
+              }
+              return prev;
+            });
+          } catch (e) {
+            console.error('Error parsing latest booking data:', e);
+          }
         }
       }
       
-      // Fetch fresh data from API
+      // Always do a full refresh through the dashboard context
+      await refreshDashboard(true);
+      
+      // Update stats from the API response
       const response = await userBookingsAPI.getStats();
-      
       if (response.data.success) {
-        const { 
-          pendingBookings, 
-          confirmedBookings, 
-          totalBookings,
-          recentBookings 
-        } = response.data.data;
-        
-        setStats({
-          pendingBookings: pendingBookings || 0,
-          confirmedBookings: confirmedBookings || 0,
-          totalBookings: totalBookings || 0
-        });
-        
-        setRecentBookings(recentBookings || []);
+        setRecentBookings(response.data.data.recentBookings || []);
         setLastUpdated(new Date().toLocaleTimeString());
-        console.log('Dashboard data refreshed successfully');
-        
-        markDataLoaded();
-      } else {
-        setError('Failed to fetch dashboard data');
       }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      
-      // More specific error handling for production
-      if (error.message.includes('CORS')) {
-        setError('Connection issue. Please refresh the page.');
-      } else if (error.response?.status === 401) {
-        setError('Session expired. Please log in again.');
-      } else {
-        setError('Unable to load dashboard data. Please try again.');
-      }
-      
-      recordError(error);
+    } catch (err) {
+      console.error('Error in dashboard refresh:', err);
     } finally {
-      setLoading(false);
-      const totalTime = performance.now() - startTime;
-      logMetric('dashboard_total_load_time', totalTime);
+      setIsRefreshing(false);
     }
-  }, [markDataLoaded, recordError]);
-
-  // Manual refresh handler
+  }, [location.search, refreshDashboard]);
+  
+  // Handle manual refresh
   const handleManualRefresh = () => {
-    refreshDashboard();
     fetchDashboardData();
   };
-    // Effect for auto-refresh based on triggers
+  
+  // Effect for auto-refresh based on triggers
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      console.log('Dashboard refreshing due to trigger change');
+      fetchDashboardData();
+    }
+  }, [refreshTrigger, fetchDashboardData]);
+  
+  // Initial data load
   useEffect(() => {
     fetchDashboardData();
-    // Log for debugging
-    if (lastRefreshTime) {
-      console.log(`Dashboard refreshed due to trigger change. Last refresh: ${new Date(lastRefreshTime).toISOString()}`);
-    }
-  }, [currentUser, refreshTrigger, lastRefreshTime, fetchDashboardData]);
-    // Special effect for arriving from booking page
-  useEffect(() => {
-    // Check if we need to refresh on arrival (specifically for production)
-    const needsRefresh = localStorage.getItem('dashboard_needs_refresh');
-    if (needsRefresh === 'true') {
-      console.log('Detected return from booking page, forcing refresh');
-      fetchDashboardData();
-      localStorage.removeItem('dashboard_needs_refresh');
-    }
     
-    // Direct data injection for when a new booking was just created
-    const newBookingCreated = localStorage.getItem('new_booking_created');
-    if (newBookingCreated === 'true') {
-      console.log('New booking detected, injecting data directly');
-      
-      // Get the latest booking data
-      const latestBookingJSON = localStorage.getItem('latest_booking');
-      if (latestBookingJSON) {
-        try {
-          const latestBooking = JSON.parse(latestBookingJSON);
-          
-          // Update stats instantly
-          setStats(prev => ({
-            pendingBookings: (prev.pendingBookings || 0) + 1,
-            confirmedBookings: prev.confirmedBookings || 0,
-            totalBookings: (prev.totalBookings || 0) + 1
-          }));
-          
-          // Add the booking to recent bookings
-          setRecentBookings(prev => [latestBooking, ...prev].slice(0, 5));
-          
-          // Don't remove the flag here, let MyBookings component also use it
-          setLastUpdated(new Date().toLocaleTimeString() + ' (New Booking Added)');
-        } catch (e) {
-          console.error('Error parsing latest booking:', e);
-        }
-      }
-      
-      // Still fetch from API after a delay to ensure data consistency
-      setTimeout(() => {
-        fetchDashboardData();
-      }, 1000);
+    // Check storage for a new booking flag
+    const bookingCompleted = localStorage.getItem('booking_completed');
+    if (bookingCompleted === 'true') {
+      console.log('New booking detected from local storage flag');
+      fetchDashboardData();
+      localStorage.removeItem('booking_completed');
     }
   }, [fetchDashboardData]);
   
-  // Simplified effect for URL parameters
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const updatedParam = queryParams.get('updated');
-    
-    if (updatedParam) {
-      console.log('Dashboard loaded after booking completion');
-      fetchDashboardData();
-    }
-  }, [location.search, fetchDashboardData]);
-
   // Effect for subscribing to booking events
   useEffect(() => {
     // Subscribe to booking events
     const unsubscribe = bookingEvents.on('booking_created', (bookingData) => {
       console.log('BookingEventEmitter: booking_created event received', bookingData);
-      setRefreshSource('event_emitter');
       
       // Immediately update UI with new booking data
-      setStats(prev => ({
-        pendingBookings: (prev.pendingBookings || 0) + 1,
-        confirmedBookings: prev.confirmedBookings || 0,
-        totalBookings: (prev.totalBookings || 0) + 1
-      }));
-      
-      // Add the booking to recent bookings at the top
-      setRecentBookings(prev => [bookingData, ...prev].slice(0, 5));
+      setRecentBookings(prev => {
+        // Only add if not already there
+        if (!prev.some(b => b._id === bookingData._id)) {
+          return [bookingData, ...prev].slice(0, 5);
+        }
+        return prev;
+      });
       
       setLastUpdated(new Date().toLocaleTimeString() + ' (Live Update)');
       
@@ -209,18 +135,25 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout title="Dashboard">
-      <div>        <div className="flex justify-between items-center mb-6">
+      <div>
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-1">Welcome back, {currentUser?.name || 'User'}!</h2>
-            <p className="text-gray-600">Here's an overview of your bookings and activities.</p>
-            {lastUpdated && <p className="text-xs text-gray-500">Last updated: {lastUpdated}</p>}
+            <h2 className="text-2xl font-bold text-gray-800 mb-1">
+              Welcome back, {currentUser?.name || 'User'}!
+            </h2>
+            <p className="text-gray-600">
+              Here's an overview of your bookings and activities.
+            </p>
+            {lastUpdated && (
+              <p className="text-xs text-gray-500">Last updated: {lastUpdated}</p>
+            )}
           </div>
           <button 
             onClick={handleManualRefresh}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
-            disabled={loading}
+            disabled={isRefreshing}
           >
-            {loading ? (
+            {isRefreshing ? (
               <span className="flex items-center">
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -233,7 +166,7 @@ const Dashboard = () => {
             )}
           </button>
         </div>
-
+        
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">

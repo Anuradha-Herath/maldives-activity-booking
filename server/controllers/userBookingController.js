@@ -76,6 +76,8 @@ exports.getUserBookingHistory = async (req, res) => {
 // @access  Private
 exports.getUpcomingBookings = async (req, res) => {
   try {
+    console.log(`Fetching upcoming bookings for user: ${req.user.email}`);
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -87,12 +89,15 @@ exports.getUpcomingBookings = async (req, res) => {
     .populate('activity')
     .sort({ date: 1 });
     
+    console.log(`Found ${bookings.length} upcoming bookings for user ${req.user.email}`);
+    
     res.status(200).json({
       success: true,
       count: bookings.length,
       data: bookings
     });
   } catch (err) {
+    console.error('Error in getUpcomingBookings:', err);
     res.status(500).json({
       success: false,
       error: 'Server Error'
@@ -197,6 +202,41 @@ exports.cancelBooking = async (req, res) => {
     });
   } catch (err) {
     console.error('Error cancelling booking:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
+};
+
+// @desc    Get user's latest booking (most recently created)
+// @route   GET /api/v1/user/bookings/latest
+// @access  Private
+exports.getLatestBooking = async (req, res) => {
+  try {
+    console.log(`Fetching latest booking for user: ${req.user.email}`);
+    
+    const booking = await Booking.findOne({ 
+      email: req.user.email 
+    })
+    .sort({ createdAt: -1 })
+    .populate('activity');
+    
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        error: 'No bookings found'
+      });
+    }
+    
+    console.log(`Found latest booking ${booking._id} for user ${req.user.email}`);
+    
+    res.status(200).json({
+      success: true,
+      data: booking
+    });
+  } catch (err) {
+    console.error('Error in getLatestBooking:', err);
     res.status(500).json({
       success: false,
       error: 'Server Error'

@@ -91,14 +91,18 @@ const BookingRequest = () => {
                 specialRequests: formData.specialRequests,
                 totalPrice: activity.price * formData.guests
             };
-              // Send booking data to the API
+            
+            // Send booking data to the API
             const response = await bookingsAPI.create(bookingData);
-              if (response.data.success) {
-                // Set flag that a new booking was created
+            
+            if (response.data.success) {
+                // Set flag that a new booking was created with timestamp for better tracking
+                const timestamp = Date.now();
                 localStorage.setItem('new_booking_created', 'true');
+                localStorage.setItem('booking_created_at', timestamp.toString());
                 
                 // Create booking data object for synchronization
-                const bookingData = {
+                const newBookingData = {
                     _id: response.data.data._id,
                     reference,
                     activity: {
@@ -107,20 +111,22 @@ const BookingRequest = () => {
                         _id: activity._id
                     },
                     date: formData.date,
-                    guests: formData.guests,
+                    guests: parseInt(formData.guests),
                     totalPrice: activity.price * formData.guests,
                     status: 'pending',
                     createdAt: new Date().toISOString()
                 };
                 
-                // Store booking data for instant access
-                localStorage.setItem('latest_booking', JSON.stringify(bookingData));
+                // Store booking data for immediate access with improved naming for clarity
+                localStorage.setItem('latest_booking', JSON.stringify(newBookingData));
+                localStorage.setItem('latest_booking_id', response.data.data._id);
                 
                 // Emit booking created event for direct data synchronization
-                bookingEvents.emit('booking_created', bookingData);
+                bookingEvents.emit('booking_created', newBookingData);
                 
                 // Also store in sessionStorage for more reliable cross-page persistence
-                sessionStorage.setItem('latest_booking', JSON.stringify(bookingData));
+                sessionStorage.setItem('latest_booking', JSON.stringify(newBookingData));
+                sessionStorage.setItem('dashboard_refresh_needed', 'true');
                 
                 setBookingReference(reference);
                 setBookingId(response.data.data._id);
@@ -135,34 +141,32 @@ const BookingRequest = () => {
     };    const handleModalClose = async () => {
         setIsModalOpen(false);
         
-        // Simplified approach - just set flags and redirect
+        // Set robust flags for dashboard refresh
         const bookingTimestamp = Date.now();
-        
-        // Set simple flags for dashboard refresh
         localStorage.setItem('booking_completed', 'true');
         localStorage.setItem('booking_timestamp', bookingTimestamp.toString());
+        localStorage.setItem('force_dashboard_refresh', 'true');
+        sessionStorage.setItem('dashboard_refresh_needed', 'true');
         
-        // Store minimal booking data for immediate display
-        const bookingData = {
-            id: bookingId,
-            reference: bookingReference,
-            activityTitle: activity.title,
-            date: formData.date,
-            guests: formData.guests,
-            totalPrice: activity.price * formData.guests,
-            status: 'pending'
-        };
-        
-        localStorage.setItem('new_booking_data', JSON.stringify(bookingData));
-        
-        // Emit simple event
-        bookingEvents.emit('booking_completed', bookingData);
-        
-        // Trigger dashboard refresh
-        refreshDashboard();
-        
-        // Simple redirect with timestamp
-        window.location.href = `/dashboard?updated=${bookingTimestamp}`;
+        try {
+            // Force refresh dashboard data before navigation
+            await refreshDashboard();
+            
+            // Ensure we have the latest data by calling the API directly
+            try {
+                await bookingsAPI.getUserUpcoming();
+                console.log('Successfully pre-fetched upcoming bookings data');
+            } catch (err) {
+                console.error('Error pre-fetching booking data:', err);
+            }
+            
+            // Redirect with query parameters to force dashboard to recognize the update
+            navigate(`/dashboard?booking=new&ts=${bookingTimestamp}`);
+        } catch (err) {
+            console.error('Error during dashboard refresh:', err);
+            // Fallback direct navigation if refresh fails
+            window.location.href = `/dashboard?booking=new&ts=${bookingTimestamp}`;
+        }
     };
 
     if (loading) {
