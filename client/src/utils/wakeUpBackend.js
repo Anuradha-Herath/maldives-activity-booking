@@ -117,6 +117,32 @@ export const wakeUpBackend = async (onProgress) => {
 };
 
 /**
+ * Keep the backend server awake by pinging it at regular intervals
+ * @param {number} interval - Time in milliseconds between pings (default: 5 minutes)
+ * @returns {Object} - Contains a stop function to cancel the regular pings
+ */
+export const keepBackendAwake = (interval = 5 * 60 * 1000) => {
+  console.log(`Setting up automatic backend wake-up every ${interval / 60000} minutes`);
+  
+  // Send initial ping
+  wakeUpBackend();
+  
+  // Set up interval for regular pinging
+  const timerId = setInterval(() => {
+    console.log('Sending periodic ping to keep backend awake');
+    wakeUpBackend();
+  }, interval);
+  
+  // Return object with method to stop the pinging
+  return {
+    stop: () => {
+      console.log('Stopping automatic backend wake-up');
+      clearInterval(timerId);
+    }
+  };
+};
+
+/**
  * Check backend health by calling multiple endpoints to ensure it's fully operational
  */
 export const checkBackendHealth = async (onProgress) => {
@@ -212,5 +238,6 @@ export const checkBackendHealth = async (onProgress) => {
 
 export default {
   wakeUpBackend,
-  checkBackendHealth
+  checkBackendHealth,
+  keepBackendAwake
 };
