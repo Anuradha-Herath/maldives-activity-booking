@@ -1,27 +1,16 @@
-#!/bin/bash
-# Exit on error
-set -e
-
-# Build frontend
-echo "Building client..."
-cd client
-npm install
-# Add dependencies for validation script if they don't exist
-npm install --save-dev glob chalk esbuild
-# Verify JSX syntax before building
-echo "Verifying JSX syntax..."
-mkdir -p scripts
-cat > scripts/verify-jsx.js << 'EOF'
 /**
  * JSX Syntax Verification Script
  * 
  * This script checks for common JSX syntax errors in React components
  * by attempting to parse them using esbuild.
+ * 
+ * Run with: node ./scripts/verify-jsx.js
  */
 
 import { glob } from 'glob';
 import { build } from 'esbuild';
 import chalk from 'chalk';
+import path from 'path';
 import fs from 'fs';
 
 console.log(chalk.blue('🔍 Starting JSX syntax verification...'));
@@ -35,7 +24,29 @@ let hasErrors = false;
 // Check each file individually to provide better error messages
 for (const file of jsxFiles) {
   try {
-    // Try to build it with esbuild
+    const content = fs.readFileSync(file, 'utf8');
+    
+    // Check for common JSX issues manually
+    // Look for mismatched tags
+    const openingTags = [];
+    const tagPattern = /<(\/?[a-zA-Z][a-zA-Z0-9]*)/g;
+    let match;
+    
+    while ((match = tagPattern.exec(content)) !== null) {
+      const tag = match[1];
+      if (!tag.startsWith('/')) {
+        openingTags.push(tag);
+      } else {
+        const closingTag = tag.substring(1);
+        if (openingTags.length > 0 && openingTags[openingTags.length - 1] === closingTag) {
+          openingTags.pop();
+        } else {
+          console.log(chalk.red(`Potential mismatched tag in ${file}: ${closingTag}`));
+        }
+      }
+    }
+
+    // Now try to actually build it with esbuild
     await build({
       entryPoints: [file],
       write: false,
@@ -58,31 +69,3 @@ if (hasErrors) {
 } else {
   console.log(chalk.green('✅ All JSX files passed syntax verification!'));
 }
-EOF
-
-echo "Running JSX verification..."
-node scripts/verify-jsx.js
-
-# Build the client
-npm run build
-
-# Create index.css that imports the real CSS file
-echo "Creating index.css symlink and headers..."
-echo '/* Redirect to actual CSS file */
-@import url("/assets/css/main.css");' > dist/index.css
-
-# Set proper MIME types in _headers
-echo '/*.css
-  Content-Type: text/css
-/*.js
-  Content-Type: application/javascript' > dist/_headers
-
-# Return to root directory
-cd ..
-
-# Build backend
-echo "Building server..."
-cd server
-npm install
-
-echo "Build completed successfully!"

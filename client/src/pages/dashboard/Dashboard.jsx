@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
+import DashboardDebugger from '../../components/dashboard/DashboardDebugger';
 import { useAuth } from '../../contexts/AuthContext';
 import { userBookingsAPI } from '../../utils/api';
 
@@ -269,8 +270,9 @@ const Dashboard = () => {  const { currentUser } = useAuth();
               </div>
             </div>
           </>
-        )}
-      </div>
+        )}      </div>
+      {/* Hidden debugger that can be activated with Alt+D */}
+      <DashboardDebugger />
     </DashboardLayout>
   );
 };

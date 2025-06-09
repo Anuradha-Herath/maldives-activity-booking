@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import BookingStatusBadge from '../../components/dashboard/BookingStatusBadge';
-import DashboardDebugger from '../../components/dashboard/DashboardDebugger';
 import { userBookingsAPI } from '../../utils/api';
 
 const MyBookings = () => {
@@ -286,9 +285,8 @@ const MyBookings = () => {
               Refresh Bookings
             </button>
           </div>
-        )}      </div>
-      {/* Hidden debugger that can be activated with Alt+D */}
-      <DashboardDebugger />
+        )}
+      </div>
     </DashboardLayout>
   );
 };
