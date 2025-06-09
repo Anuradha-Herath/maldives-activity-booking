@@ -1,0 +1,28 @@
+{
+  "name": "maldives-activity-booking",
+  "version": "1.0.0",
+  "description": "Maldives activity booking platform",  "scripts": {
+    "start": "cd server && npm start",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "install:server": "cd server && npm install",
+    "install:client": "cd client && npm install",
+    "install:all": "npm install && npm run install:server && npm run install:client",
+    "build:client": "cd client && npm run build",
+    "lint:client": "cd client && npm run lint",
+    "validate:client": "cd client && npm run validate",
+    "build": "npm run validate:client && cd client && npm run build",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0",
+    "form-data": "^4.0.3"
+  }
+}

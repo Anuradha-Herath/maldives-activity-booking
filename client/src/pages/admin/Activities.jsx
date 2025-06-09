@@ -1,25 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import axios from 'axios';
+import { activitiesAPI } from '../../utils/api';
 
 const AdminActivities = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all');
-  
-  const API_URL = 'http://localhost:5000/api/v1';
-
-  useEffect(() => {
+  const [searchTerm, setSearchTerm] = useState('');  const [filter, setFilter] = useState('all');
+    useEffect(() => {
     const fetchActivities = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/activities`);
-        
+        const response = await activitiesAPI.getAll();
         if (response.data.success) {
-          setActivities(response.data.data);
+          setActivities(response.data.data || []);
         } else {
           throw new Error('Failed to fetch activities');
         }
@@ -33,26 +28,24 @@ const AdminActivities = () => {
 
     fetchActivities();
   }, []);
-
   // Filter activities based on search term and filter
-  const filteredActivities = activities.filter(activity => {
-    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (activity.location && activity.location.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredActivities = (activities || []).filter(activity => {
+    const matchesSearch = (activity?.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (activity?.location && activity.location.toLowerCase().includes(searchTerm.toLowerCase()));
     
     if (filter === 'all') return matchesSearch;
-    if (filter === 'featured') return matchesSearch && activity.featured;
-    if (filter === 'active') return matchesSearch && activity.status === 'active';
-    if (filter === 'inactive') return matchesSearch && activity.status === 'inactive';
+    if (filter === 'featured') return matchesSearch && activity?.featured;
+    if (filter === 'active') return matchesSearch && activity?.status === 'active';
+    if (filter === 'inactive') return matchesSearch && activity?.status === 'inactive';
     
-    return matchesSearch && activity.type === filter;
+    return matchesSearch && activity?.type === filter;
   });
-
   // Delete activity handler - now calls the API
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this activity?')) {
       try {
         setLoading(true);
-        const response = await axios.delete(`${API_URL}/activities/${id}`);
+        const response = await activitiesAPI.delete(id);
         
         if (response.data.success) {
           setActivities(activities.filter(activity => activity._id !== id));

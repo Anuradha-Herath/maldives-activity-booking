@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { activitiesAPI } from './api';
 
 const DebugUpload = () => {
   const [file, setFile] = useState(null);
@@ -7,7 +8,8 @@ const DebugUpload = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   
-  const API_URL = 'http://localhost:5000/api/v1';
+  // Use the API utility for consistent URL handling
+  const API_URL = activitiesAPI.baseUrl;
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -52,15 +54,17 @@ const DebugUpload = () => {
       <h2 className="text-xl font-bold mb-4">Debug Image Upload</h2>
       
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="imageUpload" className="block text-sm font-medium text-gray-700 mb-2">
           Select an Image
         </label>
         <input
+          id="imageUpload"
           type="file"
           accept="image/*"
           onChange={handleFileChange}
           disabled={uploading}
           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          name="imageUpload"
         />
       </div>
       

@@ -2,6 +2,10 @@
 
 A comprehensive full-stack web application for booking tourist activities in the beautiful Maldives. This platform enables tourists to discover, book, and manage various activities including surfing, diving, snorkeling, and more, while providing administrators with powerful tools to manage activities, bookings, and users.
 
+## 📋 Deployment Documentation
+- [Deployment on Render](./RENDER_DEPLOYMENT.md)
+- [MIME Type Issues & Solutions](./MIME_TYPE_FIX.md)
+
 ## ✨ Features
 
 ### 🎯 User Features

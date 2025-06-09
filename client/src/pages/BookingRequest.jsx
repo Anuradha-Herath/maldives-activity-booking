@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { activitiesAPI, bookingsAPI } from '../utils/api';
+import { activitiesAPI, bookingsAPI, userBookingsAPI } from '../utils/api';
 import ConfirmationModal from '../components/booking/ConfirmationModal';
 
 const BookingRequest = () => {
@@ -88,13 +88,26 @@ const BookingRequest = () => {
                 specialRequests: formData.specialRequests,
                 totalPrice: activity.price * formData.guests
             };
-            
-            // Send booking data to the API
+              // Send booking data to the API
             const response = await bookingsAPI.create(bookingData);
             
             if (response.data.success) {
                 setBookingReference(reference);
                 setBookingId(response.data.data._id);
+                
+                // Prefetch the user's updated dashboard data to make sure it refreshes properly
+                try {
+                    // Ensure user booking stats are refreshed
+                    await userBookingsAPI.getStats();
+                    // Also refresh the user's booking lists
+                    await userBookingsAPI.getUpcoming();
+                    await userBookingsAPI.getHistory();
+                    
+                    console.log('Dashboard data refreshed after booking creation');
+                } catch (refreshError) {
+                    console.error('Error refreshing dashboard data:', refreshError);
+                }
+                
                 setIsModalOpen(true);
             }
         } catch (error) {

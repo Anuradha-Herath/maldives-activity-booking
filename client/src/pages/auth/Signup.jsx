@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
+import tokenManager from '../../utils/tokenManager';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -26,26 +27,90 @@ const Signup = () => {
     agreeTerms: Yup.boolean()
       .oneOf([true], 'You must agree to the terms and conditions')
   });
-  
   // Handle email/password signup
   const handleSignup = async (values, { setSubmitting, setFieldError }) => {
     setIsLoading(true);
     clearError();
     
     try {
+      console.log('Starting registration process...');
+      // Display API URL being used in deployment for debugging
+      if (import.meta.env?.VITE_API_URL) {
+        let apiUrlValue = import.meta.env.VITE_API_URL;
+        
+        // Check if the value contains the variable name (deployment issue)
+        if (typeof apiUrlValue === 'string' && apiUrlValue.startsWith('VITE_API_URL=')) {
+          console.log('API URL has incorrect format (includes variable name). Will be fixed by authService.');
+        }
+        
+        console.log('Using API URL from env:', apiUrlValue);
+      }
+      
       // Create user account with MongoDB backend
-      await register({
+      const result = await register({
         name: values.name,
         email: values.email,
         password: values.password
       });
+        console.log('Registration successful:', result);
       
-      // Redirect to home page
-      navigate('/');
+      // Verify authentication data was properly saved
+      if (!tokenManager.isAuthenticated()) {
+        console.warn('Authentication data not properly saved after registration');
+        
+        // Attempt to save it manually if we have the data
+        if (result?.token && result?.user) {
+          console.log('Manually saving authentication data');
+          const saveResult = tokenManager.saveAuthData(result);
+          
+          if (!saveResult) {
+            console.error('Failed to manually save authentication data');
+            setError('Authentication failed. Please try logging in manually.');
+            return;
+          }
+        } else {
+          console.error('Missing token or user data in registration result');
+          setError('Authentication failed. Please try logging in manually.');
+          return;
+        }
+      }
+      
+      // Double-check we have the auth data we need
+      if (!tokenManager.getToken()) {
+        console.error('Token still not available after registration');
+        setError('Authentication failed. Please try logging in manually.');
+        return;
+      }
+        console.log('Authentication complete, redirecting to home page...');
+      
+      // Add a small delay to ensure all state updates are complete
+      // This helps ensure the AuthContext has time to update before navigation
+      setTimeout(() => {
+        // Double check authentication before navigating
+        if (tokenManager.isAuthenticated()) {
+          console.log('Authentication confirmed, redirecting to home page');
+          navigate('/');
+        } else {
+          console.warn('Authentication state inconsistent before redirect');
+          // Try one more time with a longer delay
+          setTimeout(() => {
+            console.log('Final redirect attempt');
+            navigate('/');
+          }, 500);
+        }
+      }, 100);
     } catch (error) {
-      console.error(error);
-      if (error.response?.data?.error?.includes('email')) {
+      console.error('Registration error:', error);
+      
+      // Enhanced error handling for deployment issues
+      if (error.message?.includes('Network Error')) {
+        setError('Network error: Could not connect to the server. Please check your internet connection and try again.');
+      } else if (error.response?.status === 0 || error.message?.includes('CORS')) {
+        setError('Cross-Origin Request Blocked: The server may be down or misconfigured. Please try again later.');
+      } else if (error.response?.data?.error?.includes('email')) {
         setFieldError('email', 'Email address is already in use');
+      } else if (error.response?.status === 500) {
+        setError('Server error: The server encountered an unexpected condition. Please try again later.');
       } else {
         setError(error.response?.data?.error || 'Registration failed');
       }

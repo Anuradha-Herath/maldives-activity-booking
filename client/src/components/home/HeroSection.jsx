@@ -174,28 +174,34 @@ const HeroSection = () => {
                                     </div>
                                 )}
                             </div>
-                            
-                            <div className="relative">
+                              <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i className="fas fa-calendar text-gray-400"></i>
                                 </div>
+                                <label htmlFor="activity-date" className="sr-only">Select Date</label>
                                 <input
+                                    id="activity-date"
                                     type="date"
                                     className="w-full h-12 pl-10 pr-4 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
                                     min={new Date().toISOString().split('T')[0]}
+                                    aria-label="Select date for activity"
+                                    placeholder="Select a date"
                                 />
                             </div>
-                            
-                            <div className="relative">
+                              <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i className="fas fa-tag text-gray-400"></i>
                                 </div>
+                                <label htmlFor="activity-type" className="sr-only">Activity Type</label>
                                 <select
+                                    id="activity-type"
                                     className="w-full h-12 pl-10 pr-4 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
                                     value={activityType}
                                     onChange={(e) => setActivityType(e.target.value)}
+                                    aria-label="Select activity type"
+                                    title="Activity Type"
                                 >
                                     {activityTypes.map((option) => (
                                         <option key={option.value} value={option.value}>

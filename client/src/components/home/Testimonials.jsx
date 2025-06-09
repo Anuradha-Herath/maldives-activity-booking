@@ -1,6 +1,10 @@
 import React from 'react';
 
 const Testimonials = () => {
+    // Add a cache-busting timestamp to prevent caching issues with external images
+    // Use either the build timestamp or a version number for production to avoid changing on every page load
+    const cacheBuster = `v=${process.env.NODE_ENV === 'production' ? '1.0.0' : Date.now()}`;
+    
     const reviews = [
         {
             id: 1,
@@ -8,7 +12,7 @@ const Testimonials = () => {
             location: "United Kingdom",
             comment: "The snorkeling trip was absolutely magical! We saw so many colorful fish and even spotted a sea turtle. Would highly recommend!",
             rating: 5,
-            image: "https://randomuser.me/api/portraits/women/44.jpg"
+            image: `https://randomuser.me/api/portraits/women/44.jpg?${cacheBuster}`
         },
         {
             id: 2,
@@ -16,7 +20,7 @@ const Testimonials = () => {
             location: "Singapore",
             comment: "The sunset cruise exceeded all expectations. The staff was professional and the views were breathtaking. A perfect evening in paradise.",
             rating: 5,
-            image: "https://randomuser.me/api/portraits/men/32.jpg"
+            image: `https://randomuser.me/api/portraits/men/32.jpg?${cacheBuster}`
         },
         {
             id: 3,
@@ -24,7 +28,7 @@ const Testimonials = () => {
             location: "Spain",
             comment: "Island hopping was the highlight of our trip. Each island was more beautiful than the last, and the lunch provided was delicious!",
             rating: 4,
-            image: "https://randomuser.me/api/portraits/women/68.jpg"
+            image: `https://randomuser.me/api/portraits/women/68.jpg?${cacheBuster}`
         }
     ];
 

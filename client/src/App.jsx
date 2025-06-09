@@ -1,5 +1,41 @@
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { useEffect } from 'react';
+import authDiagnostic from './utils/authDiagnostic';
+import AuthMonitor from './components/auth/AuthMonitor';
+import { wakeUpBackend, keepBackendAwake } from './utils/wakeUpBackend';
+
+// Import environment checker for development debugging
+if (import.meta.env.DEV) {
+  import('./utils/envCheck.js');
+}
+
+// Run auth diagnostics and wake up the backend in production
+if (import.meta.env.PROD) {
+  // Wake up the backend immediately to reduce initial load time
+  wakeUpBackend().then(result => {
+    if (result.success) {
+      console.log('Successfully woke up backend server');
+      
+      // Keep the backend server awake with regular pings
+      keepBackendAwake(10 * 60 * 1000); // Ping every 10 minutes
+    }
+  });
+  
+  // Initial diagnostic check with a small delay to allow app to initialize
+  setTimeout(() => {
+    authDiagnostic.testApiConnection()
+      .then(result => {
+        if (result.success) {
+          console.log('API connection test successful');
+        } else {
+          console.warn('API connection test failed, authentication may not work properly');
+        }
+      })
+      .catch(error => console.error('Error testing API connection:', error));
+  }, 2000);
+}
+
 import Home from './pages/Home';
 import Activities from './pages/Activities';
 import ActivityDetail from './pages/ActivityDetail';
@@ -90,6 +126,7 @@ function App() {
     <AuthProvider>
       <Router>
         <AppContent />
+        <AuthMonitor />
       </Router>
     </AuthProvider>
   );

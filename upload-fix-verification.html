@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Fix Verification</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section { 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            background: #fafafa;
+        }
+        .success { color: #28a745; background: #d4edda; padding: 10px; border-radius: 4px; margin: 5px 0; }
+        .error { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 4px; margin: 5px 0; }
+        .info { color: #007bff; background: #d1ecf1; padding: 10px; border-radius: 4px; margin: 5px 0; }
+        .warning { color: #856404; background: #fff3cd; padding: 10px; border-radius: 4px; margin: 5px 0; }
+        button { 
+            padding: 12px 24px; 
+            margin: 10px 5px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        input[type="file"] { 
+            margin: 10px 0; 
+            padding: 10px;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            width: 100%;
+        }
+        pre { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 4px; 
+            overflow-x: auto; 
+            font-size: 12px;
+            border-left: 4px solid #007bff;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-pending { background: #ffc107; }
+        h1 { color: #333; text-align: center; margin-bottom: 30px; }
+        h2 { color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
+        h3 { color: #6c757d; margin-top: 25px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Image Upload Fix Verification</h1>
+        <p style="text-align: center; color: #6c757d; margin-bottom: 30px;">
+            This tool verifies that the upload fixes are working correctly in production.
+        </p>
+
+        <div class="test-section">
+            <h2>📡 Backend Connectivity Test</h2>
+            <button class="btn-primary" onclick="testBackendHealth()">Test Backend Connection</button>
+            <div id="backend-status"></div>
+        </div>
+
+        <div class="grid">
+            <div class="test-section">
+                <h2>🔧 Fixed API Method Test</h2>
+                <p>This uses the new fixed API configuration (recommended method)</p>
+                <input type="file" id="testFileFixed" accept="image/*">
+                <button class="btn-success" onclick="testUploadWithFixedAPI()">Test Fixed Upload Method</button>
+                <div id="fixed-results"></div>
+            </div>
+
+            <div class="test-section">
+                <h2>⚠️ Old API Method Test</h2>
+                <p>This uses the old method that was causing issues</p>
+                <input type="file" id="testFileOld" accept="image/*">
+                <button class="btn-warning" onclick="testUploadWithOldAPI()">Test Old Upload Method</button>
+                <div id="old-results"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Test Results Summary</h2>
+            <div id="summary"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://maldives-activity-booking-backend.onrender.com/api/v1';
+        const testResults = { backend: null, fixed: null, old: null };
+
+        // Create the fixed API instance (same as the deployed fix)
+        const API = axios.create({
+            baseURL: API_URL,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            withCredentials: true
+        });
+
+        // Add the fixed request interceptor
+        API.interceptors.request.use(
+            (config) => {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                
+                // CRITICAL FIX: For FormData uploads, remove the default Content-Type header
+                if (config.data instanceof FormData) {
+                    delete config.headers['Content-Type'];
+                    console.log('🔧 Removed Content-Type header for FormData upload');
+                }
+                
+                return config;
+            },
+            (error) => Promise.reject(error)
+        );
+
+        function logResult(containerId, message, type = 'info', details = null) {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = type;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const statusIcon = type === 'success' ? '✅' : type === 'error' ? '❌' : '📝';
+            
+            let content = `<strong>[${timestamp}] ${statusIcon} ${message}</strong>`;
+            if (details) {
+                content += `<pre>${JSON.stringify(details, null, 2)}</pre>`;
+            }
+            
+            div.innerHTML = content;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function updateSummary() {
+            const summary = document.getElementById('summary');
+            const results = [
+                { name: 'Backend Connection', status: testResults.backend, critical: true },
+                { name: 'Fixed Upload Method', status: testResults.fixed, critical: true },
+                { name: 'Old Upload Method', status: testResults.old, critical: false }
+            ];
+
+            let html = '<h3>Test Status Overview</h3>';
+            results.forEach(test => {
+                const statusClass = test.status === true ? 'status-success' : 
+                                  test.status === false ? 'status-error' : 'status-pending';
+                const statusText = test.status === true ? 'PASSED' : 
+                                 test.status === false ? 'FAILED' : 'PENDING';
+                
+                html += `<div style="margin: 10px 0;">
+                    <span class="status-indicator ${statusClass}"></span>
+                    <strong>${test.name}:</strong> ${statusText}
+                    ${test.critical && test.status === false ? ' <span style="color: #dc3545;">(CRITICAL)</span>' : ''}
+                </div>`;
+            });
+
+            const criticalPassed = testResults.backend && testResults.fixed;
+            if (criticalPassed) {
+                html += '<div class="success"><strong>🎉 Upload functionality is working! The fix was successful.</strong></div>';
+            } else if (testResults.backend === false) {
+                html += '<div class="error"><strong>❌ Backend connection failed. Check if the backend service is running.</strong></div>';
+            } else if (testResults.fixed === false) {
+                html += '<div class="error"><strong>❌ Fixed upload method failed. The upload fix needs further investigation.</strong></div>';
+            }
+
+            summary.innerHTML = html;
+        }
+
+        async function testBackendHealth() {
+            logResult('backend-status', 'Testing backend connectivity...', 'info');
+            
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                testResults.backend = true;
+                logResult('backend-status', 'Backend is accessible and healthy', 'success', data);
+            } catch (error) {
+                testResults.backend = false;
+                logResult('backend-status', 'Backend connectivity failed', 'error', { error: error.message });
+            }
+            
+            updateSummary();
+        }
+
+        async function testUploadWithFixedAPI() {
+            const fileInput = document.getElementById('testFileFixed');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                logResult('fixed-results', 'Please select a file first', 'error');
+                return;
+            }
+
+            logResult('fixed-results', `Testing fixed upload method with file: ${file.name}`, 'info');
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                logResult('fixed-results', 'Uploading with fixed API instance...', 'info');
+                
+                const response = await API.post('/upload', formData, {
+                    timeout: 30000
+                });
+                
+                testResults.fixed = true;
+                logResult('fixed-results', 'Fixed upload method successful!', 'success', response.data);
+                
+                if (response.data.data && response.data.data.url) {
+                    logResult('fixed-results', `Image uploaded successfully: ${response.data.data.url}`, 'success');
+                }
+                
+            } catch (error) {
+                testResults.fixed = false;
+                logResult('fixed-results', 'Fixed upload method failed', 'error', {
+                    message: error.message,
+                    status: error.response?.status,
+                    data: error.response?.data
+                });
+            }
+            
+            updateSummary();
+        }
+
+        async function testUploadWithOldAPI() {
+            const fileInput = document.getElementById('testFileOld');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                logResult('old-results', 'Please select a file first', 'error');
+                return;
+            }
+
+            logResult('old-results', `Testing old upload method with file: ${file.name}`, 'info');
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                logResult('old-results', 'Uploading with old method (explicit Content-Type)...', 'info');
+                
+                const response = await axios.post(`${API_URL}/upload`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    timeout: 30000
+                });
+                
+                testResults.old = true;
+                logResult('old-results', 'Old upload method unexpectedly successful', 'warning', response.data);
+                
+            } catch (error) {
+                testResults.old = false;
+                logResult('old-results', 'Old upload method failed (expected)', 'info', {
+                    message: error.message,
+                    status: error.response?.status,
+                    data: error.response?.data
+                });
+            }
+            
+            updateSummary();
+        }
+
+        // Auto-test backend connectivity on page load
+        window.addEventListener('load', () => {
+            updateSummary();
+            setTimeout(testBackendHealth, 1000);
+        });
+    </script>
+</body>
+</html>

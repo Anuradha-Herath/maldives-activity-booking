@@ -8,6 +8,7 @@ const {
   resetPassword,
   updateDetails,
   updatePassword,
+  getAuthStatus,
 } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth');
 
@@ -17,6 +18,7 @@ router.post('/register', register);
 router.post('/login', login);
 router.get('/logout', logout);
 router.get('/me', protect, getMe);
+router.get('/status', getAuthStatus); // Public endpoint to help debug auth issues
 router.put('/updatedetails', protect, updateDetails);
 router.put('/updatepassword', protect, updatePassword);
 router.post('/forgotpassword', forgotPassword);

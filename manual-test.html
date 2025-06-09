@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maldives Activity Booking - Manual Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        .pending { color: orange; font-weight: bold; }
+        .test-item { margin: 10px 0; }
+        .checkbox { margin-right: 10px; }
+        h1 { color: #333; }
+        h2 { color: #666; }
+        .instructions { background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🏝️ Maldives Activity Booking - Manual Testing Checklist</h1>
+    
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <p>1. Make sure both servers are running:</p>
+        <ul>
+            <li>Backend: <a href="http://localhost:5000/api/v1/activities" target="_blank">http://localhost:5000/api/v1/activities</a></li>
+            <li>Frontend: <a href="http://localhost:3001" target="_blank">http://localhost:3001</a></li>
+        </ul>
+        <p>2. Open the frontend application and test each item below</p>
+        <p>3. Check your browser console (F12) for JavaScript errors</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 Application Loading</h2>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Homepage loads without errors
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> No JavaScript console errors on page load
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Header/navigation displays correctly
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Footer displays correctly
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🏃 Activities Data Loading</h2>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Popular activities section shows data (not "No activities available")
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Activity cards display with images, titles, prices
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> No "undefined" text appears anywhere
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Activity prices show as numbers (not NaN)
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Navigation & Routing</h2>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Can navigate to Activities page
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Activities page shows all activities
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Can click on individual activity cards
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Browser back button works correctly
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Direct URL access works (e.g., /activities)
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 Responsive Design</h2>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Desktop view looks good (1200px+)
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Tablet view looks good (768px-1199px)
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Mobile view looks good (<768px)
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Navigation menu works on mobile
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>⚡ Performance & Error Handling</h2>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Page loads quickly (under 3 seconds)
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Images load properly
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> No broken images or missing content
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Error boundaries catch any crashes gracefully
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 API Integration</h2>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Activities data loads from backend API
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> API calls handle errors gracefully
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Loading states are shown during API calls
+        </div>
+        <div class="test-item">
+            <input type="checkbox" class="checkbox"> Null/undefined data doesn't break the UI
+        </div>
+    </div>
+
+    <script>
+        // Simple JavaScript to track progress
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const totalTests = checkboxes.length;
+        
+        function updateProgress() {
+            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const progress = Math.round((checkedBoxes.length / totalTests) * 100);
+            
+            // Update page title with progress
+            document.title = `Maldives Testing - ${checkedBoxes.length}/${totalTests} (${progress}%) Complete`;
+            
+            // Update header with progress
+            const header = document.querySelector('h1');
+            header.innerHTML = `🏝️ Maldives Activity Booking - Manual Testing Checklist (${checkedBoxes.length}/${totalTests} Complete)`;
+            
+            if (checkedBoxes.length === totalTests) {
+                header.innerHTML += ' ✅ ALL TESTS PASSED!';
+                header.style.color = 'green';
+            }
+        }
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateProgress);
+        });
+        
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>

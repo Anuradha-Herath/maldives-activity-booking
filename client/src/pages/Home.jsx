@@ -3,6 +3,7 @@ import HeroSection from '../components/home/HeroSection';
 import ActivityCategories from '../components/home/ActivityCategories';
 import PopularActivities from '../components/home/PopularActivities';
 import Testimonials from '../components/home/Testimonials';
+import ErrorBoundary from '../components/common/ErrorBoundary';
 
 const Home = () => {
     return (
@@ -10,7 +11,9 @@ const Home = () => {
             <HeroSection />
             <div className="container mx-auto px-4">
                 <ActivityCategories />
-                <PopularActivities />
+                <ErrorBoundary>
+                    <PopularActivities />
+                </ErrorBoundary>
                 <Testimonials />
             </div>
         </div>
