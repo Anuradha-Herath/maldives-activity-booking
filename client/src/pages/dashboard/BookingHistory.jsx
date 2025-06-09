@@ -3,6 +3,7 @@ import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import BookingStatusBadge from '../../components/dashboard/BookingStatusBadge';
 import { useAuth } from '../../contexts/AuthContext';
 import { userBookingsAPI } from '../../utils/api';
+import { wakeUpBackend } from '../../utils/wakeUpBackend';
 
 const BookingHistory = () => {
   const { currentUser } = useAuth();
@@ -12,7 +13,15 @@ const BookingHistory = () => {
   const [yearFilter, setYearFilter] = useState('all');
   
   useEffect(() => {
-    fetchBookingHistory();
+    const initialize = async () => {
+      try {
+        await wakeUpBackend();
+      } catch (err) {
+        console.warn('Backend wake-up failed:', err);
+      }
+      fetchBookingHistory();
+    };
+    initialize();
   }, [currentUser]);
   
   const fetchBookingHistory = async () => {

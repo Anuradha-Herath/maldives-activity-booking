@@ -8,7 +8,7 @@
 import axios from 'axios';
 
 // More robust API URL handling
-const getApiUrl = () => {
+export const getApiUrl = () => {
   let apiUrl = import.meta.env.VITE_API_URL;
 
   // Handle common deployment issues with environment variables

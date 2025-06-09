@@ -1,11 +1,8 @@
 import axios from 'axios';
+import { getApiUrl } from './wakeUpBackend';
 
-// Create axios instance with base URL - use environment variable or fallback to local development
-// Check if the environment variable is being properly loaded, otherwise use a fallback
-const envApiUrl = import.meta.env.VITE_API_URL;
-const API_URL = (typeof envApiUrl === 'string' && !envApiUrl.startsWith('VITE_API_URL=')) 
-  ? envApiUrl 
-  : 'https://maldives-activity-booking-backend.onrender.com/api/v1';
+// Determine API URL using robust logic to handle production environment values
+const API_URL = getApiUrl();
 
 // Debug: Log the API URL being used (only in development)
 if (import.meta.env.DEV) {

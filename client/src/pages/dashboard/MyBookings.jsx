@@ -3,6 +3,7 @@ import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import BookingStatusBadge from '../../components/dashboard/BookingStatusBadge';
 import { userBookingsAPI } from '../../utils/api';
+import { wakeUpBackend } from '../../utils/wakeUpBackend';
 
 const MyBookings = () => {
   const { currentUser } = useAuth();
@@ -12,7 +13,16 @@ const MyBookings = () => {
   const [activeTab, setActiveTab] = useState('all');
   
   useEffect(() => {
-    fetchBookings();
+    // Wake up the backend server (for free-tier production deployments)
+    const initialize = async () => {
+      try {
+        await wakeUpBackend();
+      } catch (err) {
+        console.warn('Backend wake-up failed:', err);
+      }
+      fetchBookings();
+    };
+    initialize();
   }, [currentUser]);
   
   const fetchBookings = async () => {
