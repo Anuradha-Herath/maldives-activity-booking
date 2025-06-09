@@ -36,6 +36,19 @@ API.interceptors.request.use(
       delete config.headers['Content-Type'];
     }
     
+    // Debug request headers in production to help diagnose issues
+    if (import.meta.env.PROD) {
+      console.log('🔐 Request headers:', {
+        auth: config.headers.Authorization ? 'Bearer token present' : 'No auth token',
+        url: config.url,
+        method: config.method,
+        withCredentials: config.withCredentials
+      });
+    }
+    
+    // Always ensure withCredentials is true for cross-origin requests
+    config.withCredentials = true;
+    
     return config;
   },  (error) => Promise.reject(error)
 );

@@ -4,8 +4,7 @@ import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import { userBookingsAPI } from '../../utils/api';
 
-const Dashboard = () => {
-  const { currentUser } = useAuth();
+const Dashboard = () => {  const { currentUser } = useAuth();
   const [stats, setStats] = useState({
     pendingBookings: 0,
     confirmedBookings: 0,
@@ -14,14 +13,24 @@ const Dashboard = () => {
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
+        // Check for authentication token
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('No authentication token found when trying to fetch dashboard data');
+        } else {
+          console.log('Token exists, attempting to fetch dashboard data');
+        }
+        
         const response = await userBookingsAPI.getStats();
         
         if (response.data.success) {
+          console.log('Dashboard data fetched successfully:', response.data.data);
           const { 
             pendingBookings, 
             confirmedBookings, 
@@ -36,19 +45,35 @@ const Dashboard = () => {
           });
           
           setRecentBookings(recentBookings);
+          setError('');
         } else {
+          console.error('API returned success:false when fetching dashboard data');
           setError('Failed to fetch dashboard data');
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setError('Error connecting to the server. Please try again.');
+        
+        // If the error is likely due to authentication or connection issues, retry after delay
+        if (retryCount < 3) {
+          console.log(`Retrying dashboard data fetch (attempt ${retryCount + 1} of 3)...`);
+          setTimeout(() => {
+            setRetryCount(prevCount => prevCount + 1);
+          }, 2000);
+        }
       } finally {
         setLoading(false);
       }
     };
     
     fetchDashboardData();
-  }, [currentUser]);
+  }, [currentUser, retryCount]);
+  
+  // Add manual refresh function for users to retry getting their data
+  const handleManualRefresh = () => {
+    setError('');
+    setRetryCount(prevCount => prevCount + 1);
+  };
   
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -64,20 +89,26 @@ const Dashboard = () => {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-1">Welcome back, {currentUser?.name || 'User'}!</h2>
           <p className="text-gray-600">Here's an overview of your bookings and activities.</p>
-        </div>
-
-        {/* Error Message */}
+        </div>        {/* Error Message */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
+            <div className="flex justify-between items-start">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
               </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
+              <button 
+                onClick={handleManualRefresh} 
+                className="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600"
+              >
+                Refresh Data
+              </button>
             </div>
           </div>
         )}

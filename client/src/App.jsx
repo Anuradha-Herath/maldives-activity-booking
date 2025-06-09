@@ -3,14 +3,25 @@ import { AuthProvider } from './contexts/AuthContext';
 import { useEffect } from 'react';
 import authDiagnostic from './utils/authDiagnostic';
 import AuthMonitor from './components/auth/AuthMonitor';
+import { wakeUpBackend, keepBackendAwake } from './utils/wakeUpBackend';
 
 // Import environment checker for development debugging
 if (import.meta.env.DEV) {
   import('./utils/envCheck.js');
 }
 
-// Run auth diagnostics in production
-if (!import.meta.env.DEV) {
+// Run auth diagnostics and wake up the backend in production
+if (import.meta.env.PROD) {
+  // Wake up the backend immediately to reduce initial load time
+  wakeUpBackend().then(result => {
+    if (result.success) {
+      console.log('Successfully woke up backend server');
+      
+      // Keep the backend server awake with regular pings
+      keepBackendAwake(10 * 60 * 1000); // Ping every 10 minutes
+    }
+  });
+  
   // Initial diagnostic check with a small delay to allow app to initialize
   setTimeout(() => {
     authDiagnostic.testApiConnection()

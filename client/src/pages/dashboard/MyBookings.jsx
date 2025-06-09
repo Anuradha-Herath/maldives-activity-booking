@@ -10,19 +10,29 @@ const MyBookings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+    const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
     fetchBookings();
-  }, [currentUser]);
+  }, [currentUser, retryCount]);
   
   const fetchBookings = async () => {
     setLoading(true);
     try {
+      // Check for authentication token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No authentication token found when trying to fetch bookings');
+      } else {
+        console.log('Token exists, attempting to fetch bookings data');
+      }
+      
       const response = await userBookingsAPI.getUpcoming();
       
       if (response.data.success) {
         console.log('Fetched bookings:', response.data.data);
         setBookings(response.data.data);
+        setError('');
       } else {
         setError('Failed to fetch bookings');
       }
@@ -32,6 +42,10 @@ const MyBookings = () => {
     } finally {
       setLoading(false);
     }
+  };
+  
+  const handleRefresh = () => {
+    setRetryCount(prevCount => prevCount + 1);
   };
   
   // Filter bookings based on the active tab
@@ -135,20 +149,29 @@ const MyBookings = () => {
               Cancelled ({bookingCounts.cancelled})
             </button>
           </nav>
-        </div>
-
-        {/* Error message */}
+        </div>        {/* Error message */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
+            <div className="flex justify-between items-start">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
               </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
+              <button 
+                onClick={handleRefresh} 
+                className="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600"
+              >
+                Refresh Data
+              </button>
+            </div>
+          </div>
+        )}
               <div className="ml-auto pl-3">
                 <button onClick={() => setError('')} className="text-red-500 hover:text-red-600">
                   <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

@@ -16,7 +16,6 @@ export const useAuthMonitor = () => {
     checking: false,
     error: null
   });
-
   // Check with the server to verify authentication
   const verifyAuthWithServer = async () => {
     setAuthStatus(prev => ({ ...prev, checking: true, error: null }));
@@ -25,12 +24,26 @@ export const useAuthMonitor = () => {
       // First get the token from storage
       const token = tokenManager.getToken();
       if (!token) {
+        console.error('Authentication check failed: No token found in storage');
         setAuthStatus({
           isAuthenticated: false,
           tokenValid: false,
           lastChecked: new Date(),
           checking: false,
           error: 'No authentication token found'
+        });
+        return false;
+      }
+      
+      // Validate token format to catch obvious errors
+      if (!tokenManager.validateTokenFormat(token)) {
+        console.error('Authentication check failed: Invalid token format');
+        setAuthStatus({
+          isAuthenticated: false,
+          tokenValid: false,
+          lastChecked: new Date(),
+          checking: false,
+          error: 'Invalid token format'
         });
         return false;
       }
