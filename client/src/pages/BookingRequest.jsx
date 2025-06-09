@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { activitiesAPI, bookingsAPI } from '../utils/api';
 import ConfirmationModal from '../components/booking/ConfirmationModal';
+import bookingEvents from '../utils/BookingEventEmitter';
 
 const BookingRequest = () => {
     const { id } = useParams();
@@ -88,14 +89,26 @@ const BookingRequest = () => {
                 specialRequests: formData.specialRequests,
                 totalPrice: activity.price * formData.guests
             };
-            
-            // Send booking data to the API
+              // Send booking data to the API
             const response = await bookingsAPI.create(bookingData);
             
             if (response.data.success) {
+                const createdBooking = response.data.data;
                 setBookingReference(reference);
-                setBookingId(response.data.data._id);
+                setBookingId(createdBooking._id);
                 setIsModalOpen(true);
+                
+                // Emit booking created event to update dashboard in real-time
+                console.log('Emitting booking_created event for booking:', createdBooking._id);
+                bookingEvents.emit('booking_created', {
+                    ...createdBooking,
+                    activity: activity // Include activity data for immediate UI updates
+                });
+                
+                // Set flags for dashboard refresh
+                localStorage.setItem('new_booking_created', 'true');
+                localStorage.setItem('dashboard_needs_refresh', 'true');
+                sessionStorage.setItem('dashboard_refresh_needed', 'true');
             }
         } catch (error) {
             console.error('Error creating booking:', error);
@@ -103,10 +116,13 @@ const BookingRequest = () => {
         } finally {
             setSubmitting(false);
         }
-    };
-
-    const handleModalClose = () => {
+    };    const handleModalClose = () => {
         setIsModalOpen(false);
+        
+        // Ensure dashboard refresh flags are set before navigation
+        localStorage.setItem('force_dashboard_refresh', 'true');
+        localStorage.setItem('booking_completed', 'true');
+        
         // Redirect to home page after successful booking
         navigate('/');
     };
