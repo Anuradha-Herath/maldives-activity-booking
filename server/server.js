@@ -234,10 +234,6 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/api/v1/debug', debugRoutes);
 }
 
-// Always include debug upload routes for troubleshooting
-const debugUploadRoutes = require('./routes/debugUpload.routes');
-app.use('/api/v1/debug', debugUploadRoutes);
-
 // Handle 404 errors - Route not found
 app.all('*', (req, res, next) => {
   const err = new Error(`Can't find ${req.originalUrl} on this server!`);
