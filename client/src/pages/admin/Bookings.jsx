@@ -13,6 +13,11 @@ const AdminBookings = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  
   useEffect(() => {
     // Get status from URL parameter
     const statusParam = searchParams.get('status');
@@ -29,7 +34,12 @@ const AdminBookings = () => {
     try {
       const response = await bookingsAPI.getAll();
       if (response.data.success) {
-        setBookings(response.data.data);
+        // Sort bookings by date (newest first)
+        const sortedBookings = response.data.data.sort((a, b) => 
+          new Date(b.date) - new Date(a.date)
+        );
+        setBookings(sortedBookings);
+        setCurrentPage(1); // Reset to first page when new data is fetched
       } else {
         setError('Failed to fetch bookings');
       }
@@ -102,6 +112,26 @@ const AdminBookings = () => {
     
     return matchesSearch && matchesStatus && matchesDate;
   });
+  
+  // Calculate pagination data
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredBookings.length / itemsPerPage));
+    if (currentPage > Math.ceil(filteredBookings.length / itemsPerPage) && Math.ceil(filteredBookings.length / itemsPerPage) > 0) {
+      setCurrentPage(1); // Reset to page 1 if current page is out of bounds
+    }
+  }, [filteredBookings, itemsPerPage]);
+
+  // Get current page bookings
+  const getCurrentPageBookings = () => {
+    const indexOfLastBooking = currentPage * itemsPerPage;
+    const indexOfFirstBooking = indexOfLastBooking - itemsPerPage;
+    return filteredBookings.slice(indexOfFirstBooking, indexOfLastBooking);
+  };
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
 
   // Format date
   const formatDate = (dateString) => {
@@ -162,6 +192,113 @@ const AdminBookings = () => {
       return;
     }
     navigateToBookingDetail(bookingId);
+  };
+
+  // Pagination component
+  const Pagination = () => {
+    const pageNumbers = [];
+    
+    // Calculate page range to display (e.g. 1...4 5 6...10)
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+    
+    // Ensure we always show 5 pages if available
+    if (endPage - startPage < 4 && totalPages > 4) {
+      if (currentPage < 3) {
+        endPage = Math.min(5, totalPages);
+      } else if (currentPage > totalPages - 2) {
+        startPage = Math.max(1, totalPages - 4);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-gray-700">
+              Showing <span className="font-medium">{Math.min((currentPage - 1) * itemsPerPage + 1, filteredBookings.length)}</span> to <span className="font-medium">{Math.min(currentPage * itemsPerPage, filteredBookings.length)}</span> of{' '}
+              <span className="font-medium">{filteredBookings.length}</span> bookings
+            </p>
+          </div>
+          <div>
+            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              {/* Previous button */}
+              <button
+                onClick={prevPage}
+                disabled={currentPage === 1}
+                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'}`}
+              >
+                <span className="sr-only">Previous</span>
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+              
+              {/* First page if not in view */}
+              {startPage > 1 && (
+                <>
+                  <button
+                    onClick={() => paginate(1)}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    1
+                  </button>
+                  {startPage > 2 && (
+                    <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                      ...
+                    </span>
+                  )}
+                </>
+              )}
+              
+              {/* Page numbers */}
+              {pageNumbers.map(number => (
+                <button
+                  key={number}
+                  onClick={() => paginate(number)}
+                  className={`relative inline-flex items-center px-4 py-2 border ${currentPage === number ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'} text-sm font-medium`}
+                >
+                  {number}
+                </button>
+              ))}
+              
+              {/* Last page if not in view */}
+              {endPage < totalPages && (
+                <>
+                  {endPage < totalPages - 1 && (
+                    <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                      ...
+                    </span>
+                  )}
+                  <button
+                    onClick={() => paginate(totalPages)}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+              
+              {/* Next button */}
+              <button
+                onClick={nextPage}
+                disabled={currentPage === totalPages}
+                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'}`}
+              >
+                <span className="sr-only">Next</span>
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -293,8 +430,8 @@ const AdminBookings = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredBookings.length > 0 ? (
-                  filteredBookings.map((booking, index) => (
+                {getCurrentPageBookings().length > 0 ? (
+                  getCurrentPageBookings().map((booking, index) => (
                     <tr 
                       key={booking._id} 
                       className={`hover:bg-blue-50 transition-colors duration-150 cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
@@ -407,11 +544,27 @@ const AdminBookings = () => {
             </table>
           </div>
           
+          {/* Pagination */}
+          {filteredBookings.length > 0 && <Pagination />}
+          
           {/* Refresh Button */}
           <div className="px-4 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-            <span className="text-xs text-gray-500">
-              Showing {filteredBookings.length} of {bookings.length} bookings
-            </span>
+            <div className="flex items-center">
+              <span className="mr-3 text-xs text-gray-500">Items per page:</span>
+              <select
+                className="border-gray-300 text-gray-700 text-sm rounded focus:ring-blue-500 focus:border-blue-500"
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1); // Reset to first page when changing items per page
+                }}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
             <button
               onClick={fetchBookings}
               className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
