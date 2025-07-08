@@ -23,7 +23,7 @@ const ActivityCategories = () => {
                 {categories.map(category => (
                     <Link
                         to={`/activities?category=${category.slug}`}
-                        key={category.id}
+                        key={category.slug}
                         className="relative bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 border border-blue-50 group"
                     >
                         <div className="bg-gradient-to-r from-blue-400 to-blue-600 p-6 text-center group-hover:from-blue-500 group-hover:to-blue-700 transition-all duration-300">

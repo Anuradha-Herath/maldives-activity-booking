@@ -1,0 +1,11 @@
+# Add headers for files
+/*
+  X-Content-Type-Options: nosniff
+
+# CSS files should always be served with the correct MIME type
+/*.css
+  Content-Type: text/css
+
+# JavaScript files should always be served with the correct MIME type  
+/*.js
+  Content-Type: application/javascript

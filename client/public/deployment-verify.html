@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2563eb;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        .card {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background-color: #f9fafb;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        pre {
+            background-color: #1f2937;
+            color: #e5e7eb;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+        .result {
+            margin-top: 10px;
+            min-height: 20px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .warning {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+    <h1>Maldives Activity Booking - Deployment Verification</h1>
+    
+    <div class="card">
+        <h2>1. API Connection Test</h2>
+        <p>Test connection to the backend API</p>
+        <button id="testApiBtn">Test API Connection</button>
+        <div id="apiResult" class="result"></div>
+    </div>
+    
+    <div class="card">
+        <h2>2. Authentication Test</h2>
+        <p>Test authentication flow</p>
+        <button id="testAuthBtn">Test Authentication</button>
+        <div id="authResult" class="result"></div>
+    </div>
+    
+    <div class="card">
+        <h2>3. Dashboard Data Test</h2>
+        <p>Test fetching dashboard data (requires login)</p>
+        <button id="testDashboardBtn">Test Dashboard Data</button>
+        <div id="dashboardResult" class="result"></div>
+    </div>
+    
+    <div class="card">
+        <h2>4. Environment Check</h2>
+        <p>Check environment variables</p>
+        <button id="checkEnvBtn">Check Environment</button>
+        <div id="envResult" class="result"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Deployment Information</h2>
+        <pre id="deploymentInfo">Loading...</pre>
+    </div>
+
+    <script>
+        // Configuration
+        const apiUrl = 'https://maldives-activity-booking-backend.onrender.com/api/v1';
+        const frontendUrl = 'https://maldives-activity-booking-frontend.onrender.com';
+        
+        // Handle API test
+        document.getElementById('testApiBtn').addEventListener('click', async () => {
+            const resultEl = document.getElementById('apiResult');
+            resultEl.innerHTML = 'Testing...';
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${apiUrl}/health`);
+                const endTime = Date.now();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultEl.innerHTML = `<span class="success">✓ API connected successfully in ${endTime - startTime}ms</span>`;
+                    resultEl.innerHTML += `<br>Status: ${data.status || 'OK'}`;
+                } else {
+                    resultEl.innerHTML = `<span class="error">✗ API returned status: ${response.status}</span>`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">✗ Failed to connect: ${error.message}</span>`;
+            }
+        });
+        
+        // Handle authentication test
+        document.getElementById('testAuthBtn').addEventListener('click', async () => {
+            const resultEl = document.getElementById('authResult');
+            resultEl.innerHTML = 'Testing...';
+            
+            // Check for existing auth
+            const token = localStorage.getItem('token');
+            if (token) {
+                resultEl.innerHTML = '<span class="success">✓ Token found in localStorage</span>';
+                
+                try {
+                    const response = await fetch(`${apiUrl}/auth/status`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                        credentials: 'include'
+                    });
+                    
+                    if (response.ok) {
+                        resultEl.innerHTML += '<br><span class="success">✓ Token valid</span>';
+                    } else {
+                        resultEl.innerHTML += `<br><span class="warning">⚠ Token validation failed: ${response.status}</span>`;
+                    }
+                } catch (error) {
+                    resultEl.innerHTML += `<br><span class="error">✗ Error validating token: ${error.message}</span>`;
+                }
+                
+                return;
+            }
+            
+            resultEl.innerHTML = '<span class="warning">⚠ No authentication token found</span>';
+            resultEl.innerHTML += '<br>Please login to test authentication';
+        });
+        
+        // Handle dashboard test
+        document.getElementById('testDashboardBtn').addEventListener('click', async () => {
+            const resultEl = document.getElementById('dashboardResult');
+            resultEl.innerHTML = 'Testing...';
+            
+            const token = localStorage.getItem('token');
+            if (!token) {
+                resultEl.innerHTML = '<span class="error">✗ No authentication token found</span>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${apiUrl}/user/bookings/stats`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultEl.innerHTML = '<span class="success">✓ Dashboard data fetched successfully</span>';
+                    resultEl.innerHTML += `<br>Total bookings: ${data.data?.totalBookings || 0}`;
+                    resultEl.innerHTML += `<br>Pending bookings: ${data.data?.pendingBookings || 0}`;
+                } else {
+                    resultEl.innerHTML = `<span class="error">✗ Failed to fetch dashboard data: ${response.status}</span>`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">✗ Error fetching dashboard data: ${error.message}</span>`;
+            }
+        });
+        
+        // Handle environment check
+        document.getElementById('checkEnvBtn').addEventListener('click', () => {
+            const resultEl = document.getElementById('envResult');
+            
+            const envVars = {
+                'NODE_ENV': process.env.NODE_ENV,
+                'API_URL': apiUrl,
+                'Frontend URL': window.location.href,
+                'localStorage': localStorage.length + ' items'
+            };
+            
+            let resultsHtml = '';
+            
+            for (const [key, value] of Object.entries(envVars)) {
+                resultsHtml += `<div><strong>${key}:</strong> ${value}</div>`;
+            }
+            
+            resultEl.innerHTML = resultsHtml;
+        });
+        
+        // Populate deployment info
+        document.addEventListener('DOMContentLoaded', () => {
+            const infoEl = document.getElementById('deploymentInfo');
+            const info = {
+                'User Agent': navigator.userAgent,
+                'Timestamp': new Date().toISOString(),
+                'Location': window.location.href,
+                'Backend API': apiUrl,
+                'Frontend Expected URL': frontendUrl
+            };
+            
+            infoEl.textContent = JSON.stringify(info, null, 2);
+        });
+    </script>
+</body>
+</html>

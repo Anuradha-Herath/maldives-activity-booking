@@ -2,7 +2,8 @@ import React from 'react';
 import ActivityListItem from './ActivityListItem';
 
 const ActivityList = ({ activities }) => {
-    if (activities.length === 0) {
+    // Handle undefined or null activities
+    if (!activities || activities.length === 0) {
         return (
             <div className="bg-white p-8 rounded-lg shadow text-center">
                 <p className="text-lg text-gray-600">No activities match your current filters.</p>
@@ -12,7 +13,8 @@ const ActivityList = ({ activities }) => {
     }
     
     return (
-        <div className="space-y-4">            {activities.map(activity => (
+        <div className="space-y-4">
+            {activities.map(activity => (
                 <ActivityListItem key={activity._id || activity.id} activity={activity} />
             ))}
         </div>

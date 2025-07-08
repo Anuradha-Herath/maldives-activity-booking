@@ -158,7 +158,7 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                 </div>
             </div>            {/* Price Range Filter */}
             <div className="mb-6">
-                <h3 className="font-medium mb-3 text-gray-800">Price Range</h3>
+                <h3 id="price-range-label" className="font-medium mb-3 text-gray-800">Price Range</h3>
                 
                 {/* Price presets */}
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -177,30 +177,37 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                     ))}
                 </div>
                 
-                <div className="px-2">
-                    {/* Price input fields */}
+                <div className="px-2">                    {/* Price input fields */}
                     <div className="flex justify-between mb-4">
                         <div className="relative w-20">
+                            <label htmlFor="min-price" className="sr-only">Minimum Price</label>
                             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                             <input
+                                id="min-price"
                                 type="number"
                                 min="0"
                                 max="500"
                                 value={priceRange[0]}
                                 onChange={(e) => handlePriceInput(e, 0)}
                                 className="w-full pl-6 pr-2 py-1 border rounded text-sm"
+                                aria-label="Minimum price"
+                                placeholder="Min"
                             />
                         </div>
                         <span className="self-center text-gray-500">to</span>
                         <div className="relative w-20">
+                            <label htmlFor="max-price" className="sr-only">Maximum Price</label>
                             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                             <input
+                                id="max-price"
                                 type="number"
                                 min="0"
                                 max="500"
                                 value={priceRange[1]}
                                 onChange={(e) => handlePriceInput(e, 1)}
                                 className="w-full pl-6 pr-2 py-1 border rounded text-sm"
+                                aria-label="Maximum price"
+                                placeholder="Max"
                             />
                         </div>
                     </div>
@@ -215,9 +222,10 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                             }}
                         ></div>
                     </div>
-                    
-                    <div className="relative">
+                      <div className="relative">
+                        <label htmlFor="price-min-slider" className="sr-only">Minimum price slider</label>
                         <input
+                            id="price-min-slider"
                             type="range"
                             min="0"
                             max="500"
@@ -225,8 +233,14 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                             value={priceRange[0]}
                             onChange={(e) => handlePriceChange(e, 0)}
                             className="absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer"
+                            aria-labelledby="price-range-label"
+                            aria-valuemin="0"
+                            aria-valuemax="500"
+                            aria-valuenow={priceRange[0]}
                         />
+                        <label htmlFor="price-max-slider" className="sr-only">Maximum price slider</label>
                         <input
+                            id="price-max-slider"
                             type="range"
                             min="0"
                             max="500"
@@ -234,12 +248,16 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                             value={priceRange[1]}
                             onChange={(e) => handlePriceChange(e, 1)}
                             className="absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer"
+                            aria-labelledby="price-range-label"
+                            aria-valuemin="0"
+                            aria-valuemax="500"
+                            aria-valuenow={priceRange[1]}
                         />
                     </div>
                 </div>
             </div>            {/* Duration Filter */}
             <div className="mb-6">
-                <h3 className="font-medium mb-3 text-gray-800">Duration (hours)</h3>
+                <h3 id="duration-range-label" className="font-medium mb-3 text-gray-800">Duration (hours)</h3>
                 
                 {/* Duration presets */}
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -258,11 +276,12 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                     ))}
                 </div>
                 
-                <div className="px-2">
-                    {/* Duration inputs */}
+                <div className="px-2">                    {/* Duration inputs */}
                     <div className="flex justify-between mb-4">
                         <div className="w-16">
+                            <label htmlFor="min-duration" className="sr-only">Minimum Duration</label>
                             <input
+                                id="min-duration"
                                 type="number"
                                 min="0"
                                 max="12"
@@ -270,11 +289,15 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                                 value={duration[0]}
                                 onChange={(e) => handleDurationInput(e, 0)}
                                 className="w-full px-2 py-1 border rounded text-sm"
+                                aria-label="Minimum duration"
+                                placeholder="Min"
                             />
                         </div>
                         <span className="self-center text-gray-500">to</span>
                         <div className="w-16">
+                            <label htmlFor="max-duration" className="sr-only">Maximum Duration</label>
                             <input
+                                id="max-duration"
                                 type="number"
                                 min="0"
                                 max="12"
@@ -282,6 +305,8 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                                 value={duration[1]}
                                 onChange={(e) => handleDurationInput(e, 1)}
                                 className="w-full px-2 py-1 border rounded text-sm"
+                                aria-label="Maximum duration"
+                                placeholder="Max"
                             />
                         </div>
                         <span className="self-center text-sm text-gray-500">hours</span>
@@ -297,9 +322,10 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                             }}
                         ></div>
                     </div>
-                    
-                    <div className="relative">
+                      <div className="relative">
+                        <label htmlFor="duration-min-slider" className="sr-only">Minimum duration slider</label>
                         <input
+                            id="duration-min-slider"
                             type="range"
                             min="0"
                             max="12"
@@ -307,8 +333,14 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                             value={duration[0]}
                             onChange={(e) => handleDurationChange(e, 0)}
                             className="absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer"
+                            aria-labelledby="duration-range-label"
+                            aria-valuemin="0"
+                            aria-valuemax="12"
+                            aria-valuenow={duration[0]}
                         />
+                        <label htmlFor="duration-max-slider" className="sr-only">Maximum duration slider</label>
                         <input
+                            id="duration-max-slider"
                             type="range"
                             min="0"
                             max="12"
@@ -316,6 +348,10 @@ const ActivityFilters = ({ filters, onFilterChange }) => {
                             value={duration[1]}
                             onChange={(e) => handleDurationChange(e, 1)}
                             className="absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer"
+                            aria-labelledby="duration-range-label"
+                            aria-valuemin="0"
+                            aria-valuemax="12"
+                            aria-valuenow={duration[1]}
                         />
                     </div>
                 </div>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Connection Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.5;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #4a56e2;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #3a46c2;
+        }
+        .log {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            color: #2da44e;
+        }
+        .error {
+            color: #d73a49;
+        }
+        .warning {
+            color: #bf8700;
+        }
+        .info {
+            color: #0969da;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Connection Diagnostic Tool</h1>
+    
+    <div class="card">
+        <h2>Environment Information</h2>
+        <div id="env-info"></div>
+        
+        <h2>API Endpoints</h2>
+        <div>
+            <button id="test-backend">Test Backend Connection</button>
+            <button id="test-auth">Test Auth Endpoint</button>
+            <button id="test-activities">Test Activities Endpoint</button>
+            <button id="test-login">Test Login (Credentials Required)</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>Authentication Test</h2>
+        <div>
+            <input type="email" id="email" placeholder="Email" style="padding: 8px; margin: 5px; width: 200px;">
+            <input type="password" id="password" placeholder="Password" style="padding: 8px; margin: 5px; width: 200px;">
+            <button id="login-test">Test Login</button>
+            <button id="register-test">Test Register</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>CORS Test</h2>
+        <button id="cors-test">Test CORS Configuration</button>
+    </div>
+    
+    <h2>Results</h2>
+    <div class="log" id="log"></div>
+    
+    <script>
+        // Get the current origin
+        const FRONTEND_URL = window.location.origin;
+        
+        // Try to detect the API URL
+        let API_URL = '';
+        
+        // First try to get from meta tag if available
+        const metaApiUrl = document.querySelector('meta[name="api-url"]')?.getAttribute('content');
+        if (metaApiUrl) {
+            API_URL = metaApiUrl;
+        }
+        
+        // Then try environment variables (for Vite apps)
+        if (!API_URL && window.ENV_API_URL) {
+            API_URL = window.ENV_API_URL;
+        }
+        
+        // Fallback to standard deployment URL
+        if (!API_URL) {
+            API_URL = 'https://maldives-activity-booking-backend.onrender.com/api/v1';
+        }
+        
+        // Logging function
+        function log(message, type = 'default') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toISOString().substr(11, 8);
+            const entry = document.createElement('div');
+            entry.classList.add(type);
+            entry.textContent = `[${timestamp}] ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        // Show environment info
+        function showEnvironmentInfo() {
+            const envEl = document.getElementById('env-info');
+            envEl.innerHTML = `
+                <p><strong>Frontend URL:</strong> ${FRONTEND_URL}</p>
+                <p><strong>API URL:</strong> ${API_URL}</p>
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+            `;
+            log(`Environment detected: Frontend at ${FRONTEND_URL}`, 'info');
+            log(`Using API URL: ${API_URL}`, 'info');
+        }
+        
+        // Test backend general connectivity
+        async function testBackendConnection() {
+            try {
+                log('Testing basic backend connection...');
+                const response = await fetch(`${API_URL.split('/api')[0]}/api/v1`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Backend connection successful: ${JSON.stringify(data)}`, 'success');
+                    return true;
+                } else {
+                    log(`❌ Backend connection failed with status: ${response.status}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Backend connection error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Test auth endpoint
+        async function testAuthEndpoint() {
+            try {
+                log('Testing auth endpoint connectivity...');
+                const response = await fetch(`${API_URL}/auth/status`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Auth endpoint accessible: ${JSON.stringify(data)}`, 'success');
+                } else {
+                    log(`⚠️ Auth endpoint returned status: ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                log(`❌ Auth endpoint error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test activities endpoint
+        async function testActivitiesEndpoint() {
+            try {
+                log('Testing activities endpoint...');
+                const response = await fetch(`${API_URL}/activities?limit=1`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Activities endpoint working: Found ${data.count} activities`, 'success');
+                } else {
+                    log(`⚠️ Activities endpoint returned status: ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                log(`❌ Activities endpoint error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test login
+        async function testLogin(email, password) {
+            try {
+                log(`Testing login with email: ${email}...`);
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Login successful! Token received: ${data.token ? 'Yes' : 'No'}`, 'success');
+                    if (data.token) {
+                        localStorage.setItem('test-token', data.token);
+                        log(`Token saved to localStorage for testing`, 'info');
+                    }
+                    return true;
+                } else {
+                    log(`❌ Login failed: ${JSON.stringify(data)}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Test registration
+        async function testRegistration(email, password) {
+            try {
+                const name = "Test User " + new Date().getTime().toString().slice(-4);
+                log(`Testing registration with email: ${email} and name: ${name}...`);
+                
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ name, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Registration successful! Token received: ${data.token ? 'Yes' : 'No'}`, 'success');
+                    return true;
+                } else {
+                    log(`❌ Registration failed: ${JSON.stringify(data)}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Registration error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Test CORS
+        async function testCORS() {
+            try {
+                log('Testing CORS configuration...');
+                
+                const response = await fetch(`${API_URL}/activities?limit=1`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': FRONTEND_URL
+                    },
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    log(`✅ CORS properly configured`, 'success');
+                    // Check for important CORS headers
+                    const corsHeader = response.headers.get('Access-Control-Allow-Origin');
+                    const credentialsHeader = response.headers.get('Access-Control-Allow-Credentials');
+                    
+                    if (corsHeader) {
+                        log(`CORS Origin Header: ${corsHeader}`, 'info');
+                    }
+                    if (credentialsHeader) {
+                        log(`CORS Credentials Header: ${credentialsHeader}`, 'info');
+                    }
+                } else {
+                    log(`⚠️ CORS test returned status: ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                if (error.message.includes('CORS')) {
+                    log(`❌ CORS error detected: ${error.message}`, 'error');
+                    log('This indicates that the server is not allowing requests from this origin.', 'error');
+                } else {
+                    log(`❌ Error during CORS test: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            showEnvironmentInfo();
+            
+            // Set up event listeners
+            document.getElementById('test-backend').addEventListener('click', testBackendConnection);
+            document.getElementById('test-auth').addEventListener('click', testAuthEndpoint);
+            document.getElementById('test-activities').addEventListener('click', testActivitiesEndpoint);
+            document.getElementById('cors-test').addEventListener('click', testCORS);
+            
+            document.getElementById('login-test').addEventListener('click', () => {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                if (!email || !password) {
+                    log('Please enter both email and password', 'warning');
+                    return;
+                }
+                testLogin(email, password);
+            });
+            
+            document.getElementById('register-test').addEventListener('click', () => {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                if (!email || !password) {
+                    log('Please enter both email and password', 'warning');
+                    return;
+                }
+                testRegistration(email, password);
+            });
+            
+            // Auto-run basic connectivity test
+            setTimeout(() => {
+                testBackendConnection();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

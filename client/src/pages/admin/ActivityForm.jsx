@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import AdminLayout from '../../components/admin/AdminLayout';
-import axios from 'axios';
+import API from '../../utils/api';
 
 const ActivityForm = () => {
   const { id } = useParams();
@@ -12,19 +12,15 @@ const ActivityForm = () => {
   const [loading, setLoading] = useState(id ? true : false);
   const [images, setImages] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(null);
+  const [uploading, setUploading] = useState(false);  const [error, setError] = useState(null);
   const isNew = !id;
-  
-  const API_URL = 'http://localhost:5000/api/v1';
 
   useEffect(() => {
     // Fetch activity data if editing
     if (id) {
-      const fetchActivity = async () => {
-        try {
+      const fetchActivity = async () => {        try {
           setLoading(true);
-          const response = await axios.get(`${API_URL}/activities/${id}`);
+          const response = await API.get(`/activities/${id}`);
           
           if (response.data.success) {
             const activityData = response.data.data;
@@ -72,7 +68,6 @@ const ActivityForm = () => {
     type: Yup.string().required('Activity type is required'),
     maxParticipants: Yup.number().positive('Must be positive').integer('Must be a whole number'),
   });
-
   // Handle image upload for main image
   const handleImageUpload = async (event) => {
     const files = Array.from(event.target.files);
@@ -88,11 +83,31 @@ const ActivityForm = () => {
       
       console.log('Uploading main image:', file.name);
       
-      const response = await axios.post(`${API_URL}/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      // Add retry logic for better reliability
+      let response;
+      let retries = 0;
+      const maxRetries = 2;
+      
+      while (retries <= maxRetries) {        try {
+          console.log(`Upload attempt ${retries + 1} of ${maxRetries + 1}`);
+          
+          response = await API.post('/upload', formData, {
+            // Don't set Content-Type header - let browser set it with boundary for FormData
+            timeout: 30000
+          });
+          
+          // If we get here, the request was successful
+          break;
+        } catch (err) {
+          retries++;
+          if (retries > maxRetries) {
+            throw err; // Give up after max retries
+          }
+          console.log(`Upload failed, retrying (${retries}/${maxRetries})...`);
+          // Wait a bit before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
-      });
+      }
       
       console.log('Upload response:', response.data);
       
@@ -100,58 +115,134 @@ const ActivityForm = () => {
         const newImage = {
           id: Date.now(),
           url: response.data.data.url,
-          isUploaded: true
+          isUploaded: true,
+          // Store these for debugging purposes
+          isPlaceholder: response.data.data.isPlaceholder,
+          isFallback: response.data.data.isFallback
         };
         
         setImages([...images, newImage]);
+        
+        // Show warnings if using placeholder/fallback
+        if (response.data.data.isPlaceholder || response.data.data.isFallback) {
+          console.warn('Using fallback/placeholder image due to upload issues');
+          alert('Note: Using a placeholder image because the image upload service is currently unavailable. Your activity will still be saved.');
+        }
       } else {
         throw new Error(response.data.error || 'Upload failed with unknown error');
       }
     } catch (error) {
       console.error('Error uploading image:', error);
       console.log('Error details:', error.response ? error.response.data : 'No response data');
-      alert(`Failed to upload image: ${error.message || 'Unknown error'}`);
+      
+      // Fallback to placeholder if everything fails
+      const placeholderUrl = `https://picsum.photos/seed/${Date.now()}/800/600`;
+      const newImage = {
+        id: Date.now(),
+        url: placeholderUrl,
+        isUploaded: true,
+        isPlaceholder: true
+      };
+      
+      setImages([...images, newImage]);
+      
+      alert(`Note: Using a placeholder image because the upload failed. Your activity will still be saved.`);
     } finally {
       setUploading(false);
     }
   };
-  
-  // Handle gallery image upload - simplified to upload one at a time
+    // Handle gallery image upload with improved error handling
   const handleGalleryImageUpload = async (event) => {
     const files = Array.from(event.target.files);
     if (!files.length) return;
     
     setUploading(true);
     
+    // Track successful and failed uploads
+    const uploadResults = {
+      success: 0,
+      failed: 0,
+      total: files.length
+    };
+    
     try {
-      // Process files one at a time
+      // Process files one at a time with improved error handling
       for (const file of files) {
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        console.log('Uploading gallery image:', file.name);
-        
-        const response = await axios.post(`${API_URL}/upload`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          
+          console.log('Uploading gallery image:', file.name);
+          
+          // Add retry logic for better reliability
+          let response;
+          let retries = 0;
+          const maxRetries = 2;
+          
+          while (retries <= maxRetries) {            try {
+              console.log(`Gallery upload attempt ${retries + 1} of ${maxRetries + 1}`);
+              
+              response = await API.post('/upload', formData, {
+                // Don't set Content-Type header - let browser set it with boundary for FormData
+                timeout: 30000
+              });
+              
+              // If we get here, the request was successful
+              break;
+            } catch (err) {
+              retries++;
+              if (retries > maxRetries) {
+                throw err; // Give up after max retries
+              }
+              console.log(`Gallery upload failed, retrying (${retries}/${maxRetries})...`);
+              // Wait a bit before retrying
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
           }
-        });
-        
-        if (response.data.success) {
+          
+          if (response.data.success) {
+            const newImage = {
+              id: Date.now() + Math.random(),
+              url: response.data.data.url,
+              isUploaded: true,
+              // Store these for debugging purposes
+              isPlaceholder: response.data.data.isPlaceholder,
+              isFallback: response.data.data.isFallback
+            };
+            
+            setGalleryImages(prev => [...prev, newImage]);
+            uploadResults.success++;
+          } else {
+            console.error('Upload failed:', response.data.error);
+            uploadResults.failed++;
+          }
+        } catch (individualError) {
+          console.error(`Error uploading gallery image ${file.name}:`, individualError);
+          uploadResults.failed++;
+          
+          // Add a placeholder image instead
+          const placeholderUrl = `https://picsum.photos/seed/${Date.now() + Math.random()}/800/600`;
           const newImage = {
             id: Date.now() + Math.random(),
-            url: response.data.data.url,
-            isUploaded: true
+            url: placeholderUrl,
+            isUploaded: true,
+            isPlaceholder: true
           };
           
           setGalleryImages(prev => [...prev, newImage]);
-        } else {
-          console.error('Upload failed:', response.data.error);
         }
       }
+      
+      // Report upload summary
+      if (uploadResults.failed > 0) {
+        alert(`Uploaded ${uploadResults.success} of ${uploadResults.total} gallery images. ${uploadResults.failed} failed and were replaced with placeholders.`);
+      } else if (uploadResults.success > 0) {
+        console.log(`Successfully uploaded all ${uploadResults.success} gallery images`);
+      }
+      
     } catch (error) {
-      console.error('Error uploading gallery images:', error);
-      alert(`Failed to upload gallery images: ${error.message || 'Unknown error'}`);
+      console.error('Error in gallery image upload process:', error);
+      alert(`There were issues uploading some gallery images. Some may have been replaced with placeholders.`);
     } finally {
       setUploading(false);
     }
@@ -197,13 +288,12 @@ const ActivityForm = () => {
       };
       
       let response;
-      
-      if (isNew) {
+        if (isNew) {
         // Create new activity
-        response = await axios.post(`${API_URL}/activities`, activityData);
+        response = await API.post('/activities', activityData);
       } else {
         // Update existing activity
-        response = await axios.put(`${API_URL}/activities/${id}`, activityData);
+        response = await API.put(`/activities/${id}`, activityData);
       }
       
       if (response.data.success) {
@@ -620,8 +710,7 @@ const ActivityForm = () => {
                     
                     {/* Upload button */}
                     {images.length === 0 && (
-                      <div className="h-32 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center">
-                        <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                      <div className="h-32 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center">                        <label htmlFor="mainImage" className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
                           {uploading ? (
                             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                           ) : (
@@ -631,9 +720,10 @@ const ActivityForm = () => {
                                 Add Main Image
                               </span>
                             </>
-                          )}
-                          <input
+                          )}<input
                             type="file"
+                            id="mainImage"
+                            name="mainImage"
                             className="hidden"
                             accept="image/*"
                             onChange={handleImageUpload}
@@ -672,8 +762,7 @@ const ActivityForm = () => {
                     ))}
                     
                     {/* Upload button */}
-                    <div className="h-32 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center">
-                      <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                    <div className="h-32 border-2 border-gray-300 border-dashed rounded-lg flex items-center justify-center">                      <label htmlFor="galleryImages" className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
                         {uploading ? (
                           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                         ) : (
@@ -683,9 +772,10 @@ const ActivityForm = () => {
                               Add Gallery Images
                             </span>
                           </>
-                        )}
-                        <input
+                        )}<input
                           type="file"
+                          id="galleryImages"
+                          name="galleryImages"
                           className="hidden"
                           accept="image/*"
                           multiple
