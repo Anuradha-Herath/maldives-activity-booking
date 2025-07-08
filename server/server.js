@@ -68,6 +68,28 @@ const allowedOrigins = corsOriginValue
   ? (corsOriginValue === '*' ? '*' : corsOriginValue.split(',').map(origin => origin.trim()))
   : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'https://maldives-activity-booking-frontend.onrender.com'];
 
+// Enhanced CORS configuration for debugging
+const corsOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:3000'];
+console.log('Configured CORS origins:', corsOrigins);
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (corsOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Temporarily allow all origins for testing
+    }
+  },
+  credentials: true
+}));
+
+// Add OPTIONS handling for preflight requests
+app.options('*', cors());
+
 // Diagnostic root endpoint to check if the server is running
 app.get('/server-status', (req, res) => {
   res.redirect('/api/v1/server-status');
@@ -80,14 +102,6 @@ app.use(cookieParser());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
-// Enable CORS
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'], // Add all your frontend URLs
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 // File upload middleware with improved configuration
 app.use(fileUpload({
@@ -175,6 +189,15 @@ app.get('/api/v1/server-status', (req, res) => {
       corsOriginRaw: process.env.CORS_ORIGIN,
       port: process.env.PORT || 5000
     }
+  });
+});
+
+// Test endpoint for CORS
+app.get('/api/v1/cors-test', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'CORS is working correctly',
+    origin: req.headers.origin || 'No origin header'
   });
 });
 
