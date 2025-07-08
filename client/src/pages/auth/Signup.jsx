@@ -52,9 +52,9 @@ const Signup = () => {
         email: values.email,
         password: values.password
       });
-        console.log('Registration successful:', result);
+      console.log('Registration successful:', result);
       
-      // Verify authentication data was properly saved
+      // First verify authentication data was properly saved
       if (!tokenManager.isAuthenticated()) {
         console.warn('Authentication data not properly saved after registration');
         
@@ -81,24 +81,14 @@ const Signup = () => {
         setError('Authentication failed. Please try logging in manually.');
         return;
       }
-        console.log('Authentication complete, redirecting to home page...');
       
-      // Add a small delay to ensure all state updates are complete
-      // This helps ensure the AuthContext has time to update before navigation
-      setTimeout(() => {
-        // Double check authentication before navigating
-        if (tokenManager.isAuthenticated()) {
-          console.log('Authentication confirmed, redirecting to home page');
-          navigate('/');
-        } else {
-          console.warn('Authentication state inconsistent before redirect');
-          // Try one more time with a longer delay
-          setTimeout(() => {
-            console.log('Final redirect attempt');
-            navigate('/');
-          }, 500);
-        }
-      }, 100);
+      // All authentication checks passed, now force navigation to home page
+      console.log('Authentication complete, redirecting to home page...');
+      
+      // Force navigation after all checks are complete - this ensures we only navigate when authentication is confirmed
+      // Using window.location instead of navigate() to ensure a complete page refresh
+      window.location.href = '/';
+      
     } catch (error) {
       console.error('Registration error:', error);
       
