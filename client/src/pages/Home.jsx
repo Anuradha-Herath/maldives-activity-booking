@@ -1,8 +1,8 @@
 import React from 'react';
 import HeroSection from '../components/home/HeroSection';
-import PopularActivities from '../components/home/PopularActivities';
-import ActivityCategories from '../components/home/ActivityCategories';
-import Testimonials from '../components/home/Testimonials';
+import ServicesOverview from '../components/home/ServicesOverview';
+import TravelPackagesPreview from '../components/home/TravelPackagesPreview';
+import TestimonialsSection from '../components/home/TestimonialsSection';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 
 const Home = () => {
@@ -10,15 +10,13 @@ const Home = () => {
         <div className="bg-background">
             <HeroSection />
             <ErrorBoundary>
-                <PopularActivities />
+                <ServicesOverview />
+            </ErrorBoundary>
+            <ErrorBoundary>
+                <TravelPackagesPreview />
             </ErrorBoundary>
             <div className="container mx-auto px-4">
-                <ErrorBoundary>
-                    <div className="py-12">
-                        <ActivityCategories />
-                    </div>
-                </ErrorBoundary>
-                <Testimonials />
+                <TestimonialsSection />
             </div>
         </div>
     );

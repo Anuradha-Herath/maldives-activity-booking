@@ -69,7 +69,7 @@ const Navbar = () => {
                             <span className="text-yellow-400 ml-1 group-hover:scale-105 transition-transform duration-300">Activities</span>
                         </div>
                     </Link>
-                      {/* Desktop Navigation */}
+                    {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-6">
                         <Link to="/" className={`text-white hover:text-yellow-400 transition-colors relative ${
                             location.pathname === '/' 
@@ -80,36 +80,59 @@ const Navbar = () => {
                             {location.pathname === '/' && (
                                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-400"></span>
                             )}
-                            {location.pathname !== '/' && (
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
+                        </Link>
+
+                        {/* Travel Services Dropdown */}
+                        <div className="relative group">
+                            <button className="flex items-center text-white hover:text-yellow-400 transition-all hover:scale-105 transform">
+                                Travel Services <i className="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-300"></i>
+                            </button>
+                            <div className="absolute left-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 border border-blue-200/20">
+                                <div className="py-2">
+                                    <Link to="/travel-services" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Travel Services</Link>
+                                    <Link to="/travel-packages" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Travel Packages</Link>
+                                    <Link to="/real-estate" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Real Estate</Link>
+                                    <Link to="/foreign-investment" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Investment Support</Link>
+                                    <Link to="/brand-representation" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Brand Representation</Link>
+                                    <Link to="/tourism-facilities" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Tourism Facilities</Link>
+                                    <Link to="/media-advertising" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Media & Advertising</Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        <Link to="/accommodation" className={`text-white hover:text-yellow-400 transition-colors relative ${
+                            location.pathname.startsWith('/accommodation') 
+                            ? 'font-semibold text-yellow-400'
+                            : 'hover:scale-105 transform'
+                        }`}>
+                            Accommodation
+                            {location.pathname.startsWith('/accommodation') && (
+                                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-400"></span>
                             )}
                         </Link>
+
                         <Link to="/activities" className={`text-white hover:text-yellow-400 transition-colors relative ${
-                            location.pathname === '/activities' 
+                            location.pathname.startsWith('/activities') 
                             ? 'font-semibold text-yellow-400'
                             : 'hover:scale-105 transform'
                         }`}>
                             Activities
-                            {location.pathname === '/activities' && (
+                            {location.pathname.startsWith('/activities') && (
                                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-400"></span>
                             )}
-                            {location.pathname !== '/activities' && (
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
+                        </Link>
+
+                        <Link to="/blogs" className={`text-white hover:text-yellow-400 transition-colors relative ${
+                            location.pathname.startsWith('/blogs') 
+                            ? 'font-semibold text-yellow-400'
+                            : 'hover:scale-105 transform'
+                        }`}>
+                            Blogs
+                            {location.pathname.startsWith('/blogs') && (
+                                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-400"></span>
                             )}
                         </Link>
-                        <div className="relative group">
-                            <button className="flex items-center text-white hover:text-yellow-400 transition-all hover:scale-105 transform">
-                                Destinations <i className="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-300"></i>
-                            </button>
-                            <div className="absolute left-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 border border-blue-200/20">
-                                <div className="py-2">
-                                    <Link to="/activities?location=male" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Malé</Link>
-                                    <Link to="/activities?location=ari-atoll" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Ari Atoll</Link>
-                                    <Link to="/activities?location=baa-atoll" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Baa Atoll</Link>
-                                    <Link to="/activities" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">All Destinations</Link>
-                                </div>
-                            </div>
-                        </div>
+
                         <Link to="/about" className={`text-white hover:text-yellow-400 transition-colors relative ${
                             location.pathname === '/about' 
                             ? 'font-semibold text-yellow-400'
@@ -119,10 +142,8 @@ const Navbar = () => {
                             {location.pathname === '/about' && (
                                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-400"></span>
                             )}
-                            {location.pathname !== '/about' && (
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
-                            )}
                         </Link>
+
                         <Link to="/contact" className={`text-white hover:text-yellow-400 transition-colors relative ${
                             location.pathname === '/contact' 
                             ? 'font-semibold text-yellow-400'
@@ -131,9 +152,6 @@ const Navbar = () => {
                             Contact
                             {location.pathname === '/contact' && (
                                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-400"></span>
-                            )}
-                            {location.pathname !== '/contact' && (
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
                             )}
                         </Link>
                     </div>
@@ -206,6 +224,12 @@ const Navbar = () => {
                                                     >
                                                         <i className="fas fa-bookmark mr-2 text-blue-600"></i> My Bookings
                                                     </Link>
+                                                    <Link 
+                                                        to="/dashboard/custom-packages" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-box mr-2 text-blue-600"></i> Custom Packages
+                                                    </Link>
                                                 </>
                                             )}
                                             <div className="border-t border-gray-100 my-1"></div>
@@ -253,13 +277,21 @@ const Navbar = () => {
                             <i className="fas fa-home mr-2"></i> Home
                             {location.pathname === '/' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
                         </Link>
-                        <Link to="/activities" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/activities' ? 'font-semibold text-yellow-400' : ''}`}>
-                            <i className="fas fa-water mr-2"></i> Activities
-                            {location.pathname === '/activities' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        <Link to="/travel-services" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/travel-services' ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-plane mr-2"></i> Travel Services
+                            {location.pathname === '/travel-services' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
                         </Link>
-                        <Link to="/destinations" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/destinations' ? 'font-semibold text-yellow-400' : ''}`}>
-                            <i className="fas fa-map-marker-alt mr-2"></i> Destinations
-                            {location.pathname === '/destinations' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        <Link to="/accommodation" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname.startsWith('/accommodation') ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-bed mr-2"></i> Accommodation
+                            {location.pathname.startsWith('/accommodation') && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        </Link>
+                        <Link to="/activities" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname.startsWith('/activities') ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-water mr-2"></i> Activities
+                            {location.pathname.startsWith('/activities') && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        </Link>
+                        <Link to="/blogs" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname.startsWith('/blogs') ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-blog mr-2"></i> Blogs
+                            {location.pathname.startsWith('/blogs') && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
                         </Link>
                         <Link to="/about" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/about' ? 'font-semibold text-yellow-400' : ''}`}>
                             <i className="fas fa-info-circle mr-2"></i> About

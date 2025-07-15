@@ -36,10 +36,34 @@ if (import.meta.env.PROD) {
   }, 2000);
 }
 
+// Pages
 import Home from './pages/Home';
-import Activities from './pages/Activities';
-import ActivityDetail from './pages/ActivityDetail';
-import BookingRequest from './pages/BookingRequest';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import NotFound from './pages/NotFound';
+
+// Travel Services
+import TravelServices from './pages/travel/TravelServices';
+import TravelPackages from './pages/travel/TravelPackages';
+import TravelPackageDetail from './pages/travel/TravelPackageDetail';
+
+// Accommodation
+import Accommodation from './pages/accommodation/Accommodation';
+import AccommodationDetail from './pages/accommodation/AccommodationDetail';
+import RoomDetail from './pages/accommodation/RoomDetail';
+import RoomReservation from './pages/accommodation/RoomReservation';
+
+// Activities & Experiences
+import Activities from './pages/activities/Activities';
+import ActivityDetail from './pages/activities/ActivityDetail';
+
+// Blogs
+import Blogs from './pages/blogs/Blogs';
+import BlogDetail from './pages/blogs/BlogDetail';
+import CreateBlog from './pages/blogs/CreateBlog';
+import EditBlog from './pages/blogs/EditBlog';
+
+// User Profile & Dashboard
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -48,47 +72,64 @@ import Profile from './pages/auth/Profile';
 import Dashboard from './pages/dashboard/Dashboard';
 import MyBookings from './pages/dashboard/MyBookings';
 import BookingHistory from './pages/dashboard/BookingHistory';
+import CustomPackages from './pages/dashboard/CustomPackages';
 import EditProfile from './pages/dashboard/EditProfile';
+
+// Services Static Pages
+import RealEstate from './pages/services/RealEstate';
+import ForeignInvestment from './pages/services/ForeignInvestment';
+import BrandRepresentation from './pages/services/BrandRepresentation';
+import TourismFacilities from './pages/services/TourismFacilities';
+import MediaAdvertising from './pages/services/MediaAdvertising';
+
+// Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import AdminRoute from './components/auth/AdminRoute';
-import NotFound from './pages/NotFound';
-import About from './pages/About';
-import Contact from './pages/Contact';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import Navbar from './components/common/Navbar';
 
-// Admin Pages
-import AdminDashboard from './pages/admin/Dashboard';
-import AdminActivities from './pages/admin/Activities';
-import ActivityForm from './pages/admin/ActivityForm';
-import AdminBookings from './pages/admin/Bookings';
-import AdminBookingDetail from './pages/admin/BookingDetail'; // Add this import
-import AdminUsers from './pages/admin/Users';
-import AdminActivityView from './pages/admin/AdminActivityView';
-
 // Wrapper component to conditionally render Header and Navbar
 const AppContent = () => {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isAdminRoute && (
-        <>
-          <Header />
-          <Navbar />
-        </>
-      )}
-      <main className={`flex-grow ${isAdminRoute ? 'h-screen' : ''}`}>
+      <Header />
+      <Navbar />
+      <main className="flex-grow">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/activities" element={<Activities />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          
+          {/* Travel Services */}
+          <Route path="/travel-services" element={<TravelServices />} />
+          <Route path="/travel-packages" element={<TravelPackages />} />
+          <Route path="/travel-packages/:id" element={<TravelPackageDetail />} />
+          
+          {/* Accommodation */}
+          <Route path="/accommodation" element={<Accommodation />} />
+          <Route path="/accommodation/:id" element={<AccommodationDetail />} />
+          <Route path="/accommodation/:id/rooms/:roomId" element={<RoomDetail />} />
+          <Route path="/accommodation/:id/rooms/:roomId/book" element={<RoomReservation />} />
+          
+          {/* Activities & Experiences */}
+          <Route path="/activities" element={<Activities />} />
           <Route path="/activities/:id" element={<ActivityDetail />} />
-          <Route path="/booking/:id" element={<BookingRequest />} />
+          
+          {/* Blogs */}
+          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blogs/:id" element={<BlogDetail />} />
+          <Route path="/blogs/create" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
+          <Route path="/blogs/:id/edit" element={<ProtectedRoute><EditBlog /></ProtectedRoute>} />
+          
+          {/* Services Static Pages */}
+          <Route path="/real-estate" element={<RealEstate />} />
+          <Route path="/foreign-investment" element={<ForeignInvestment />} />
+          <Route path="/brand-representation" element={<BrandRepresentation />} />
+          <Route path="/tourism-facilities" element={<TourismFacilities />} />
+          <Route path="/media-advertising" element={<MediaAdvertising />} />
           
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
@@ -100,23 +141,14 @@ const AppContent = () => {
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/dashboard/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
           <Route path="/dashboard/history" element={<ProtectedRoute><BookingHistory /></ProtectedRoute>} />
+          <Route path="/dashboard/custom-packages" element={<ProtectedRoute><CustomPackages /></ProtectedRoute>} />
           <Route path="/dashboard/profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/activities" element={<AdminRoute><AdminActivities /></AdminRoute>} />
-          <Route path="/admin/activities/new" element={<AdminRoute><ActivityForm /></AdminRoute>} />
-          <Route path="/admin/activities/:id" element={<AdminRoute><ActivityForm /></AdminRoute>} />
-          <Route path="/admin/activities/view/:id" element={<AdminRoute><AdminActivityView /></AdminRoute>} />
-          <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
-          <Route path="/admin/bookings/:id" element={<AdminRoute><AdminBookingDetail /></AdminRoute>} /> {/* Add this line */}
-          <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isAdminRoute && <Footer />}
+      <Footer />
     </div>
   );
 };
