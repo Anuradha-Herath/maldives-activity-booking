@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -12,7 +13,7 @@ const Header = () => {
                     </div>
                     <div className="hidden md:flex items-center group">
                         <i className="fas fa-envelope mr-2 text-yellow-400 group-hover:text-yellow-300 transition-colors"></i>
-                        <span className="group-hover:text-yellow-100 transition-colors">info@maldivesactivities.com</span>
+                        <span className="group-hover:text-yellow-100 transition-colors">info@islekeytourism.com</span>
                     </div>
                 </div>
                 
@@ -27,17 +28,22 @@ const Header = () => {
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
                         </Link>
                     </div>
-                    <div className="flex space-x-3">                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our Facebook page" title="Facebook">
+                    <div className="flex space-x-3">
+                        <a href="https://facebook.com/islekeytourism" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our Facebook page" title="Facebook">
                             <i className="fab fa-facebook-f"></i>
                             <span className="sr-only">Facebook</span>
                         </a>
-                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our Twitter page" title="Twitter">
-                            <i className="fab fa-twitter"></i>
-                            <span className="sr-only">Twitter</span>
+                        <a href="https://x.com/islekeytourism" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our X page" title="X">
+                            <i className="fab fa-x-twitter"></i>
+                            <span className="sr-only">X</span>
                         </a>
-                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our Instagram page" title="Instagram">
+                        <a href="https://instagram.com/islekeytourism" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our Instagram page" title="Instagram">
                             <i className="fab fa-instagram"></i>
                             <span className="sr-only">Instagram</span>
+                        </a>
+                        <a href="https://linkedin.com/company/islekeytourism" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors transform hover:scale-110" aria-label="Visit our LinkedIn page" title="LinkedIn">
+                            <i className="fab fa-linkedin-in"></i>
+                            <span className="sr-only">LinkedIn</span>
                         </a>
                     </div>
                 </div>

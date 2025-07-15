@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -14,38 +15,37 @@ document.head.appendChild(fontLink);
 if (import.meta.env.DEV) {
   console.log('Running in development mode');
 } else {
-  // Log important environment variables for debugging in production
   console.log('Running in production mode');
   
-  // Check API URL format
+  // Log important environment variables for debugging in production
   const apiUrl = import.meta.env.VITE_API_URL;
   if (typeof apiUrl === 'string') {
     if (apiUrl.startsWith('VITE_API_URL=')) {
       console.warn('⚠️ API URL has incorrect format (includes variable name). This will be fixed by authService.');
     }
-    console.log('API URL:', apiUrl);
+    console.log('API URL for IsleKey Tourism services:', apiUrl);
   } else {
-    console.warn('⚠️ API URL not set correctly in environment variables');
+    console.warn('⚠️ API URL not set correctly in environment variables. Services may be unavailable.');
   }
   
-  // Wake up the backend server if it's in sleep mode (common with free deployment services)
+  // Wake up the backend server if it's in sleep mode
   try {
-    console.log('Attempting to wake up backend server...');
+    console.log('Attempting to wake up backend server for IsleKey Tourism...');
     wakeUpBackend()
       .then(result => {
         if (result.success) {
-          console.log('✅ Backend server is awake and ready:', result.message);
+          console.log('✅ Backend server is awake and ready for services:', result.message);
         } else {
           console.warn('⚠️ Backend server may be initializing:', result.message);
-          console.log('The application will continue loading, but some features may be delayed.');
+          console.log('The application will continue loading, but services (e.g., travel packages, accommodations) may be delayed.');
         }
       })
       .catch(error => {
         console.error('❌ Failed to wake up backend server:', error);
-        console.log('The application will continue loading, but API features may not work immediately.');
+        console.log('The application will continue loading, but API-dependent features (e.g., bookings, real estate listings) may not work immediately.');
       });
   } catch (error) {
-    console.error('Error in wake up process:', error);
+    console.error('Error in wake-up process:', error);
   }
 }
 

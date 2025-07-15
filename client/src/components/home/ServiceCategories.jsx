@@ -1,28 +1,29 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const ActivityCategories = () => {
+const ServiceCategories = () => {
     const categories = [
-        { slug: 'water-sports', title: 'Water Sports', icon: '🏄‍♂️', description: 'Experience jet skiing, parasailing and more' },
-        { slug: 'cruises', title: 'Cruises', icon: '🚢', description: 'Enjoy scenic boat tours and sunset cruises' },
-        { slug: 'island-tours', title: 'Island Tours', icon: '🏝️', description: 'Discover multiple islands and their unique cultures' },
-        { slug: 'diving', title: 'Diving', icon: '🤿', description: 'Explore vibrant coral reefs and underwater wonders' },
-        { slug: 'adventure', title: 'Adventure', icon: '🧗‍♂️', description: 'Thrilling land and water based adventures' },
-        { slug: 'cultural', title: 'Cultural', icon: '🎭', description: 'Immerse in Maldivian traditions and experiences' },
-        { slug: 'wellness', title: 'Wellness', icon: '💆‍♀️', description: 'Relax with spa treatments overlooking the ocean' }
+        { slug: 'activities', title: 'Activities', icon: '🏄‍♂️', description: 'Experience water sports, diving, and cultural adventures' },
+        { slug: 'travel-packages', title: 'Travel Packages', icon: '🧳', description: 'Curated trips combining activities and stays' },
+        { slug: 'accommodation', title: 'Accommodation', icon: '🏨', description: 'Luxury resorts and cozy guesthouses' },
+        { slug: 'real-estate', title: 'Real Estate', icon: '🏡', description: 'Find your dream property in the Maldives' },
+        { slug: 'investment', title: 'Investment Support', icon: '📈', description: 'Expert guidance for business investments' },
+        { slug: 'brand-representation', title: 'Brand Representation', icon: '🌍', description: 'Global promotion for your brand' },
+        { slug: 'travel-services', title: 'Travel Services', icon: '✈️', description: 'Flights, transfers, and visa assistance' },
     ];
 
     return (
         <section className="py-16">
             <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-blue-700 font-display mb-3">Activity Categories</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">Discover the perfect activities for your Maldives getaway, from underwater adventures to relaxing experiences</p>
+                <h2 className="text-3xl font-bold text-blue-700 font-display mb-3">Service Categories</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">Explore IsleKey Tourism’s range of services for your perfect Maldives experience</p>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {categories.map(category => (
                     <Link
-                        to={`/activities?category=${category.slug}`}
+                        to={`/${category.slug}`}
                         key={category.slug}
                         className="relative bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 border border-blue-50 group"
                     >
@@ -42,10 +43,10 @@ const ActivityCategories = () => {
             
             <div className="text-center mt-10">
                 <Link 
-                    to="/activities" 
+                    to="/services" 
                     className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-full transition-colors duration-300"
                 >
-                    View All Activities
+                    View All Services
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -55,4 +56,4 @@ const ActivityCategories = () => {
     );
 };
 
-export default ActivityCategories;
+export default ServiceCategories;

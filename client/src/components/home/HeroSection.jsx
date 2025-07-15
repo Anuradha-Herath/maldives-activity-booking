@@ -5,7 +5,7 @@ const HeroSection = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [date, setDate] = useState('');
-    const [activityType, setActivityType] = useState('');
+    const [serviceType, setServiceType] = useState('');
     const [location, setLocation] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -25,16 +25,15 @@ const HeroSection = () => {
         "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
     ];
 
-    // Activity types from our model
-    const activityTypes = [
-        { value: "", label: "All Activity Types" },
-        { value: "cruises", label: "Cruises" },
-        { value: "diving", label: "Diving" },
-        { value: "island-tours", label: "Island Tours" },
-        { value: "water-sports", label: "Water Sports" },
-        { value: "adventure", label: "Adventure" },
-        { value: "cultural", label: "Cultural" },
-        { value: "wellness", label: "Wellness" }
+    // Updated service types to include new proposal sections
+    const serviceTypes = [
+        { value: "", label: "All Services" },
+        { value: "activities", label: "Activities & Experiences" },
+        { value: "travel-packages", label: "Travel Packages" },
+        { value: "accommodation", label: "Accommodation" },
+        { value: "real-estate", label: "Real Estate Consultation" },
+        { value: "investment", label: "Investment Support" },
+        { value: "brand-representation", label: "International Brand Representation" },
     ];
 
     // Filter suggestions based on input
@@ -46,7 +45,6 @@ const HeroSection = () => {
         const interval = setInterval(() => {
             setBackgroundIndex(prev => (prev + 1) % backgroundImages.length);
         }, 8000);
-        
         return () => clearInterval(interval);
     }, []);
 
@@ -56,15 +54,21 @@ const HeroSection = () => {
         
         // Build query parameters
         const queryParams = new URLSearchParams();
-        
         if (searchTerm) queryParams.append('search', searchTerm);
         if (date) queryParams.append('date', date);
-        if (activityType) queryParams.append('type', activityType);
+        if (serviceType) queryParams.append('type', serviceType);
         if (location) queryParams.append('location', location);
         
-        // Simulate loading state
+        // Navigate to appropriate page based on service type
+        const route = serviceType === 'travel-packages' ? '/travel-packages' :
+                      serviceType === 'accommodation' ? '/accommodation' :
+                      serviceType === 'real-estate' ? '/real-estate' :
+                      serviceType === 'investment' ? '/investment' :
+                      serviceType === 'brand-representation' ? '/brand-representation' :
+                      '/activities';
+        
         setTimeout(() => {
-            navigate(`/activities?${queryParams.toString()}`);
+            navigate(`${route}?${queryParams.toString()}`);
         }, 600);
     };
 
@@ -121,7 +125,7 @@ const HeroSection = () => {
                     </h1>
                     
                     <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto animate-fade-in-delay text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-                        Book unforgettable experiences and activities in the world's most beautiful archipelago
+                        Explore travel packages, accommodations, real estate, investments, and global brands
                     </p>
                     
                     {/* Enhanced Search form */}
@@ -136,7 +140,7 @@ const HeroSection = () => {
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="What would you like to do?"
+                                    placeholder="Search services or activities"
                                     className="w-full h-12 pl-10 pr-4 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -174,36 +178,36 @@ const HeroSection = () => {
                                     </div>
                                 )}
                             </div>
-                              <div className="relative">
+                            <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i className="fas fa-calendar text-gray-400"></i>
                                 </div>
-                                <label htmlFor="activity-date" className="sr-only">Select Date</label>
+                                <label htmlFor="service-date" className="sr-only">Select Date</label>
                                 <input
-                                    id="activity-date"
+                                    id="service-date"
                                     type="date"
                                     className="w-full h-12 pl-10 pr-4 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
                                     min={new Date().toISOString().split('T')[0]}
-                                    aria-label="Select date for activity"
+                                    aria-label="Select date for service"
                                     placeholder="Select a date"
                                 />
                             </div>
-                              <div className="relative">
+                            <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i className="fas fa-tag text-gray-400"></i>
                                 </div>
-                                <label htmlFor="activity-type" className="sr-only">Activity Type</label>
+                                <label htmlFor="service-type" className="sr-only">Service Type</label>
                                 <select
-                                    id="activity-type"
+                                    id="service-type"
                                     className="w-full h-12 pl-10 pr-4 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-                                    value={activityType}
-                                    onChange={(e) => setActivityType(e.target.value)}
-                                    aria-label="Select activity type"
-                                    title="Activity Type"
+                                    value={serviceType}
+                                    onChange={(e) => setServiceType(e.target.value)}
+                                    aria-label="Select service type"
+                                    title="Service Type"
                                 >
-                                    {activityTypes.map((option) => (
+                                    {serviceTypes.map((option) => (
                                         <option key={option.value} value={option.value}>
                                             {option.label}
                                         </option>
@@ -213,7 +217,6 @@ const HeroSection = () => {
                                     <i className="fas fa-chevron-down text-gray-400"></i>
                                 </div>
                             </div>
-                            
                             <div className="md:col-span-2 lg:col-span-4">
                                 <button 
                                     type="submit" 
@@ -226,10 +229,10 @@ const HeroSection = () => {
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
-                                            <span className="animate-pulse">Searching for adventures...</span>
+                                            <span className="animate-pulse">Searching...</span>
                                         </>
                                     ) : (
-                                        <><span className="relative group">Find Perfect Activities <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-900 group-hover:w-full transition-all"></span></span> <i className="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i></>
+                                        <><span className="relative group">Find Your Experience <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-900 group-hover:w-full transition-all"></span></span> <i className="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i></>
                                     )}
                                 </button>
                             </div>
@@ -242,38 +245,36 @@ const HeroSection = () => {
                             <div className="text-yellow-400 text-3xl mb-3 group-hover:text-yellow-300 transition-colors transform group-hover:scale-110 group-hover:rotate-3 duration-300 drop-shadow-md">
                                 <i className="fas fa-star"></i>
                             </div>
-                            <h3 className="text-xl font-bold mb-2 text-yellow-400 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Top-rated Experiences</h3>
-                            <p className="text-white transition-colors">Curated selection of the highest quality activities</p>
+                            <h3 className="text-xl font-bold mb-2 text-yellow-400 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Premium Services</h3>
+                            <p className="text-white transition-colors">Curated travel, real estate, and investment solutions</p>
                             <div className="mt-3 h-0.5 w-0 bg-yellow-400 group-hover:w-1/2 transition-all duration-300"></div>
                         </div>
-                        
                         <div className="bg-white/20 backdrop-blur-md p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:shadow-lg cursor-pointer group hover:bg-white/25 border border-white/30 shadow-md">
                             <div className="text-yellow-400 text-3xl mb-3 group-hover:text-yellow-300 transition-colors transform group-hover:scale-110 group-hover:rotate-3 duration-300 drop-shadow-md">
                                 <i className="fas fa-calendar-check"></i>
                             </div>
                             <h3 className="text-xl font-bold mb-2 text-yellow-400 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Instant Booking</h3>
-                            <p className="text-white transition-colors">Secure your spot instantly with immediate confirmation</p>
+                            <p className="text-white transition-colors">Book packages and accommodations instantly</p>
                             <div className="mt-3 h-0.5 w-0 bg-yellow-400 group-hover:w-1/2 transition-all duration-300"></div>
                         </div>
-                        
                         <div className="bg-white/20 backdrop-blur-md p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:shadow-lg cursor-pointer group hover:bg-white/25 border border-white/30 shadow-md">
                             <div className="text-yellow-400 text-3xl mb-3 group-hover:text-yellow-300 transition-colors transform group-hover:scale-110 group-hover:rotate-3 duration-300 drop-shadow-md">
-                                <i className="fas fa-money-bill-wave"></i>
+                                <i className="fas fa-globe"></i>
                             </div>
-                            <h3 className="text-xl font-bold mb-2 text-yellow-400 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Best Price Guarantee</h3>
-                            <p className="text-white transition-colors">Find it cheaper elsewhere and we'll match the price</p>
+                            <h3 className="text-xl font-bold mb-2 text-yellow-400 group-hover:text-yellow-300 transition-colors drop-shadow-sm">Global Connections</h3>
+                            <p className="text-white transition-colors">Explore international brands and investments</p>
                             <div className="mt-3 h-0.5 w-0 bg-yellow-400 group-hover:w-1/2 transition-all duration-300"></div>
                         </div>
                     </div>
                     
-                    {/* Trending Activity Types */}
+                    {/* Service Links */}
                     <div className="mt-12 mb-8 animate-fade-in-delay-2">
-                        <h3 className="text-xl font-semibold mb-6 drop-shadow-md text-yellow-300">Trending Activity Types</h3>
+                        <h3 className="text-xl font-semibold mb-6 drop-shadow-md text-yellow-300">Explore Our Services</h3>
                         <div className="flex flex-wrap justify-center gap-3">
-                            {activityTypes.filter(type => type.value).map((type, index) => (
+                            {serviceTypes.filter(type => type.value).map((type, index) => (
                                 <Link 
                                     key={type.value}
-                                    to={`/activities?type=${type.value}`}
+                                    to={`/${type.value}`}
                                     className="relative px-4 py-2 bg-white/25 backdrop-blur-md rounded-full text-yellow-300 transition-all hover:scale-105 hover:shadow-lg group border border-yellow-300 shadow-sm hover:bg-yellow-400 hover:text-yellow-900"
                                     style={{ animationDelay: `${index * 100}ms` }}
                                 >
@@ -284,17 +285,25 @@ const HeroSection = () => {
                         </div>
                     </div>
                     
-                    {/* CTA Button */}
-                    <Link 
-                        to="/activities" 
-                        className="relative inline-block mt-8 group"
-                    >
-                        <span className="absolute inset-0 rounded-full bg-yellow-400 blur-md opacity-80 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        <span className="relative inline-block bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 text-blue-950 px-10 py-5 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg border border-yellow-300/50">
-                            Explore All Activities
-                            <i className="fas fa-chevron-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                        </span>
-                    </Link>
+                    {/* Static Content Links */}
+                    <div className="mt-8 flex justify-center gap-4">
+                        <Link 
+                            to="/about" 
+                            className="relative inline-block group"
+                        >
+                            <span className="relative inline-block bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 text-blue-950 px-6 py-3 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg border border-yellow-300/50">
+                                About Us
+                            </span>
+                        </Link>
+                        <Link 
+                            to="/travel-services" 
+                            className="relative inline-block group"
+                        >
+                            <span className="relative inline-block bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 text-blue-950 px-6 py-3 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg border border-yellow-300/50">
+                                Travel Services
+                            </span>
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

@@ -13,18 +13,11 @@ const Navbar = () => {
     // Handle scroll effect for navbar
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 50) {
-                setScrolled(true);
-            } else {
-                setScrolled(false);
-            }
+            setScrolled(window.scrollY > 50);
         };
         
         window.addEventListener('scroll', handleScroll);
-        
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
     
     // Close mobile menu when route changes
@@ -53,7 +46,9 @@ const Navbar = () => {
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [profileDropdownOpen]);    return (
+    }, [profileDropdownOpen]);
+
+    return (
         <nav className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-sm ${scrolled 
             ? 'bg-blue-900/95 shadow-lg py-2' 
             : 'bg-gradient-to-r from-blue-950 to-blue-800 py-4'}`}>
@@ -65,11 +60,11 @@ const Navbar = () => {
                             <span className="text-yellow-400 mr-1 group-hover:rotate-12 transition-transform duration-300">
                                 <i className="fas fa-umbrella-beach drop-shadow-md"></i>
                             </span>
-                            <span className="hidden sm:inline group-hover:text-yellow-100 transition-colors">Maldives</span>
-                            <span className="text-yellow-400 ml-1 group-hover:scale-105 transition-transform duration-300">Activities</span>
+                            <span className="hidden sm:inline group-hover:text-yellow-100 transition-colors">IsleKey</span>
+                            <span className="text-yellow-400 ml-1 group-hover:scale-105 transition-transform duration-300">Tourism</span>
                         </div>
                     </Link>
-                      {/* Desktop Navigation */}
+                    {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-6">
                         <Link to="/" className={`text-white hover:text-yellow-400 transition-colors relative ${
                             location.pathname === '/' 
@@ -97,16 +92,42 @@ const Navbar = () => {
                                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
                             )}
                         </Link>
+                        <Link to="/travel-packages" className={`text-white hover:text-yellow-400 transition-colors relative ${
+                            location.pathname === '/travel-packages' 
+                            ? 'font-semibold text-yellow-400'
+                            : 'hover:scale-105 transform'
+                        }`}>
+                            Travel Packages
+                            {location.pathname === '/travel-packages' && (
+                                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-400"></span>
+                            )}
+                            {location.pathname !== '/travel-packages' && (
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
+                            )}
+                        </Link>
+                        <Link to="/accommodation" className={`text-white hover:text-yellow-400 transition-colors relative ${
+                            location.pathname === '/accommodation' 
+                            ? 'font-semibold text-yellow-400'
+                            : 'hover:scale-105 transform'
+                        }`}>
+                            Accommodation
+                            {location.pathname === '/accommodation' && (
+                                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-400"></span>
+                            )}
+                            {location.pathname !== '/accommodation' && (
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
+                            )}
+                        </Link>
                         <div className="relative group">
                             <button className="flex items-center text-white hover:text-yellow-400 transition-all hover:scale-105 transform">
-                                Destinations <i className="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-300"></i>
+                                Services <i className="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-300"></i>
                             </button>
                             <div className="absolute left-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 border border-blue-200/20">
                                 <div className="py-2">
-                                    <Link to="/activities?location=male" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Malé</Link>
-                                    <Link to="/activities?location=ari-atoll" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Ari Atoll</Link>
-                                    <Link to="/activities?location=baa-atoll" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Baa Atoll</Link>
-                                    <Link to="/activities" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">All Destinations</Link>
+                                    <Link to="/real-estate" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Real Estate</Link>
+                                    <Link to="/investment" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Investment Support</Link>
+                                    <Link to="/brand-representation" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Brand Representation</Link>
+                                    <Link to="/travel-services" className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900">Travel Services</Link>
                                 </div>
                             </div>
                         </div>
@@ -137,7 +158,7 @@ const Navbar = () => {
                             )}
                         </Link>
                     </div>
-                      {/* User Authentication Section */}
+                    {/* User Authentication Section */}
                     <div className="hidden md:flex items-center">
                         {currentUser ? (
                             <div className="relative profile-dropdown">
@@ -153,12 +174,10 @@ const Navbar = () => {
                                     <span className="hidden lg:inline">{currentUser.name || currentUser.email.split('@')[0]}</span>
                                     <i className="fas fa-chevron-down text-xs group-hover:rotate-180 transition-transform duration-300"></i>
                                 </button>
-                                
                                 {profileDropdownOpen && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-md shadow-lg z-10 border border-blue-200/20 overflow-hidden animate-fade-in-down">
                                         <div className="py-1">
                                             {currentUser.role === 'admin' ? (
-                                                /* Admin specific links */
                                                 <>
                                                     <Link 
                                                         to="/admin/dashboard" 
@@ -173,6 +192,18 @@ const Navbar = () => {
                                                         <i className="fas fa-water mr-2 text-purple-600"></i> Manage Activities
                                                     </Link>
                                                     <Link 
+                                                        to="/admin/travel-packages" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-suitcase mr-2 text-purple-600"></i> Manage Travel Packages
+                                                    </Link>
+                                                    <Link 
+                                                        to="/admin/accommodation" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-hotel mr-2 text-purple-600"></i> Manage Accommodation
+                                                    </Link>
+                                                    <Link 
                                                         to="/admin/bookings" 
                                                         className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
                                                     >
@@ -184,9 +215,14 @@ const Navbar = () => {
                                                     >
                                                         <i className="fas fa-users mr-2 text-purple-600"></i> Manage Users
                                                     </Link>
+                                                    <Link 
+                                                        to="/admin/enquiries" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-envelope mr-2 text-purple-600"></i> Manage Enquiries
+                                                    </Link>
                                                 </>
                                             ) : (
-                                                /* Regular user links */
                                                 <>
                                                     <Link 
                                                         to="/dashboard" 
@@ -206,6 +242,12 @@ const Navbar = () => {
                                                     >
                                                         <i className="fas fa-bookmark mr-2 text-blue-600"></i> My Bookings
                                                     </Link>
+                                                    <Link 
+                                                        to="/dashboard/travel-packages" 
+                                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-100/80 hover:text-blue-900 transition-colors"
+                                                    >
+                                                        <i className="fas fa-suitcase mr-2 text-blue-600"></i> My Travel Packages
+                                                    </Link>
                                                 </>
                                             )}
                                             <div className="border-t border-gray-100 my-1"></div>
@@ -224,13 +266,13 @@ const Navbar = () => {
                                 <Link to="/login" className="text-white mr-4 hover:text-yellow-400 hover:scale-105 transition-transform flex items-center">
                                     <i className="fas fa-user mr-1"></i> Login
                                 </Link>
-                                <Link to="/activities" className="bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-500 text-blue-900 px-6 py-2 rounded-full font-semibold transition-all transform hover:scale-105 shadow-md hover:shadow-yellow-400/50 border border-yellow-300/50">
-                                    Book Now
+                                <Link to="/signup" className="bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-500 text-blue-900 px-6 py-2 rounded-full font-semibold transition-all transform hover:scale-105 shadow-md hover:shadow-yellow-400/50 border border-yellow-300/50">
+                                    Sign Up
                                 </Link>
                             </>
                         )}
                     </div>
-                      {/* Mobile menu button */}
+                    {/* Mobile menu button */}
                     <div className="md:hidden flex items-center">
                         <button 
                             onClick={() => setIsOpen(!isOpen)} 
@@ -257,9 +299,29 @@ const Navbar = () => {
                             <i className="fas fa-water mr-2"></i> Activities
                             {location.pathname === '/activities' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
                         </Link>
-                        <Link to="/destinations" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/destinations' ? 'font-semibold text-yellow-400' : ''}`}>
-                            <i className="fas fa-map-marker-alt mr-2"></i> Destinations
-                            {location.pathname === '/destinations' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        <Link to="/travel-packages" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/travel-packages' ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-suitcase mr-2"></i> Travel Packages
+                            {location.pathname === '/travel-packages' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        </Link>
+                        <Link to="/accommodation" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/accommodation' ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-hotel mr-2"></i> Accommodation
+                            {location.pathname === '/accommodation' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        </Link>
+                        <Link to="/real-estate" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/real-estate' ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-building mr-2"></i> Real Estate
+                            {location.pathname === '/real-estate' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        </Link>
+                        <Link to="/investment" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/investment' ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-chart-line mr-2"></i> Investment Support
+                            {location.pathname === '/investment' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        </Link>
+                        <Link to="/brand-representation" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/brand-representation' ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-globe mr-2"></i> Brand Representation
+                            {location.pathname === '/brand-representation' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
+                        </Link>
+                        <Link to="/travel-services" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/travel-services' ? 'font-semibold text-yellow-400' : ''}`}>
+                            <i className="fas fa-plane mr-2"></i> Travel Services
+                            {location.pathname === '/travel-services' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
                         </Link>
                         <Link to="/about" className={`text-white hover:text-yellow-400 transition-colors flex items-center ${location.pathname === '/about' ? 'font-semibold text-yellow-400' : ''}`}>
                             <i className="fas fa-info-circle mr-2"></i> About
@@ -269,12 +331,10 @@ const Navbar = () => {
                             <i className="fas fa-envelope mr-2"></i> Contact
                             {location.pathname === '/contact' && <i className="fas fa-circle text-xs ml-auto text-yellow-400"></i>}
                         </Link>
-                        
                         {currentUser ? (
                             <>
                                 <div className="border-t border-blue-700 pt-4 mt-2"></div>
                                 {currentUser.role === 'admin' ? (
-                                    /* Mobile Admin links */
                                     <>
                                         <Link to="/admin/dashboard" className="text-white hover:text-yellow-300 transition-colors flex items-center">
                                             <i className="fas fa-user-shield mr-2"></i> Admin Panel
@@ -282,15 +342,23 @@ const Navbar = () => {
                                         <Link to="/admin/activities" className="text-white hover:text-yellow-300 transition-colors flex items-center">
                                             <i className="fas fa-water mr-2"></i> Manage Activities
                                         </Link>
+                                        <Link to="/admin/travel-packages" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-suitcase mr-2"></i> Manage Travel Packages
+                                        </Link>
+                                        <Link to="/admin/accommodation" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-hotel mr-2"></i> Manage Accommodation
+                                        </Link>
                                         <Link to="/admin/bookings" className="text-white hover:text-yellow-300 transition-colors flex items-center">
                                             <i className="fas fa-calendar-check mr-2"></i> Manage Bookings
                                         </Link>
                                         <Link to="/admin/users" className="text-white hover:text-yellow-300 transition-colors flex items-center">
                                             <i className="fas fa-users mr-2"></i> Manage Users
                                         </Link>
+                                        <Link to="/admin/enquiries" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-envelope mr-2"></i> Manage Enquiries
+                                        </Link>
                                     </>
                                 ) : (
-                                    /* Mobile user links */
                                     <>
                                         <Link to="/dashboard" className="text-white hover:text-yellow-300 transition-colors flex items-center">
                                             <i className="fas fa-tachometer-alt mr-2"></i> Dashboard
@@ -303,8 +371,11 @@ const Navbar = () => {
                                             </div>
                                             My Profile
                                         </Link>
-                                        <Link to="/dashboard/bookings" className="text-white hover:text-yellow-300 transition-colors">
-                                            My Bookings
+                                        <Link to="/dashboard/bookings" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-bookmark mr-2"></i> My Bookings
+                                        </Link>
+                                        <Link to="/dashboard/travel-packages" className="text-white hover:text-yellow-300 transition-colors flex items-center">
+                                            <i className="fas fa-suitcase mr-2"></i> My Travel Packages
                                         </Link>
                                     </>
                                 )}
@@ -323,7 +394,7 @@ const Navbar = () => {
                                 <Link to="/signup" className="text-white hover:text-yellow-300 transition-colors">
                                     <i className="fas fa-user-plus mr-1"></i> Sign Up
                                 </Link>
-                                <Link to="/activities" className="bg-yellow-500 hover:bg-yellow-600 text-blue-900 px-4 py-2 rounded-full font-semibold transition-colors inline-block text-center">
+                                <Link to="/travel-packages" className="bg-yellow-500 hover:bg-yellow-600 text-blue-900 px-4 py-2 rounded-full font-semibold transition-colors inline-block text-center">
                                     Book Now
                                 </Link>
                             </>

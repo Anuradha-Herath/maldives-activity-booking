@@ -1,8 +1,7 @@
+
 import React from 'react';
 
 const Testimonials = () => {
-    // Add a cache-busting timestamp to prevent caching issues with external images
-    // Use either the build timestamp or a version number for production to avoid changing on every page load
     const cacheBuster = `v=${process.env.NODE_ENV === 'production' ? '1.0.0' : Date.now()}`;
     
     const reviews = [
@@ -10,25 +9,37 @@ const Testimonials = () => {
             id: 1,
             name: "Sarah Johnson",
             location: "United Kingdom",
-            comment: "The snorkeling trip was absolutely magical! We saw so many colorful fish and even spotted a sea turtle. Would highly recommend!",
+            comment: "The travel package was perfectly curated! From snorkeling to luxury resort stays, everything was seamless and unforgettable.",
             rating: 5,
-            image: `https://randomuser.me/api/portraits/women/44.jpg?${cacheBuster}`
+            image: `https://randomuser.me/api/portraits/women/44.jpg?${cacheBuster}`,
+            service: "Travel Package"
         },
         {
             id: 2,
             name: "Michael Chen",
             location: "Singapore",
-            comment: "The sunset cruise exceeded all expectations. The staff was professional and the views were breathtaking. A perfect evening in paradise.",
+            comment: "The real estate consultation helped us find the perfect investment property in the Maldives. Professional and insightful guidance!",
             rating: 5,
-            image: `https://randomuser.me/api/portraits/men/32.jpg?${cacheBuster}`
+            image: `https://randomuser.me/api/portraits/men/32.jpg?${cacheBuster}`,
+            service: "Real Estate Consultation"
         },
         {
             id: 3,
             name: "Emma Rodriguez",
             location: "Spain",
-            comment: "Island hopping was the highlight of our trip. Each island was more beautiful than the last, and the lunch provided was delicious!",
+            comment: "Booking our resort stay was a breeze, and the accommodation exceeded expectations. The team made our trip truly special!",
             rating: 4,
-            image: `https://randomuser.me/api/portraits/women/68.jpg?${cacheBuster}`
+            image: `https://randomuser.me/api/portraits/women/68.jpg?${cacheBuster}`,
+            service: "Accommodation"
+        },
+        {
+            id: 4,
+            name: "Ahmed Khan",
+            location: "UAE",
+            comment: "Their investment support made setting up our business in the Maldives straightforward. Highly recommend their expertise!",
+            rating: 5,
+            image: `https://randomuser.me/api/portraits/men/45.jpg?${cacheBuster}`,
+            service: "Investment Support"
         }
     ];
 
@@ -36,9 +47,9 @@ const Testimonials = () => {
         <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl font-bold text-blue-700 font-display mb-4">What Our Guests Say</h2>
+                    <h2 className="text-4xl font-bold text-blue-700 font-display mb-4">What Our Clients Say</h2>
                     <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                        Don't just take our word for it - hear from travelers who have experienced the magic of Maldives with us
+                        Hear from clients who have experienced the excellence of IsleKey Tourism's services
                     </p>
                     <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mt-6 rounded-full"></div>
                 </div>
@@ -80,6 +91,7 @@ const Testimonials = () => {
                                         </svg>
                                         {review.location}
                                     </p>
+                                    <p className="text-sm text-blue-600">{review.service}</p>
                                 </div>
                             </div>
                         </div>
@@ -87,7 +99,7 @@ const Testimonials = () => {
                 </div>
                 
                 <div className="text-center mt-12">
-                    <p className="text-gray-600 mb-4">Join thousands of satisfied customers</p>
+                    <p className="text-gray-600 mb-4">Join thousands of satisfied clients</p>
                     <div className="flex justify-center items-center space-x-2">
                         <div className="flex">
                             {[...Array(5)].map((_, i) => (
