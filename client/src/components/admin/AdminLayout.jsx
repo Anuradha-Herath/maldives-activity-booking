@@ -16,9 +16,16 @@ const AdminLayout = ({ children }) => {
   // Sidebar links
   const navLinks = [
     { path: '/admin/dashboard', icon: 'fa-tachometer-alt', text: 'Dashboard' },
+    { path: '/admin/analytics', icon: 'fa-chart-bar', text: 'Analytics' },
+    { path: '/admin/travel-packages', icon: 'fa-suitcase', text: 'Travel Packages' },
+    { path: '/admin/accommodation', icon: 'fa-building', text: 'Accommodation' },
     { path: '/admin/activities', icon: 'fa-umbrella-beach', text: 'Activities' },
     { path: '/admin/bookings', icon: 'fa-calendar-check', text: 'Bookings' },
+    { path: '/admin/blogs', icon: 'fa-blog', text: 'Blogs' },
+    { path: '/admin/custom-packages', icon: 'fa-clipboard-list', text: 'Custom Packages' },
+    { path: '/admin/contact-submissions', icon: 'fa-envelope', text: 'Contact Forms' },
     { path: '/admin/users', icon: 'fa-users', text: 'Users' },
+    { path: '/admin/services', icon: 'fa-handshake', text: 'Service Inquiries' },
   ];
 
   // Check if link is active

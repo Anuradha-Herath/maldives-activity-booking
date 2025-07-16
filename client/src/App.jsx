@@ -82,6 +82,19 @@ import BrandRepresentation from './pages/services/BrandRepresentation';
 import TourismFacilities from './pages/services/TourismFacilities';
 import MediaAdvertising from './pages/services/MediaAdvertising';
 
+// Admin Pages
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminAnalytics from './pages/admin/Analytics';
+import AdminTravelPackages from './pages/admin/TravelPackages';
+import AdminAccommodation from './pages/admin/Accommodation';
+import AdminBookings from './pages/admin/Bookings';
+import AdminBlogs from './pages/admin/Blogs';
+import AdminCustomPackages from './pages/admin/CustomPackages';
+import AdminContactSubmissions from './pages/admin/ContactSubmissions';
+import AdminUsers from './pages/admin/Users';
+import AdminActivities from './pages/admin/Activities';
+import AdminServices from './pages/admin/Services';
+
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Header from './components/common/Header';
@@ -144,6 +157,19 @@ const AppContent = () => {
           <Route path="/dashboard/custom-packages" element={<ProtectedRoute><CustomPackages /></ProtectedRoute>} />
           <Route path="/dashboard/profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalytics /></ProtectedRoute>} />
+          <Route path="/admin/travel-packages" element={<ProtectedRoute><AdminTravelPackages /></ProtectedRoute>} />
+          <Route path="/admin/accommodation" element={<ProtectedRoute><AdminAccommodation /></ProtectedRoute>} />
+          <Route path="/admin/activities" element={<ProtectedRoute><AdminActivities /></ProtectedRoute>} />
+          <Route path="/admin/bookings" element={<ProtectedRoute><AdminBookings /></ProtectedRoute>} />
+          <Route path="/admin/blogs" element={<ProtectedRoute><AdminBlogs /></ProtectedRoute>} />
+          <Route path="/admin/custom-packages" element={<ProtectedRoute><AdminCustomPackages /></ProtectedRoute>} />
+          <Route path="/admin/contact-submissions" element={<ProtectedRoute><AdminContactSubmissions /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+          <Route path="/admin/services" element={<ProtectedRoute><AdminServices /></ProtectedRoute>} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
